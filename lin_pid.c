@@ -9,6 +9,7 @@
 /* File Inclusions */
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Local Macro Definitions */
 #define GET_BIT(x, n) ((x >> n) & 0x01)
@@ -29,12 +30,23 @@
 int main(void)
 {
    /* Local variables */
-   static const uint8_t TEST_ID = 0x00u;
-   uint8_t pid = TEST_ID;
+   uint8_t pid = 0xFFu;
+   unsigned int user_input;
 
    /* Get user input */
+   printf("Input ID: ");
+   // TODO: Use an alternative to scanf()
+   // TODO: What about negative input?
+   // TODO: What about non-hexadecimal digit inputs?
+   scanf("%X", &user_input);
 
    /* Process input */
+   if ( user_input > 0x3F )
+   {
+      fprintf(stderr, "ID is out of range!\n");
+      return EXIT_FAILURE;
+   }
+   pid = (uint8_t)user_input;
 
    // TODO: FSM state to print out welcome message and options */
    // TODO: FSM state to print a full table of all possible PIDs */
@@ -56,8 +68,8 @@ int main(void)
    pid |= ( ( GET_BIT(pid, 0) ^ GET_BIT(pid, 1) ^ GET_BIT(pid, 2) ^ GET_BIT(pid, 4) ) << 6 );
    pid |= (!( GET_BIT(pid, 1) ^ GET_BIT(pid, 3) ^ GET_BIT(pid, 4) ^ GET_BIT(pid, 5) ) << 7 );
 
-   printf( "ID:  0x%02X\n", pid & 0x3Fu );
+   printf( "ID:  0x%02X\n", user_input );
    printf( "PID: 0x%02X\n", pid );
 
-   return 0;
+   return EXIT_SUCCESS;
 }
