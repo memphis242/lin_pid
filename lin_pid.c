@@ -18,27 +18,34 @@
 
 /* Meat of the Program */
 /**
- * @brief Brief description of the function.
+ * @fn main
  *
- * Detailed description of what the function does, if necessary.
+ * @param[in] argc The number of tokens passed in
+ * @param[in] argv Array of strings that contain the tokens in string form
+ * @note Refer to 5.1.2.2.1 Program startup of the C11 (and probably other)
+ *       standards for the expectations around the main function
  *
- * @param[in] param1 Description of the first input parameter.
- * @param[in] param2 Description of the second input parameter.
- * @param[out] param3 Description of the output parameter, if applicable.
- * @return Description of the return value, if any.
+ * @return int value : stdlib.h macros : EXIT_SUCCESS or EXIT_FAILURE
  */
-int main(void)
+#ifdef TEST
+int lin_pid_fcn(int argc, char * argv[])
+#else
+int main(int argc, char * argv[])
+#endif
 {
    /* Local variables */
    uint8_t pid = 0xFFu;
    unsigned int user_input;
 
    /* Get user input */
-   printf("Input ID: ");
-   // TODO: Use an alternative to scanf()
+//   printf("Input ID: ");
+//   // TODO: Use an alternative to scanf()
    // TODO: What about negative input?
    // TODO: What about non-hexadecimal digit inputs?
-   scanf("%X", &user_input);
+   if ( argc >= 2 )
+   {
+      scanf("%X", argv[2]);
+   }
 
    /* Process input */
    if ( user_input > 0x3F )
