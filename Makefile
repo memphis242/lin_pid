@@ -37,7 +37,10 @@ SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) $(wildc
 # List of all object files I'm expecting
 OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
 # List of all the result output .txt files from the build
-RESULTS = $(patsubst $(PATH_TEST_FILES)Test_%.c, $(PATH_RESULTS)Test_%.txt, $(SRC_TEST_FILES))
+RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
+
+# Other constants
+MAIN_TARGET_NAME = lin_pid
 
 # Compiler setup
 CROSS	= 
@@ -61,24 +64,17 @@ LDFLAGS =
 .PHONY: test
 # Print the test results
 test: $(BUILD_PATHS) $(RESULTS)
-	@echo "-----------------------IGNORES:------------------------"
-	@echo "grep -s IGNORE $(PATH_RESULTS)*.txt"
-	@echo "-----------------------FAILURES:-----------------------"
-	@echo "grep -s FAIL $(PATH_RESULTS)*.txt"
-	@echo "-----------------------PASSED:-------------------------"
-	@echo "grep -s PASS $(PATH_RESULTS)*.txt"
-	@echo
 
 # Write the test results to a result .txt file
-$(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)scratchpad.lst	# Don't actually need the .lst file but want to force the disassembly generation
+$(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)$(MAIN_TARGET_NAME).lst	# Don't actually need the .lst file but want to force the disassembly generation
 	@echo
 	@echo "----------------------------------------"
 	@echo "Running $<..."
 	@echo
-	-./$< > $@ 2>&1
+	-./$< 2>&1 | tee $@ | python colorize_unity_output.py
 
 # Produces an object dump that includes the disassembly of the executable
-$(PATH_BUILD)scratchpad.lst: $(PATH_OBJECT_FILES)scratchpad.o
+$(PATH_BUILD)%.lst: $(PATH_OBJECT_FILES)%.o
 	@echo
 	@echo "----------------------------------------"
 	@echo "Disassembly of $<..."
@@ -93,7 +89,7 @@ $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
-$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c
+$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo "Compiling $<..."
@@ -113,28 +109,6 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c
 	@echo "Compiling $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
-
-## Build the UUT object file and run static analysis against it
-#$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
-#	@echo
-#	@echo "----------------------------------------"
-#	@echo "Compiling $<..."
-#	@echo
-#	$(CC) -c $(CFLAGS) $< -o $@
-#	@echo
-#	@echo "----------------------------------------"
-#	@echo "Running static analysis on $<..."
-#	@echo
-#	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee cppcheck.log | python colorize_cppcheck.py
-#
-## Build the unity source files
-#$(PATH_OBJECT_FILES)unity.o: $(PATH_UNITY)unity.c $(PATH_UNITY)unity.h
-#	@echo
-#	@echo "----------------------------------------"
-#	@echo "Compiling $<..."
-#	@echo
-#	$(CC) -c $(CFLAGS) $< -o $@
-#	@echo
 
 # Make the directories if they don't already exist
 $(PATH_RESULTS):
