@@ -1,3 +1,6 @@
 [submodule "dep/Unity"]
 	path = dep/Unity
 	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "Unity"]
+	path = Unity
+	url = git@github.com:ThrowTheSwitch/Unity.git
