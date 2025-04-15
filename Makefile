@@ -56,15 +56,31 @@ INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY)
 DEFINES = -DTEST
 # TODO: Add separate defines for release build
 CFLAGS = $(INCLUDE_PATHS) $(DEFINES) $(COMPILER_WARNING_FLAGS) $(COMPILER_SANITIZERS) $(DEFAULT_COMPILER_OPTIMIZATION_LEVEL) $(COMPILER_STANDARD)
-CFLAGS_FAST = $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPEED)
-CFLAGS_SMALL = $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPACE)
+CFLAGS_FAST = $(INCLUDE_PATHS) $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPEED) $(COMPILER_STANDARD)
+CFLAGS_SMALL = $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPACE) $(COMPILER_STANDARD)
 LDFLAGS = 
 
 ## The Rules & Recipes
 
+.PHONY: target
+target: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
+
 .PHONY: test
-# Print the test results
 test: $(BUILD_PATHS) $(RESULTS)
+
+$(PATH_BUILD)$(MAIN_TARGET_NAME).exe: $(PATH_BUILD)$(MAIN_TARGET_NAME).o
+	@echo
+	@echo "----------------------------------------"
+	@echo "Linking the object files $^ into the test executable..."
+	@echo
+	$(CC) $(LDFLAGS) $^ -o $@
+
+$(PATH_BUILD)$(MAIN_TARGET_NAME).o: $(PATH_SRC)$(MAIN_TARGET_NAME).c $(PATH_SRC)$(MAIN_TARGET_NAME).h
+	@echo
+	@echo "----------------------------------------"
+	@echo "Compiling $<..."
+	$(CC) -c $(CFLAGS_FAST) $< -o $@
+	@echo
 
 # Write the test results to a result .txt file
 $(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)$(MAIN_TARGET_NAME).lst	# Don't actually need the .lst file but want to force the disassembly generation
