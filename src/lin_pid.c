@@ -1,15 +1,17 @@
 /*!
- * \file    lid_pid.c
- * \brief   Compute the PID given an ID, and sprinke some CLI and possibly a GUI on top.
+ * @file    lid_pid.c
+ * @brief   Compute the PID given an ID, and sprinke some CLI and possibly a GUI on top.
  * 
- * \author  Abdullah Almosalami @memphis242
- * \date    Wed Apr 9, 2025
+ * @author  Abdullah Almosalami @memphis242
+ * @date    Wed Apr 9, 2025
+ * @copyright MIT License
  */
 
 /* File Inclusions */
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "lin_pid.h"
 
 /* Local Macro Definitions */
 #define GET_BIT(x, n) ((x >> n) & 0x01)
@@ -28,7 +30,7 @@
  * @return int value : stdlib.h macros : EXIT_SUCCESS or EXIT_FAILURE
  */
 #ifdef TEST
-int lin_pid_fcn(int argc, char * argv[])
+int Lin_PID_Cli(int argc, char * argv[])
 #else
 int main(int argc, char * argv[])
 #endif
@@ -38,17 +40,17 @@ int main(int argc, char * argv[])
    unsigned int user_input;
 
    /* Get user input */
-//   printf("Input ID: ");
-//   // TODO: Use an alternative to scanf()
+   // printf("Input ID: ");
+   // TODO: Use an alternative to scanf()
    // TODO: What about negative input?
    // TODO: What about non-hexadecimal digit inputs?
    if ( argc >= 2 )
    {
-      scanf("%X", argv[2]);
+      sscanf(argv[2], "%X", &user_input);
    }
 
    /* Process input */
-   if ( user_input > 0x3F )
+   if ( user_input > MAX_ID_ALLOWED )
    {
       fprintf(stderr, "ID is out of range!\n");
       return EXIT_FAILURE;
@@ -59,6 +61,25 @@ int main(int argc, char * argv[])
    // TODO: FSM state to print a full table of all possible PIDs */
 
    /* Perform computation */
+   pid = ComputePID(pid);
+
+   /* Print Output */
+   printf( "ID:  0x%02X\n", user_input );
+   printf( "PID: 0x%02X\n", pid );
+
+   return EXIT_SUCCESS;
+}
+
+uint8_t ComputePID(uint8_t id)
+{
+   uint8_t pid = id;
+
+   if ( id > MAX_ID_ALLOWED )
+   {
+      // TODO: Throw exception
+      return 0xFFu;
+   }
+
    // From the LIN Protocol Specification 2.1, section 2.3.1.3 Protected identifier field
    // 
    // The ...
@@ -75,8 +96,6 @@ int main(int argc, char * argv[])
    pid |= ( ( GET_BIT(pid, 0) ^ GET_BIT(pid, 1) ^ GET_BIT(pid, 2) ^ GET_BIT(pid, 4) ) << 6 );
    pid |= (!( GET_BIT(pid, 1) ^ GET_BIT(pid, 3) ^ GET_BIT(pid, 4) ^ GET_BIT(pid, 5) ) << 7 );
 
-   printf( "ID:  0x%02X\n", user_input );
-   printf( "PID: 0x%02X\n", pid );
-
-   return EXIT_SUCCESS;
+   return pid;
 }
+
