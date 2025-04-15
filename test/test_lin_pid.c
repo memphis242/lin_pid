@@ -53,3 +53,33 @@ void Test_FullRangeOfValidIDs(void)
 
 /* CLI */
 // TODO
+// Example from GH CP
+// #include "unity.h"
+// #include <stdio.h>
+// #include <string.h>
+// 
+// void component_to_test() {
+//     printf("Unity test output\n");
+// }
+// 
+// void test_component_output() {
+//     char buffer[100];
+//     FILE *temp_file = freopen("temp_output.txt", "w+", stdout);
+// 
+//     component_to_test();
+// 
+//     fflush(temp_file);
+//     rewind(temp_file);
+//     fgets(buffer, sizeof(buffer), temp_file);
+// 
+//     TEST_ASSERT_EQUAL_STRING("Unity test output\n", buffer);
+// 
+//     fclose(temp_file);
+//     remove("temp_output.txt");
+// }
+// 
+// int main() {
+//     UNITY_BEGIN();
+//     RUN_TEST(test_component_output);
+//     return UNITY_END();
+// }
