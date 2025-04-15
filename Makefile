@@ -1,4 +1,45 @@
 .POSIX:
+
+## The Prelude
+
+CLEANUP = rm -f
+MKDIR = mkdir -p
+TARGET_EXTENSION=exe
+# Set the OS-specific tool cmds / executable extensions
+# ifeq ($(OS),Windows_NT)
+#   ifeq ($(shell uname -s),) # not in a bash-like shell
+# 	CLEANUP = del /F /Q
+# 	MKDIR = mkdir
+#   else # in a bash-like shell, like msys
+# 	CLEANUP = rm -f
+# 	MKDIR = mkdir -p
+#   endif
+# else
+# 	CLEANUP = rm -f
+# 	MKDIR = mkdir -p
+# 	TARGET_EXTENSION=out
+# endif
+
+# Relevant paths
+PATH_UNITY        = Unity/src/
+PATH_SRC          = src/
+PATH_TEST_FILES   = test/
+PATH_BUILD        = build/
+PATH_OBJECT_FILES = build/objs/
+PATH_RESULTS      = build/results/
+
+# List of all the build paths
+BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES) $(PATH_RESULTS)
+# List of all the test .c files
+SRC_TEST_FILES = $(wildcard $(PATH_TEST_FILES)*.c)
+# List of all .c files to be compiled
+SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) $(wildcard $(PATH_UNITY)*.c)
+# List of all object files I'm expecting
+OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
+# List of all the result output .txt files from the build
+RESULTS = $(patsubst $(PATH_TEST_FILES)Test_%.c, $(PATH_RESULTS)Test_%.txt, $(SRC_TEST_FILES))
+
+# Compiler setup
 CROSS	= 
 CC = $(CROSS)gcc
 COMPILER_WARNING_FLAGS = -Wall -Wextra -Wconversion -Wdouble-promotion -Wnull-dereference -Wwrite-strings -Wformat=2 -Wcast-align=strict -Wswitch-enum -Wpedantic
@@ -8,24 +49,36 @@ DEFAULT_COMPILER_OPTIMIZATION_LEVEL = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
 COMPILER_STANDARD = -std=c99
-CFLAGS = $(COMPILER_WARNING_FLAGS) $(COMPILER_SANITIZERS) $(DEFAULT_COMPILER_OPTIMIZATION_LEVEL) $(COMPILER_STANDARD)
+INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY)
+DEFINES = -DTEST
+CFLAGS = $(INCLUDE_PATHS) $(DEFINES) $(COMPILER_WARNING_FLAGS) $(COMPILER_SANITIZERS) $(DEFAULT_COMPILER_OPTIMIZATION_LEVEL) $(COMPILER_STANDARD)
 CFLAGS_FAST = $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPEED)
 CFLAGS_SMALL = $(COMPILER_WARNING_FLAGS) $(COMPILER_OPTIMIZATION_LEVEL_SPACE)
 LDFLAGS = 
 
-# Rules for building the executable, object file, and listing file
+## The Rules & Recipes
 
-# Run it, baby!
-.PHONY: run
-run: lin_pid.exe lin_pid.lst	# Don't actually need the .lst file but want to force the disassembly generation
+.PHONY: test
+# Print the test results
+test: $(BUILD_PATHS) $(RESULTS)
+	@echo "-----------------------IGNORES:------------------------"
+	@echo "grep -s IGNORE $(PATH_RESULTS)*.txt"
+	@echo "-----------------------FAILURES:-----------------------"
+	@echo "grep -s FAIL $(PATH_RESULTS)*.txt"
+	@echo "-----------------------PASSED:-------------------------"
+	@echo "grep -s PASS $(PATH_RESULTS)*.txt"
+	@echo
+
+# Write the test results to a result .txt file
+$(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)scratchpad.lst	# Don't actually need the .lst file but want to force the disassembly generation
 	@echo
 	@echo "----------------------------------------"
 	@echo "Running $<..."
 	@echo
-	./lin_pid.exe
+	-./$< > $@ 2>&1
 
 # Produces an object dump that includes the disassembly of the executable
-lin_pid.lst: lin_pid.exe
+$(PATH_BUILD)scratchpad.lst: $(PATH_OBJECT_FILES)scratchpad.o
 	@echo
 	@echo "----------------------------------------"
 	@echo "Disassembly of $<..."
@@ -33,27 +86,75 @@ lin_pid.lst: lin_pid.exe
 	objdump -D $< > $@
 
 # Build the executable
-lin_pid.exe: lin_pid.o
+$(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
-	@echo "Linking $< into executable..."
+	@echo "Linking the object files $^ into the test executable..."
 	@echo
-	$(CC) $(LDFLAGS) $< -o $@
+	$(CC) $(LDFLAGS) $^ -o $@
 
-# Build the object file and run static analysis against it
-lin_pid.o: lin_pid.c
+$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c
 	@echo
 	@echo "----------------------------------------"
 	@echo "Compiling $<..."
-	@echo
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
-	@echo "----------------------------------------"
-	@echo "Running static analysis on $<..."
+
+$(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo
-	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee cppcheck.log | python colorize_cppcheck.py
+	@echo "----------------------------------------"
+	@echo "Compiling $<..."
+	$(CC) -c $(CFLAGS) $< -o $@
+	@echo
+
+$(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c
+	@echo
+	@echo "----------------------------------------"
+	@echo "Compiling $<..."
+	$(CC) -c $(CFLAGS) $< -o $@
+	@echo
+
+## Build the UUT object file and run static analysis against it
+#$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
+#	@echo
+#	@echo "----------------------------------------"
+#	@echo "Compiling $<..."
+#	@echo
+#	$(CC) -c $(CFLAGS) $< -o $@
+#	@echo
+#	@echo "----------------------------------------"
+#	@echo "Running static analysis on $<..."
+#	@echo
+#	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee cppcheck.log | python colorize_cppcheck.py
+#
+## Build the unity source files
+#$(PATH_OBJECT_FILES)unity.o: $(PATH_UNITY)unity.c $(PATH_UNITY)unity.h
+#	@echo
+#	@echo "----------------------------------------"
+#	@echo "Compiling $<..."
+#	@echo
+#	$(CC) -c $(CFLAGS) $< -o $@
+#	@echo
+
+# Make the directories if they don't already exist
+$(PATH_RESULTS):
+	$(MKDIR) $@
+
+$(PATH_OBJECT_FILES):
+	$(MKDIR) $@
+
+$(PATH_BUILD):
+	$(MKDIR) $@
 
 # Clean rule to remove generated files
 .PHONY: clean
 clean:
-	rm -f *.exe *.o *.lst
+	$(CLEANUP) $(PATH_OBJECT_FILES)*.o
+	$(CLEANUP) $(PATH_BUILD)*.$(TARGET_EXTENSION)
+	$(CLEANUP) $(PATH_RESULTS)*.txt
+	$(CLEANUP) $(PATH_BUILD)*.lst
+
+.PRECIOUS: $(PATH_BUILD)%.$(TARGET_EXTENSION)
+.PRECIOUS: $(PATH_BUILD)Test%.o
+.PRECIOUS: $(PATH_RESULTS)%.txt
+.PRECIOUS: $(PATH_RESULTS)%.lst
