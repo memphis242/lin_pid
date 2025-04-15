@@ -52,7 +52,7 @@ int main(int argc, char * argv[])
    /* Process input */
    if ( user_input > MAX_ID_ALLOWED )
    {
-      fprintf(stderr, "ID is out of range!\n");
+      fprintf(stderr, "ID is out of range!\nID: 0x%-5X\n", user_input);
       return EXIT_FAILURE;
    }
    pid = (uint8_t)user_input;
