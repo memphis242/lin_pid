@@ -46,7 +46,7 @@ int main(int argc, char * argv[])
    // TODO: What about non-hexadecimal digit inputs?
    if ( argc >= 2 )
    {
-      sscanf(argv[2], "%X", &user_input);
+      sscanf(argv[1], "%X", &user_input);
    }
 
    /* Process input */
