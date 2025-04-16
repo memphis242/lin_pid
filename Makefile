@@ -63,7 +63,7 @@ LDFLAGS =
 ## The Rules & Recipes
 
 .PHONY: target
-target: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
+target: $(BUILD_PATHS) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
 
 .PHONY: test
 test: $(BUILD_PATHS) $(RESULTS)
