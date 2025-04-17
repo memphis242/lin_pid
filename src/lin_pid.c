@@ -70,6 +70,12 @@ int main(int argc, char * argv[])
    {
       sscanf(argv[1], "%X", &user_input);
    }
+   else
+   {
+      // TODO: Instead of an error, print a help
+      fprintf(stdout, "No ID passed in.");
+      return EXIT_SUCCESS;
+   }
 
    /* Process input */
    if ( user_input > MAX_ID_ALLOWED )
