@@ -27,6 +27,7 @@ PATH_TEST_FILES   = test/
 PATH_BUILD        = build/
 PATH_OBJECT_FILES = build/objs/
 PATH_RESULTS      = build/results/
+PATH_BENCHMARK		= benchmark/
 
 # List of all the build paths
 ifeq ($(BUILD_TYPE), TEST)
@@ -68,7 +69,7 @@ COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
 COMPILER_STANDARD = -std=c99
-INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY)
+INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY) -I$(PATH_BENCHMARK)
 COMMON_DEFINES =
 DIAGNOSTIC_FLAGS = -fdiagnostics-color
 COMPILER_STATIC_ANALYZER = -fanalyzer
@@ -85,6 +86,10 @@ else ifeq ($(BUILD_TYPE), TEST)
 $(info CFLAGS for TST)
 CFLAGS += -DTEST $(COMPILER_SANITIZERS) $(COMPILER_OPTIMIZATION_LEVEL_DEBUG)
 
+else ifeq ($(BUILD_TYPE), BENCHMARK)
+$(info CFLAGS for BNCHMRK)
+CFLAGS += -DNDEBUG $(COMPILER_OPTIMIZATION_LEVEL_SPEED)
+
 else
 $(info CFLAGS for DBG)
 CFLAGS += $(COMPILER_SANITIZERS) $(COMPILER_OPTIMIZATION_LEVEL_DEBUG)
@@ -100,6 +105,58 @@ target: $(BUILD_PATHS) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
 
 .PHONY: test
 test: $(BUILD_PATHS) $(RESULTS)
+
+.PHONY: benchmark
+benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION)
+	@echo
+	@echo "----------------------------------------"
+	@echo "Running $(MAIN_TARGET_NAME).$(TARGET_EXTENSION) 100 times and calculating the average, max, and min times..."
+	@{ \
+		total=0; \
+		max=0; \
+		min=999999; \
+		for i in $$(seq 1 100); do \
+			echo -ne "Run $$i...\r"; \
+			time=$$( { time -f "%e" ./$(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) > /dev/null; } 2>&1 ); \
+			time_ms=$$(echo "scale=6; $$time * 1000" | bc); \
+			total=$$(echo "scale=6; $$total + $$time_ms" | bc); \
+			if [ $$(echo "scale=6; $$time_ms > $$max" | bc) -eq 1 ]; then \
+				max=$$time_ms; \
+			fi; \
+			if [ $$(echo "scale=6; $$time_ms < $$min" | bc) -eq 1 ]; then \
+				min=$$time_ms; \
+			fi; \
+		done; \
+		average=$$(echo "scale=6; $$total / 100" | bc); \
+		echo "Average execution time: $$average ms"; \
+		echo "Max execution time: $$max ms"; \
+		echo "Min execution time: $$min ms"; \
+		echo -e "----------------------------------------\n"; \
+	}
+	@echo "Running lin_pid_sscanf.$(TARGET_EXTENSION) 100 times and calculating the average, max, and min times..."
+	@{ \
+		total=0; \
+		max=0; \
+		min=999999; \
+		for i in $$(seq 1 100); do \
+			echo -ne "Run $$i...\r"; \
+			time=$$( { time -f "%e" ./$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) > /dev/null; } 2>&1 ); \
+			time_ms=$$(echo "scale=6; $$time * 1000" | bc); \
+			total=$$(echo "scale=6; $$total + $$time_ms" | bc); \
+			if [ $$(echo "scale=6; $$time_ms > $$max" | bc) -eq 1 ]; then \
+				max=$$time_ms; \
+			fi; \
+			if [ $$(echo "scale=6; $$time_ms < $$min" | bc) -eq 1 ]; then \
+				min=$$time_ms; \
+			fi; \
+		done; \
+		average=$$(echo "scale=6; $$total / 100" | bc); \
+		echo "Average execution time: $$average ms"; \
+		echo "Max execution time: $$max ms"; \
+		echo "Min execution time: $$min ms"; \
+		echo -e "----------------------------------------\n"; \
+	}
+	@echo
 
 # Write the test results to a result .txt file
 $(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)$(MAIN_TARGET_NAME).lst	# Don't actually need the .lst file but want to force the disassembly generation
@@ -124,12 +181,27 @@ $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
+$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION): $(PATH_OBJECT_FILES)lin_pid_sscanf.o
+	@echo
+	@echo "----------------------------------------"
+	@echo "Linking the object files $^ into the executable..."
+	@echo
+	$(CC) $(LDFLAGS) $^ -o $@
+
 $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
 	@echo "Linking the object files $^ into the executable..."
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
+
+$(PATH_OBJECT_FILES)lin_pid_sscanf.o: $(PATH_BENCHMARK)lin_pid_sscanf.c
+	@echo
+	@echo "----------------------------------------"
+	@echo "Compiling $<..."
+	$(CC) -c $(CFLAGS) $< -o $@
+	@echo
+
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
