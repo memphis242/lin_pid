@@ -31,6 +31,8 @@
 
 /* Local Data */
 
+#ifndef NDEBUG
+
 static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 {
    0x80, 0xC1, 0x42, 0x03, 0xC4, 0x85, 0x06, 0x47, 
@@ -42,6 +44,8 @@ static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
    0xF0, 0xB1, 0x32, 0x73, 0xB4, 0xF5, 0x76, 0x37, 
    0x78, 0x39, 0xBA, 0xFB, 0x3C, 0x7D, 0xFE, 0xBF
 };
+
+#endif
 
 static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 {
@@ -57,7 +61,9 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 
 /* Private Function Prototypes */
 
+#ifndef NDEBUG
 STATIC int UInt8_Cmp( const void * a, const void * b );
+#endif
 STATIC bool GetID( char * str, uint8_t * id );
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -405,6 +411,8 @@ STATIC bool MyAtoI(char digit, uint8_t * converted_digit)
    return ret_val;
 }
 
+#ifndef NDEBUG
+
 int UInt8_Cmp( const void * a, const void * b )
 {
    uint8_t * c = (uint8_t *)a;
@@ -412,3 +420,5 @@ int UInt8_Cmp( const void * a, const void * b )
 
    return (int)( *c - *d );
 }
+
+#endif
