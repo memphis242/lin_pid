@@ -1,6 +1,6 @@
 .POSIX:
 
-## The Prelude
+################################# The Prelude ##################################
 
 CLEANUP = rm -f
 MKDIR = mkdir -p
@@ -29,15 +29,29 @@ PATH_OBJECT_FILES = build/objs/
 PATH_RESULTS      = build/results/
 
 # List of all the build paths
+ifeq ($(BUILD_TYPE), TEST)
 BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES) $(PATH_RESULTS)
 # List of all the test .c files
 SRC_TEST_FILES = $(wildcard $(PATH_TEST_FILES)*.c)
+# List of all the result output .txt files from the build
+RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
 # List of all .c files to be compiled
 SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) $(wildcard $(PATH_UNITY)*.c)
 # List of all object files I'm expecting
 OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
-# List of all the result output .txt files from the build
-RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
+
+else
+BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES)
+# List of all .c files to be compiled
+SRC_FILES = $(wildcard $(PATH_SRC)*.c)
+# List of all object files I'm expecting
+OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
+endif
+
+# ifneq ( $(DEBUG_MAKEFILE), "" )
+# 	$(info SRC_FILES=$(SRC_FILES))
+# 	$(info OBJ_FILES=$(OBJ_FILES))
+# endif
 
 # Other constants
 MAIN_TARGET_NAME = lin_pid
@@ -45,46 +59,47 @@ MAIN_TARGET_NAME = lin_pid
 # Compiler setup
 CROSS	= 
 CC = $(CROSS)gcc
-COMPILER_WARNING_FLAGS = -Wall -Wextra -Wconversion -Wdouble-promotion -Wnull-dereference -Wwrite-strings -Wformat=2 -Wcast-align=strict -Wswitch-enum -Wpedantic
-# COMPILER_SANITIZERS =
+COMPILER_WARNING_FLAGS = -Wall -Wextra \
+								 -Wconversion -Wdouble-promotion -Wnull-dereference \
+								 -Wwrite-strings -Wformat=2 -Wcast-align=strict \
+								 -Wswitch-enum -Wpedantic
 COMPILER_SANITIZERS = -fsanitize=bool -fsanitize=undefined -fsanitize-trap
-DEFAULT_COMPILER_OPTIMIZATION_LEVEL = -Og -g3
+COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
 COMPILER_STANDARD = -std=c99
 INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY)
-DEFINES_RELEASE =
-DEFINES_TEST = -DTEST
+COMMON_DEFINES =
 DIAGNOSTIC_FLAGS = -fdiagnostics-color
 COMPILER_STATIC_ANALYZER = -fanalyzer
-# TODO: Add separate defines for release build
-CFLAGS = $(INCLUDE_PATHS) $(DEFINES) $(DIAGNOSTIC_FLAGS) $(COMPILER_WARNING_FLAGS) $(COMPILER_STATIC_ANALYZER) $(COMPILER_SANITIZERS) $(DEFAULT_COMPILER_OPTIMIZATION_LEVEL) $(COMPILER_STANDARD)
-CFLAGS_TEST = $(DEFINES_TEST) $(CFLAGS)
-CFLAGS_FAST = $(INCLUDE_PATHS) $(DIAGNOSTIC_FLAGS) $(COMPILER_WARNING_FLAGS) $(COMPILER_STATIC_ANALYZER) $(COMPILER_OPTIMIZATION_LEVEL_SPEED) $(COMPILER_STANDARD)
-CFLAGS_SMALL = $(INCLUDE_PATHS) $(DIAGNOSTIC_FLAGS) $(COMPILER_WARNING_FLAGS) $(COMPILER_STATIC_ANALYZER) $(COMPILER_OPTIMIZATION_LEVEL_SPACE) $(COMPILER_STANDARD)
+
+# Compile up the compiler flags
+CFLAGS = $(INCLUDE_PATHS) $(COMMON_DEFINES) $(DIAGNOSTIC_FLAGS) $(COMPILER_WARNING_FLAGS) $(COMPILER_STATIC_ANALYZER) $(COMPILER_STANDARD)
+
+$(info BUILD_TYPE = $(BUILD_TYPE))
+ifeq ($(BUILD_TYPE), RELEASE)
+$(info CFLAGS for REL)
+CFLAGS += -DNDEBUG $(COMPILER_OPTIMIZATION_LEVEL_SPEED)
+
+else ifeq ($(BUILD_TYPE), TEST)
+$(info CFLAGS for TST)
+CFLAGS += -DTEST $(COMPILER_SANITIZERS) $(COMPILER_OPTIMIZATION_LEVEL_DEBUG)
+
+else
+$(info CFLAGS for DBG)
+CFLAGS += $(COMPILER_SANITIZERS) $(COMPILER_OPTIMIZATION_LEVEL_DEBUG)
+endif
+
+# Compile up linker flags
 LDFLAGS = $(DIAGNOSTIC_FLAGS)
 
-## The Rules & Recipes
+############################# The Rules & Recipes ##############################
 
 .PHONY: target
 target: $(BUILD_PATHS) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
 
 .PHONY: test
 test: $(BUILD_PATHS) $(RESULTS)
-
-$(PATH_BUILD)$(MAIN_TARGET_NAME).exe: $(PATH_OBJECT_FILES)$(MAIN_TARGET_NAME).o
-	@echo
-	@echo "----------------------------------------"
-	@echo "Linking the object files $^ into the release executable..."
-	@echo
-	$(CC) $(LDFLAGS) $^ -o $@
-
-$(PATH_OBJECT_FILES)$(MAIN_TARGET_NAME).o: $(PATH_SRC)$(MAIN_TARGET_NAME).c $(PATH_SRC)$(MAIN_TARGET_NAME).h
-	@echo
-	@echo "----------------------------------------"
-	@echo "Compiling for release $<..."
-	$(CC) -c $(CFLAGS_FAST) $< -o $@
-	@echo
 
 # Write the test results to a result .txt file
 $(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)$(MAIN_TARGET_NAME).lst	# Don't actually need the .lst file but want to force the disassembly generation
@@ -102,11 +117,17 @@ $(PATH_BUILD)%.lst: $(PATH_OBJECT_FILES)%.o
 	@echo
 	objdump -D $< > $@
 
-# Build the executable
+$(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION): $(OBJ_FILES)
+	@echo
+	@echo "----------------------------------------"
+	@echo "Linking the object files $^ into the executable..."
+	@echo
+	$(CC) $(LDFLAGS) $^ -o $@
+
 $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
-	@echo "Linking the object files $^ into the test executable..."
+	@echo "Linking the object files $^ into the executable..."
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
@@ -114,7 +135,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo "Compiling $<..."
-	$(CC) -c $(CFLAGS_TEST) $< -o $@
+	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
@@ -124,7 +145,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
 
-$(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c
+$(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo "Compiling $<..."
