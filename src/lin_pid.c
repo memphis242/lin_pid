@@ -30,7 +30,7 @@
  * @return int value : stdlib.h macros : EXIT_SUCCESS or EXIT_FAILURE
  */
 #ifdef TEST
-int Lin_PID_Cli(int argc, char * argv[])
+int lin_pid_cli(int argc, char * argv[])
 #else
 int main(int argc, char * argv[])
 #endif

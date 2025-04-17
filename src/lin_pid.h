@@ -35,7 +35,7 @@
  * @return Returns 0 on success, or a non-zero value on failure.
  */
 #ifdef TEST
-int Lin_PID_Cli(int argc, char * argv[]);
+int lin_pid_cli(int argc, char * argv[]);
 #endif
 
 /**
