@@ -122,8 +122,8 @@ int main(int argc, char * argv[])
                      UInt8_Cmp ) != NULL) );
 
    /* Print Output */
-   printf( "ID:  0x%02X\n", user_input );
-   printf( "PID: 0x%02X\n", pid );
+   printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
+   printf( "PID: \033[32m0x%02X\033[0m\n", pid );
 
    return EXIT_SUCCESS;
 }
