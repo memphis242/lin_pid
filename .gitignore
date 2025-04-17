@@ -4,3 +4,6 @@
 *.lst
 *.log
 *.txt
+
+# VSCode
+.vscode/*
