@@ -6,19 +6,21 @@ CLEANUP = rm -f
 MKDIR = mkdir -p
 TARGET_EXTENSION=exe
 # Set the OS-specific tool cmds / executable extensions
-# ifeq ($(OS),Windows_NT)
-#   ifeq ($(shell uname -s),) # not in a bash-like shell
-# 	CLEANUP = del /F /Q
-# 	MKDIR = mkdir
-#   else # in a bash-like shell, like msys
-# 	CLEANUP = rm -f
-# 	MKDIR = mkdir -p
-#   endif
-# else
-# 	CLEANUP = rm -f
-# 	MKDIR = mkdir -p
-# 	TARGET_EXTENSION=out
-# endif
+ifeq ($(OS),Windows_NT)
+
+ifeq ($(shell uname -s),) # not in a bash-like shell
+CLEANUP = del /F /Q
+MKDIR = mkdir
+else # in a bash-like shell, like msys
+CLEANUP = rm -f
+MKDIR = mkdir -p
+endif
+
+else
+CLEANUP = rm -f
+MKDIR = mkdir -p
+TARGET_EXTENSION=out
+endif
 
 # Relevant paths
 PATH_UNITY        = Unity/src/
@@ -28,6 +30,7 @@ PATH_BUILD        = build/
 PATH_OBJECT_FILES = build/objs/
 PATH_RESULTS      = build/results/
 PATH_BENCHMARK		= benchmark/
+PATH_PROFILE		= profile/
 
 # List of all the build paths
 ifeq ($(BUILD_TYPE), TEST)
@@ -47,6 +50,10 @@ BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES)
 SRC_FILES = $(wildcard $(PATH_SRC)*.c)
 # List of all object files I'm expecting
 OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
+endif
+
+ifeq ($(BUILD_TYPE), PROFILE)
+BUILD_PATHS += $(PATH_PROFILE)
 endif
 
 # ifneq ( $(DEBUG_MAKEFILE), "" )
@@ -90,13 +97,18 @@ else ifeq ($(BUILD_TYPE), BENCHMARK)
 $(info CFLAGS for BNCHMRK)
 CFLAGS += -DNDEBUG $(COMPILER_OPTIMIZATION_LEVEL_SPEED)
 
+else ifeq ($(BUILD_TYPE), PROFILE)
+$(info CFLAGS for PRF)
+CFLAGS += -DNDEBUG $(COMPILER_OPTIMIZATION_LEVEL_DEBUG) -pg
+LDFLAGS += -pg
+
 else
 $(info CFLAGS for DBG)
 CFLAGS += $(COMPILER_SANITIZERS) $(COMPILER_OPTIMIZATION_LEVEL_DEBUG)
 endif
 
 # Compile up linker flags
-LDFLAGS = $(DIAGNOSTIC_FLAGS)
+LDFLAGS += $(DIAGNOSTIC_FLAGS)
 
 ############################# The Rules & Recipes ##############################
 
@@ -117,7 +129,7 @@ benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin
 		min=999999; \
 		for i in $$(seq 1 100); do \
 			echo -ne "Run $$i...\r"; \
-			time=$$( { time -f "%e" ./$(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) > /dev/null; } 2>&1 ); \
+			time=$$( { time -f "%e" ./$(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) 0x00 > /dev/null; } 2>&1 ); \
 			time_ms=$$(echo "scale=6; $$time * 1000" | bc); \
 			total=$$(echo "scale=6; $$total + $$time_ms" | bc); \
 			if [ $$(echo "scale=6; $$time_ms > $$max" | bc) -eq 1 ]; then \
@@ -140,7 +152,7 @@ benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin
 		min=999999; \
 		for i in $$(seq 1 100); do \
 			echo -ne "Run $$i...\r"; \
-			time=$$( { time -f "%e" ./$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) > /dev/null; } 2>&1 ); \
+			time=$$( { time -f "%e" ./$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) 0x00 > /dev/null; } 2>&1 ); \
 			time_ms=$$(echo "scale=6; $$time * 1000" | bc); \
 			total=$$(echo "scale=6; $$total + $$time_ms" | bc); \
 			if [ $$(echo "scale=6; $$time_ms > $$max" | bc) -eq 1 ]; then \
@@ -156,6 +168,23 @@ benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin
 		echo "Min execution time: $$min ms"; \
 		echo -e "----------------------------------------\n"; \
 	}
+	@echo
+
+.PHONY: profile
+profile: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) $(BUILD_PATHS)
+	@echo
+	@echo "----------------------------------------"
+	@echo "Running $< with profiling enabled..."
+	./$< 0x00
+	mv gmon.out $(PATH_PROFILE)gmon_$(MAIN_TARGET_NAME).out
+	@echo
+	@echo "Running $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) with profiling enabled..."
+	./$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) 0x00
+	mv gmon.out $(PATH_PROFILE)gmon_lin_pid_sscanf.out
+	@echo
+	@echo "Running gprof..."
+	gprof $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_PROFILE)gmon_$(MAIN_TARGET_NAME).out > $(PATH_PROFILE)$(MAIN_TARGET_NAME)_profile.txt
+	gprof $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) $(PATH_PROFILE)gmon_lin_pid_sscanf.out > $(PATH_PROFILE)lin_pid_sscanf_profile.txt
 	@echo
 
 # Write the test results to a result .txt file
@@ -232,6 +261,9 @@ $(PATH_OBJECT_FILES):
 	$(MKDIR) $@
 
 $(PATH_BUILD):
+	$(MKDIR) $@
+
+$(PATH_PROFILE):
 	$(MKDIR) $@
 
 # Clean rule to remove generated files
