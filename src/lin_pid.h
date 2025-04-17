@@ -48,7 +48,6 @@ int lin_pid_cli(int argc, char * argv[]);
  *
  * @param[in] id The 6-bit frame identifier (0x00 to 0x3F).
  * @return The 8-bit Protected Identifier (PID), including the parity bits.
- * @note The input ID must not exceed the maximum allowed value (0x3F).
  */
 uint8_t ComputePID(uint8_t id);
 

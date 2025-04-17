@@ -19,16 +19,7 @@
 /* Datatypes */
 
 /* Meat of the Program */
-/**
- * @fn main
- *
- * @param[in] argc The number of tokens passed in
- * @param[in] argv Array of strings that contain the tokens in string form
- * @note Refer to 5.1.2.2.1 Program startup of the C11 (and probably other)
- *       standards for the expectations around the main function
- *
- * @return int value : stdlib.h macros : EXIT_SUCCESS or EXIT_FAILURE
- */
+
 #ifdef TEST
 int lin_pid_cli(int argc, char * argv[])
 #else
@@ -69,6 +60,8 @@ int main(int argc, char * argv[])
 
    return EXIT_SUCCESS;
 }
+
+/* Public Function Implementations */
 
 uint8_t ComputePID(uint8_t id)
 {
