@@ -77,7 +77,7 @@ uint8_t ComputePID(uint8_t id)
    if ( id > MAX_ID_ALLOWED )
    {
       // TODO: Throw exception
-      return 0xFFu;
+      return INVALID_PID;
    }
 
    // From the LIN Protocol Specification 2.1, section 2.3.1.3 Protected identifier field

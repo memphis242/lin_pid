@@ -18,6 +18,7 @@
 /* Public Macro Definitions */
 #define LIN_2p0_MAX_ID  0x3Fu
 #define MAX_ID_ALLOWED  LIN_2p0_MAX_ID
+#define INVALID_PID     0x00u
 
 /* Public Datatypes */
 
