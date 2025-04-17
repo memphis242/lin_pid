@@ -89,21 +89,21 @@ int main(int argc, char * argv[])
       bool digits_read_successfully = GetID(argv[1], &user_input);
       if ( !digits_read_successfully )
       {
-         fprintf(stderr, "Invalid user input.");
+         fprintf(stderr, "\n\033[31;1mInvalid user input.\033[0m\n");
          return EXIT_FAILURE;
       }
    }
    else
    {
       // TODO: Instead of an error, print a help
-      fprintf(stdout, "No ID passed in.");
+      fprintf(stdout, "\n\033[33mNo ID passed in.\033[0m\n");
       return EXIT_SUCCESS;
    }
 
    /* Process input */
    if ( user_input > MAX_ID_ALLOWED )
    {
-      fprintf(stderr, "ID is out of range!\nID: 0x%-5X\n", user_input);
+      fprintf(stderr, "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n", user_input);
       return EXIT_FAILURE;
    }
    pid = (uint8_t)user_input;
