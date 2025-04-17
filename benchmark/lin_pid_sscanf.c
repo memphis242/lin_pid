@@ -47,7 +47,7 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 
 /* Private Function Prototypes */
 
-int uint8_cmp( const void * a, const void * b );
+int UInt8_Cmp( const void * a, const void * b );
 
 /* Meat of the Program */
 
@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
 {
    /* Local variables */
    uint8_t pid = 0xFFu;
-   unsigned int user_input;
+   uint8_t user_input;
 
    /* Get user input */
    // printf("Input ID: ");
@@ -68,7 +68,9 @@ int main(int argc, char * argv[])
    // TODO: What about non-hexadecimal digit inputs?
    if ( argc >= 2 )
    {
-      sscanf(argv[1], "%X", &user_input);
+      unsigned int ui;
+      sscanf(argv[1], "%X", &ui);
+      user_input = (uint8_t)ui;
    }
    else
    {
@@ -96,7 +98,7 @@ int main(int argc, char * argv[])
                      SORTED_REFERENCE_PID_TABLE,
                      sizeof(SORTED_REFERENCE_PID_TABLE)/sizeof(uint8_t),
                      sizeof(uint8_t),
-                     uint8_cmp ) != NULL) );
+                     UInt8_Cmp ) != NULL) );
 
    /* Print Output */
    printf( "ID:  0x%02X\n", user_input );
@@ -141,7 +143,7 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-int uint8_cmp( const void * a, const void * b )
+int UInt8_Cmp( const void * a, const void * b )
 {
    uint8_t * c = (uint8_t *)a;
    uint8_t * d = (uint8_t *)b;
