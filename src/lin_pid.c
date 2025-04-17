@@ -78,7 +78,7 @@ int main(int argc, char * argv[])
    // TODO: Use an alternative to scanf()
    // TODO: What about negative input?
    // TODO: What about non-hexadecimal digit inputs?
-   if ( (argc >= 2) || (argv[1] != NULL) )
+   if ( argc >= 2 )
    {
       bool digits_read_successfully = GetID(argv[1], &user_input);
       if ( !digits_read_successfully )
@@ -185,6 +185,8 @@ STATIC bool GetID( char * str, uint8_t * id )
 
    uint8_t most_significant_digit = 0xFF;
    uint8_t least_significant_digit = 0xFF;
+   bool ishex = false;
+   bool isdec = false;
    bool ret_val = false;
    size_t idx = 0;
    size_t loop_limit_counter = 0;
@@ -193,13 +195,13 @@ STATIC bool GetID( char * str, uint8_t * id )
    //       pass in white-space leading characters?
    // Skip over any leading whitespace
    while ( (loop_limit_counter <= MAX_INPUT_CHARS) &&
-           (str[idx] != '0') &&
+           (str[idx] != '\0') &&
            (isblank( (int)str[idx] )) )
    {
       idx++;
       loop_limit_counter++;
    }
-   if ( str[idx] == '0' )
+   if ( str[idx] == '\0' )
    {
       return false;
    }
@@ -228,6 +230,7 @@ STATIC bool GetID( char * str, uint8_t * id )
                }
                else
                {
+                  ishex = true;
                   parser_state = ParserHexDigits;
                }
                bool atoi_conversion_successful = MyAtoI(ch, &most_significant_digit);
@@ -253,6 +256,7 @@ STATIC bool GetID( char * str, uint8_t * id )
             }
             else if ( ('x' == ch) || ('X' == ch) )
             {
+               ishex = true;
                parser_state = ParserHexPrefix;
             }
             break;
@@ -335,7 +339,13 @@ STATIC bool GetID( char * str, uint8_t * id )
       loop_limit_counter++;
    }
    
-   if ( exit_loop )
+   // Post state machine processing
+   if ( loop_limit_counter >= MAX_INPUT_CHARS )
+   {
+      // TODO: Throw exception because we should have stopped sooner than that!
+      // This means the string was not null-terminated.
+   }
+   else if ( exit_loop )
    {
       // Invalid digits were detected! Don't update ID.
    }
@@ -344,17 +354,18 @@ STATIC bool GetID( char * str, uint8_t * id )
       // Update ID
       // Digits obtained should be <= 0xF
       assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
-      *id = (uint8_t)( (most_significant_digit * 10) + least_significant_digit );
+      if ( ishex )
+      {
+         *id = (uint8_t)( (most_significant_digit * 0x10) + least_significant_digit );
+      }
+      else
+      {
+         *id = (uint8_t)( (most_significant_digit * 10) + least_significant_digit );
+      }
 
       ret_val = true;
    }
    
-   if ( loop_limit_counter >= MAX_INPUT_CHARS )
-   {
-      // TODO: Throw exception because we should have stopped sooner than that!
-      // This means the string was not null-terminated.
-   }
-
    return ret_val;
 }
 
