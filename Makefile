@@ -233,6 +233,10 @@ $(PATH_OBJECT_FILES)lin_pid_sscanf.o: $(PATH_BENCHMARK)lin_pid_sscanf.c
 	@echo "Compiling $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
+	@echo "----------------------------------------"
+	@echo "Running static analysis on $<..."
+	@echo
+	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
@@ -241,6 +245,10 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo "Compiling $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
+	@echo "----------------------------------------"
+	@echo "Running static analysis on $<..."
+	@echo
+	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo
@@ -255,6 +263,10 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	@echo "Compiling $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
+	@echo "----------------------------------------"
+	@echo "Running static analysis on $<..."
+	@echo
+	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 # Make the directories if they don't already exist
 $(PATH_RESULTS):
