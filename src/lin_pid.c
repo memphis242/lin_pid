@@ -17,7 +17,10 @@
 #include "lin_pid.h"
 
 /* Local Macro Definitions */
-#define MAX_INPUT_CHARS    10
+// Put an upper cap on how many characters will be processed from the input stream.
+// Enough to cover any of the possible input forms:
+//    0xZZ, ZZ, ZZh, xZZ, XZZ, ZZd, or ZZ plus some margin for growth
+#define MAX_INPUT_CHARS 5
 
 #define GET_BIT(x, n) ((x >> n) & 0x01)
 
@@ -164,22 +167,22 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-// Acceptable formats: 0xZZ, ZZ, ZZh, xZZ, XZZ, ZZd
-//                     All will be assumed to be hexadecimal except ZZd.
+// Acceptable formats:
+// Hex:     0xZZ, ZZ, ZZh, xZZ, XZZ, ZZ, Z
+// Decimal: ZZd, ZZD
 STATIC bool GetID( char * str, uint8_t * id )
 {
    enum ParserState_E
    {
       ParserInit,
-      ParserOneZeroAlreadyDetected,
-      ParserIndeterminate,
+      ParserOneZeroIn,
       ParserHexPrefix,
-      ParserIndeterminateDigits,
+      ParserIndeterminateOneDigitIn,
+      ParserIndeterminateTwoDigitsIn,
       ParserDecDigits,
       ParserHexDigits,
-      ParserHexSuffix,
-      ParserDecSuffix,
-      ParserTwoZerosAlreadyDetected,
+      ParserSuffixReadAlready,
+      ParserTwoZerosIn,
       ParserTwoDigitsAlreadyRead
    } parser_state = ParserInit;
 
@@ -189,17 +192,17 @@ STATIC bool GetID( char * str, uint8_t * id )
       return false;
    }
 
-   uint8_t most_significant_digit = 0xFF;
-   uint8_t least_significant_digit = 0xFF;
+   char first_digit = '\0';
+   char second_digit = '\0';
    bool ishex = false;
    bool isdec = false;
    bool ret_val = false;
    size_t idx = 0;
    size_t loop_limit_counter = 0;
 
+   // Skip over any leading whitespace
    // TODO: Do I need to check for this? Can I trust that the terminal will not
    //       pass in white-space leading characters?
-   // Skip over any leading whitespace
    while ( (loop_limit_counter <= MAX_INPUT_CHARS) &&
            (str[idx] != '\0') &&
            (isblank( (int)str[idx] )) )
@@ -209,15 +212,16 @@ STATIC bool GetID( char * str, uint8_t * id )
    }
    if ( str[idx] == '\0' )
    {
+      // TODO: Throw exception: only encountered whitespace
       return false;
    }
 
    // Parser State Machine Time!
-   // First non-whitespace character should be either a a '0' or a hexadecimal digit
    loop_limit_counter = 0;
    bool exit_loop = false;
-   while ( (loop_limit_counter <= MAX_INPUT_CHARS) &&
-           (str[idx] != '\0') )
+   while ( (loop_limit_counter <= MAX_INPUT_CHARS) && /* Upper-bound on loop to prevent ∞ */
+           (str[idx] != '\0') && /* Keep going until we hit a terminating null character */
+           !exit_loop /* Redundant here but I like extra guard rails... */ )
    {
       char ch = str[idx];
 
@@ -226,39 +230,42 @@ STATIC bool GetID( char * str, uint8_t * id )
          case ParserInit:
             if ( '0' == ch )
             {
-               parser_state = ParserOneZeroAlreadyDetected;
+               first_digit = ch;
+               parser_state = ParserOneZeroIn;
             }
             else if ( isxdigit(ch) )
             {
                if ( isdigit(ch) )
                {
-                  parser_state = ParserIndeterminateDigits;
+                  // Determined to be within hex range but also within dec range
+                  // so, still indeterminate...
+                  parser_state = ParserIndeterminateOneDigitIn;
                }
                else
                {
+                  // Must be a uniquely hex digit
                   ishex = true;
                   parser_state = ParserHexDigits;
                }
-               bool atoi_conversion_successful = MyAtoI(ch, &most_significant_digit);
-               // The conversion should have been successful at this point
-               assert(atoi_conversion_successful == true);
+               first_digit = ch;
             }
             else if ( ('x' == ch) && ('X' == ch) )
             {
+               ishex = true;
                parser_state = ParserHexPrefix;
             }
             else
             {
-               // Invalid character detected
                // TODO: Throw exception - invalid character
                exit_loop = true;
             }
             break;
 
-         case ParserOneZeroAlreadyDetected:
+         case ParserOneZeroIn:
             if ( '0' == ch )
             {
-               parser_state = ParserTwoZerosAlreadyDetected;
+               second_digit = ch;
+               parser_state = ParserTwoZerosIn;
             }
             else if ( ('x' == ch) || ('X' == ch) )
             {
@@ -267,17 +274,10 @@ STATIC bool GetID( char * str, uint8_t * id )
             }
             break;
 
-         case ParserIndeterminate:
-            break;
-
-
          case ParserHexPrefix:
             if ( isxdigit(ch) )
             {
-               bool atoi_conversion_successful = MyAtoI(ch, &most_significant_digit);
-               // The conversion should have been successful at this point
-               assert(atoi_conversion_successful == true);
-
+               first_digit = ch;
                parser_state = ParserHexDigits;
             }
             else
@@ -288,7 +288,44 @@ STATIC bool GetID( char * str, uint8_t * id )
             }
             break;
 
-         case ParserIndeterminateDigits:
+         case ParserIndeterminateOneDigitIn:
+            if ( isxdigit(ch) )
+            {
+               if ( isdigit(ch) )
+               {
+                  parser_state = ParserIndeterminateTwoDigitsIn;
+               }
+               else
+               {
+                  ishex = true;
+                  parser_state = ParserHexDigits;
+               }
+               second_digit = ch;
+            }
+            else
+            {
+               // Invalid character detected
+               // TODO: Throw exception - invalid character
+               exit_loop = true;
+            }
+            break;
+         
+         case ParserIndeterminateTwoDigitsIn:
+            if ( ('x' == ch) || ('X' == ch) )
+            {
+               ishex = true;
+               parser_state = ParserSuffixReadAlready;
+            }
+            else if ( ('d' == ch) || ('D' == ch) )
+            {
+               isdec = true;
+               parser_state = ParserSuffixReadAlready;
+            }
+            else
+            {
+               // TODO: Throw exception - invalid character sequence
+               exit_loop = true;
+            }
             break;
 
          case ParserDecDigits:
@@ -297,10 +334,7 @@ STATIC bool GetID( char * str, uint8_t * id )
          case ParserHexDigits:
             if ( isxdigit(ch) )
             {
-               bool atoi_conversion_successful = MyAtoI(ch, &least_significant_digit);
-               // The conversion should have been successful at this point
-               assert(atoi_conversion_successful == true);
-
+               second_digit = ch;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -311,23 +345,25 @@ STATIC bool GetID( char * str, uint8_t * id )
             }
             break;
 
-         case ParserHexSuffix:
+         case ParserSuffixReadAlready:
+            // TODO: Throw exception - should have already stopped by now
+            exit_loop = true;
             break;
 
-         case ParserDecSuffix:
-            break;
-
-         case ParserTwoZerosAlreadyDetected:
-            if ( '0' == ch )
+         case ParserTwoZerosIn:
+            if ( ('x' == ch) || ('X' == ch) ||
+                 ('d' == ch) || ('D' == ch) )
             {
-               // Too many 0 digits in a row. Invalid input!
+               parser_state = ParserSuffixReadAlready;
+            }
+            else
+            {
                // TODO: Throw exception - too many 0s in a row.
                exit_loop = true;
             }
             break;
 
          case ParserTwoDigitsAlreadyRead:
-            // Too many digits in a row. Invalid input!
             // TODO: Throw exception - too many digits passed in.
             exit_loop = true;
             break;
@@ -357,14 +393,40 @@ STATIC bool GetID( char * str, uint8_t * id )
    }
    else
    {
-      // Update ID
+      // We got valid digits! Let's get that ID.
+      uint8_t most_significant_digit = 0xFF;
+      uint8_t least_significant_digit = 0xFF;
+
+      if ( (second_digit == '\0') && (first_digit != '\0') )
+      {
+         // We only got one digit → assume it is hex
+         most_significant_digit = 0x00u;
+         bool conv = MyAtoI( first_digit, &least_significant_digit );
+         ishex = true;
+         // We should have handled the input well enough by here that the conversion runs successfully...
+         assert( conv );
+         // Obtained digits should in-range at this point
+         assert( (most_significant_digit == 0x00) && (least_significant_digit <= 0x0F) );
+      }
+      else if ( (first_digit != '\0') && (second_digit != '\0') )
+      {
+         bool conv1 = MyAtoI( first_digit, &most_significant_digit );
+         bool conv2 = MyAtoI( second_digit, &least_significant_digit );
+         // We should have handled the input well enough by here that the conversion runs successfully...
+         assert( conv1 && conv2 );
+         // Digits should be <= 0xF
+         assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
+      }
+
       // Digits obtained should be <= 0xF
       assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
-      if ( ishex )
+
+      // Final step!
+      if ( ishex || !isdec )
       {
          *id = (uint8_t)( (most_significant_digit * 0x10) + least_significant_digit );
       }
-      else
+      else  // Must be decimal
       {
          *id = (uint8_t)( (most_significant_digit * 10) + least_significant_digit );
       }
@@ -381,6 +443,7 @@ STATIC bool MyAtoI(char digit, uint8_t * converted_digit)
 
    // Check input validity
    if ( ( converted_digit != NULL ) ||
+          ( (digit >= '0') && (digit <= '9') ) ||
           ( (digit >= 'A') && (digit <= 'F') ) ||
           ( (digit >= 'a') && (digit <= 'f') )
       )
@@ -395,16 +458,10 @@ STATIC bool MyAtoI(char digit, uint8_t * converted_digit)
          *converted_digit = (uint8_t)( 10 + (digit - 'A') );
          ret_val = true;
       }
-      else if ( (digit >= 'a') && (digit <= 'f') )
+      else
       {
          *converted_digit = (uint8_t)( 10 + (digit - 'a') );
          ret_val = true;
-      }
-      else
-      {
-         // Invalid digit
-         // TODO: Throw exception - invalid digit
-         // Leave ret_val to its initialized value
       }
    }
 
