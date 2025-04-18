@@ -56,11 +56,6 @@ ifeq ($(BUILD_TYPE), PROFILE)
 BUILD_PATHS += $(PATH_PROFILE)
 endif
 
-# ifneq ( $(DEBUG_MAKEFILE), "" )
-# 	$(info SRC_FILES=$(SRC_FILES))
-# 	$(info OBJ_FILES=$(OBJ_FILES))
-# endif
-
 # Other constants
 MAIN_TARGET_NAME = lin_pid
 
