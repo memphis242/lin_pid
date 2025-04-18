@@ -18,9 +18,6 @@
 
 /* Local Macro Definitions */
 // Put an upper cap on how many characters will be processed from the input stream.
-// Enough to cover any of the possible input forms:
-//    0xZZ, ZZ, ZZh, xZZ, XZZ, ZZd, or ZZ plus some margin for growth
-#define MAX_INPUT_CHARS 5
 
 #define GET_BIT(x, n) ((x >> n) & 0x01)
 
@@ -168,8 +165,9 @@ uint8_t ComputePID(uint8_t id)
 }
 
 // Acceptable formats:
-// Hex:     0xZZ, ZZ, ZZh, xZZ, XZZ, ZZ, Z
+// Hex:     0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z
 // Decimal: ZZd, ZZD
+#define MAX_INPUT_CHARS 5  // Enough to cover the possible formats + margin for growth
 STATIC bool GetID( char * str, uint8_t * id )
 {
    enum ParserState_E
@@ -181,7 +179,6 @@ STATIC bool GetID( char * str, uint8_t * id )
       ParserIndeterminateTwoDigitsIn,
       ParserDecDigits,
       ParserHexDigits,
-      ParserSuffixReadAlready,
       ParserTwoZerosIn,
       ParserTwoDigitsAlreadyRead
    } parser_state = ParserInit;
@@ -249,7 +246,7 @@ STATIC bool GetID( char * str, uint8_t * id )
                }
                first_digit = ch;
             }
-            else if ( ('x' == ch) && ('X' == ch) )
+            else if ( ('x' == ch) || ('X' == ch) )
             {
                ishex = true;
                parser_state = ParserHexPrefix;
@@ -311,15 +308,15 @@ STATIC bool GetID( char * str, uint8_t * id )
             break;
          
          case ParserIndeterminateTwoDigitsIn:
-            if ( ('x' == ch) || ('X' == ch) )
+            if ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) )
             {
                ishex = true;
-               parser_state = ParserSuffixReadAlready;
+               parser_state = ParserTwoDigitsAlreadyRead;
             }
             else if ( ('d' == ch) || ('D' == ch) )
             {
                isdec = true;
-               parser_state = ParserSuffixReadAlready;
+               parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
             {
@@ -329,6 +326,7 @@ STATIC bool GetID( char * str, uint8_t * id )
             break;
 
          case ParserDecDigits:
+            // TODO: Add in when I add support for -dec or --decimal flag
             break;
          
          case ParserHexDigits:
@@ -345,16 +343,11 @@ STATIC bool GetID( char * str, uint8_t * id )
             }
             break;
 
-         case ParserSuffixReadAlready:
-            // TODO: Throw exception - should have already stopped by now
-            exit_loop = true;
-            break;
-
          case ParserTwoZerosIn:
-            if ( ('x' == ch) || ('X' == ch) ||
+            if ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ||
                  ('d' == ch) || ('D' == ch) )
             {
-               parser_state = ParserSuffixReadAlready;
+               parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
             {
@@ -380,6 +373,9 @@ STATIC bool GetID( char * str, uint8_t * id )
       idx++;
       loop_limit_counter++;
    }
+   
+   // Logic should not determine that input was both hex and dec at the same time
+   assert( !(ishex && isdec) );
    
    // Post state machine processing
    if ( loop_limit_counter >= MAX_INPUT_CHARS )
