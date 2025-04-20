@@ -62,13 +62,16 @@ MAIN_TARGET_NAME = lin_pid
 # Compiler setup
 CROSS	= 
 CC = $(CROSS)gcc
-COMPILER_WARNING_FLAGS = -Wall -Wextra \
-								 -Wconversion -Wdouble-promotion -Wnull-dereference \
-								 -Wwrite-strings -Wformat=2 -Wcast-align=strict \
-								 -Wswitch-enum -Wpedantic -Wfloat-equal \
-								 -Wdeprecated-declarations -Wmissing-prototypes -Wparentheses \
-								 -Wreturn-type -Wlogical-op -Wstrict-aliasing \
-								 -Wuninitialized -Wmaybe-uninitialized -Wshadow
+COMPILER_WARNING_FLAGS = \
+    -Wall -Wextra -Wpedantic \
+    -Wconversion -Wdouble-promotion -Wnull-dereference \
+    -Wwrite-strings -Wformat=2 -Wformat-overflow=2 \
+    -Wformat-signedness \
+    -Wcast-align=strict \
+    -Wswitch-enum -Wfloat-equal \
+    -Wdeprecated-declarations -Wmissing-prototypes -Wparentheses \
+    -Wreturn-type -Wlogical-op -Wstrict-aliasing \
+    -Wuninitialized -Wmaybe-uninitialized -Wshadow
 COMPILER_SANITIZERS = -fsanitize=bool -fsanitize=undefined -fsanitize-trap
 COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
