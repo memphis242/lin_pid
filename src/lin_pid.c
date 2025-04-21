@@ -94,10 +94,11 @@ int main(int argc, char * argv[])
    else
    {
       fprintf(stdout,
-         "\nProgram usage:\n"
-            "\t\033[37;2m<path>/\033[36;1mlin_pid.exe \033[37;1m<hex or decimal num> [hex | dec]  \033[37;2mor...\n"
-            "\t\033[37;2m<path>/\033[36;1mlin_pid.exe \033[37;1m<hex or decimal num> \033[35m[--help | -h] \033[37;2mor...\n"
-         "\nContact @memphis242 on GitHub or make an issue in github.com/memphis242/lin_pid if there are still confusions\n"
+         "\nBasic Program usage:\n\n"
+            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[34;1m<hex or decimal number> \033[35m[hex | dec]  \033[37;2mor...\033[0m\n"
+            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[35m[--help | -h] \033[0m\n"
+         "\n\t\t\033[37;2mHexadecimal Numbers can be entered in any of the following forms: 0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z"
+         "\nContact \033[35m@memphis242\033[0m on GitHub or make an issue in \033[35;4mgithub.com/memphis242/lin_pid\033[0m if confusions remain.\n\n"
       );
       return EXIT_SUCCESS;
    }
