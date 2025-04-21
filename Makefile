@@ -67,11 +67,12 @@ COMPILER_WARNING_FLAGS = \
     -Wconversion -Wdouble-promotion -Wnull-dereference \
     -Wwrite-strings -Wformat=2 -Wformat-overflow=2 \
     -Wformat-signedness \
-    -Wcast-align=strict \
+    -Wcast-align=strict -Wimplicit-fallthrough=3 -Wswitch-default \
     -Wswitch-enum -Wfloat-equal \
     -Wdeprecated-declarations -Wmissing-prototypes -Wparentheses \
     -Wreturn-type -Wlogical-op -Wstrict-aliasing \
     -Wuninitialized -Wmaybe-uninitialized -Wshadow
+# Consider -Wmismatched-dealloc
 COMPILER_SANITIZERS = -fsanitize=bool -fsanitize=undefined -fsanitize-trap
 COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
