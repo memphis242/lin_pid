@@ -81,6 +81,7 @@ int main(int argc, char * argv[])
    uint8_t user_input;
 
    /* Get user input */
+   // TODO: FSM state to print a full table of all possible PIDs */
    if ( argc == 2 )
    {
       // TODO: Support [hex | dec]
@@ -95,9 +96,13 @@ int main(int argc, char * argv[])
    {
       fprintf(stdout,
          "\nBasic Program usage:\n\n"
-            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[34;1m<hex or decimal number> \033[35m[hex | dec]  \033[37;2mor...\033[0m\n"
-            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[35m[--help | -h] \033[0m\n"
-         "\n\t\t\033[37;2mHexadecimal Numbers can be entered in any of the following forms: 0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z"
+            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[34;1m<hex or decimal number> \033[35m[(--hex | -h) | (--dec | -d)]  \033[37;2mor...\033[0m\n"
+            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[35m[--help] \033[0m\n"
+         "\nSupported hex number formats:\n\n"
+            "\t0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, \033[;1mZZ\033[0m, Z, or \033[35mZZ (-h | --hex)\033[0m\n"
+         "\nSupported dec number formats:\n\n"
+            "\tZZd, ZZD, or \033[35mZZ (-d | --dec)\033[0m\n"
+         "\nNote that entering two digits with no prefix/suffix by default is assumed to be hex unless the \033[35m--dec\033[0m or \033[35m-d\033[0m flag is specified.\n"
          "\nContact \033[35m@memphis242\033[0m on GitHub or make an issue in \033[35;4mgithub.com/memphis242/lin_pid\033[0m if confusions remain.\n\n"
       );
       return EXIT_SUCCESS;
@@ -111,8 +116,6 @@ int main(int argc, char * argv[])
    }
    pid = (uint8_t)user_input;
 
-   // TODO: FSM state to print out welcome message and options */
-   // TODO: FSM state to print a full table of all possible PIDs */
 
    /* Perform computation */
    pid = ComputePID(pid);
