@@ -64,8 +64,9 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 #ifndef NDEBUG
 STATIC int UInt8_Cmp( const void * a, const void * b );
 #endif
-STATIC bool GetID( char * str, uint8_t * id );
+STATIC bool GetID( char const * str, uint8_t * id );
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
+STATIC bool ArgContainsHelp( char const * str );
 
 /* Meat of the Program */
 
@@ -80,12 +81,9 @@ int main(int argc, char * argv[])
    uint8_t user_input;
 
    /* Get user input */
-   // printf("Input ID: ");
-   // TODO: Use an alternative to scanf()
-   // TODO: What about negative input?
-   // TODO: What about non-hexadecimal digit inputs?
-   if ( argc >= 2 )
+   if ( argc == 2 )
    {
+      // TODO: Support [hex | dec]
       bool digits_read_successfully = GetID(argv[1], &user_input);
       if ( !digits_read_successfully )
       {
@@ -95,8 +93,12 @@ int main(int argc, char * argv[])
    }
    else
    {
-      // TODO: Instead of an error, print a help
-      fprintf(stdout, "\n\033[33mNo ID passed in.\033[0m\n");
+      fprintf(stdout,
+         "\nProgram usage:\n"
+            "\t\033[37;2m<path>/\033[36;1mlin_pid.exe \033[37;1m<hex or decimal num> [hex | dec]  \033[37;2mor...\n"
+            "\t\033[37;2m<path>/\033[36;1mlin_pid.exe \033[37;1m<hex or decimal num> \033[35m[--help | -h] \033[37;2mor...\n"
+         "\nContact @memphis242 on GitHub or make an issue in github.com/memphis242/lin_pid if there are still confusions\n"
+      );
       return EXIT_SUCCESS;
    }
 
@@ -164,11 +166,24 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
+STATIC bool ArgContainsHelp( char const * str )
+{
+   if ( NULL == str )
+   {
+      return false;
+   }
+
+   bool ret_val = false;
+
+
+   return ret_val;
+}
+
 // Acceptable formats:
 // Hex:     0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z
 // Decimal: ZZd, ZZD
 #define MAX_INPUT_CHARS 5  // Enough to cover the possible formats + margin for growth
-STATIC bool GetID( char * str, uint8_t * id )
+STATIC bool GetID( char const * str, uint8_t * id )
 {
    enum ParserState_E
    {
