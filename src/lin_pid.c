@@ -95,15 +95,36 @@ int main(int argc, char * argv[])
    else
    {
       fprintf(stdout,
+         "\n\033[36;4mLIN Protected Identifier (PID) Calculator\033[0m\n"
+
          "\nBasic Program usage:\n\n"
-            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[34;1m<hex or decimal number> \033[35m[(--hex | -h) | (--dec | -d)]  \033[37;2mor...\033[0m\n"
-            "\t\033[33m<path>/\033[36;1mlin_pid.exe \033[35m[--help] \033[0m\n"
-         "\nSupported hex number formats:\n\n"
+
+         "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[;3mto get the PID that corresponds to an ID.\033[0m\n"
+         "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[35m(--quiet | -q)\033[0m \033[0m \033[35m[--no-new-line]\033[0m \033[;3msame as above but quieter and not colored.\033[0m\n"
+         "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[35m[--help]\033[0m \033[;3mto print the help message.\033[0m\n"
+         "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[35m[(--table | -t)]\033[0m \033[;3mto print a full LIN ID vs PID table for reference.\033[0m\n"
+
+         "\n\033[;3mNote that deviations from the above usage will result in an\033[0m \033[31;3merror message\033[0m.\n"
+
+         "\nSupported hexadecimal number formats:\n\n"
+
             "\t0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, \033[;1mZZ\033[0m, Z, or \033[35mZZ (-h | --hex)\033[0m\n"
-         "\nSupported dec number formats:\n\n"
+
+         "\nSupported decimal number formats:\n\n"
+
             "\tZZd, ZZD, or \033[35mZZ (-d | --dec)\033[0m\n"
-         "\nNote that entering two digits with no prefix/suffix by default is assumed to be hex unless the \033[35m--dec\033[0m or \033[35m-d\033[0m flag is specified.\n"
-         "\nContact \033[35m@memphis242\033[0m on GitHub or make an issue in \033[35;4mgithub.com/memphis242/lin_pid\033[0m if confusions remain.\n\n"
+
+         "\nHere are some examples of basic usage:\n\n"
+
+            "\t\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m0x27\033[0m\033[0m --> \033[3m0xE7 will be included in the reply as the corresponding PID\n"
+            "\t\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m27\033[0m\033[0m --> \033[3mHex assumed, so 0xE7 will be included in the reply as the corresponding PID\n"
+            "\t\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m27d\033[0m\033[0m --> \033[3m0x1B will be included in the reply as the corresponding PID\n"
+            "\t\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m27\033[0m \033[35m--dec\033[0m\033[0m --> \033[3m0x1B will be included in the reply as the corresponding PID\n"
+
+         "\n\033[;3mNote that entering two digits with\033[0m \033[;4mno prefix/suffix\033[0m, \033[;3mby default, the number is assumed to be\033[0m \033[;1mhexadecimal\033[0m \033[;3munless the\033[0m \033[35m--dec\033[0m or \033[35m-d\033[0m \033[;3mflag is specified.\033[0m\n"
+         "\033[;3mNote that deviations from the above supported formats will result in an\033[0m \033[31;3merror message\033[0m.\n"
+
+         "\nContact \033[35m@memphis242\033[0m on GitHub or raise an issue in the \033[35;4mgithub.com/memphis242/lin_pid\033[0m repository if confusion remains. Cheers!\n\n"
       );
       return EXIT_SUCCESS;
    }
