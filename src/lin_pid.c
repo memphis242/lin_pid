@@ -126,11 +126,11 @@ int main(int argc, char * argv[])
             pid = ComputePID(pid);
             // PID should be of a certain subset of possible 8-bit ints...
             assert( (INVALID_PID == pid) ||
-                  (bsearch( &pid,
-                              SORTED_REFERENCE_PID_TABLE,
-                              sizeof(SORTED_REFERENCE_PID_TABLE)/sizeof(uint8_t),
-                              sizeof(uint8_t),
-                              UInt8_Cmp ) != NULL) );
+                    (bsearch( &pid,
+                                SORTED_REFERENCE_PID_TABLE,
+                                sizeof(SORTED_REFERENCE_PID_TABLE)/sizeof(uint8_t),
+                                sizeof(uint8_t),
+                                UInt8_Cmp ) != NULL) );
 
             /* Print Output */
             printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
@@ -553,7 +553,7 @@ static void PrintHelpMsg(void)
 
 static void PrintReferenceTable(void)
 {
-   fprintf(stdout, "\n\033[;4mReference Table\033[0m\n\n");
+   fprintf(stdout, "\n\033[35;4mReference Table\033[0m\n\n");
    fprintf(stdout, "---------------\n");
    fprintf(stdout, "|  \033[36mID\033[0m  |  \033[32mPID\033[0m |\n");
    fprintf(stdout, "---------------\n");
