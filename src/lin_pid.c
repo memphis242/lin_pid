@@ -65,7 +65,7 @@ STATIC int UInt8_Cmp( const void * a, const void * b );
 #endif
 STATIC bool GetID( char const * str, uint8_t * id );
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
-STATIC bool ArgContainsHelp( char const * str );
+STATIC bool ArgsContains( char const * args[], char const * str );
 static void PrintHelpMsg(void);
 static void PrintReferenceTable(void);
 
@@ -183,15 +183,33 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-STATIC bool ArgContainsHelp( char const * str )
+#define MAX_ARGS_TO_CHECK 5
+STATIC bool ArgsContains( char const * args[], char const * str )
 {
-   if ( NULL == str )
+   if ( (NULL == args) || (NULL == str) )
    {
       return false;
    }
 
    bool ret_val = false;
 
+   // Scan through str
+   for ( uint8_t i = 0; i < MAX_ARGS_TO_CHECK; i++ )
+   {
+      if ( args[i] == NULL )
+      {
+         break;
+      }
+      else if ( (strcmp( str, args[i] ) == 0) )
+      {
+         ret_val = true;
+         break;
+      }
+      else
+      {
+         // Keep looking...
+      }
+   }
 
    return ret_val;
 }
@@ -545,12 +563,6 @@ static void PrintReferenceTable(void)
    fprintf(stdout, "---------------\n");
    fprintf(stdout, "\n");
 }
-
-
-
-
-
-
 
 
 #ifndef NDEBUG
