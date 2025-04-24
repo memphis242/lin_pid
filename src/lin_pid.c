@@ -120,7 +120,7 @@ int main(int argc, char * argv[])
                fprintf(stderr, "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n", user_input);
                return EXIT_FAILURE;
             }
-            pid = (uint8_t)user_input;
+            pid = user_input;
 
             /* Perform computation */
             pid = ComputePID(pid);
@@ -572,7 +572,7 @@ int UInt8_Cmp( const void * a, const void * b )
    uint8_t * c = (uint8_t *)a;
    uint8_t * d = (uint8_t *)b;
 
-   return (int)( *c - *d );
+   return ( *c - *d );
 }
 
 #endif
