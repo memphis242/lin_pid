@@ -65,7 +65,7 @@ STATIC int UInt8_Cmp( const void * a, const void * b );
 #endif
 STATIC bool GetID( char const * str, uint8_t * id );
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
-STATIC bool ArgsContains( char const * args[], char const * str );
+STATIC bool ArgsContain( char const * args[], char const * str );
 static void PrintHelpMsg(void);
 static void PrintReferenceTable(void);
 
@@ -183,8 +183,9 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-#define MAX_ARGS_TO_CHECK 5
-STATIC bool ArgsContains( char const * args[], char const * str )
+#define MAX_ARGS_TO_CHECK  5
+#define MAX_ARG_LEN        (strlen("--no-new-line"))
+STATIC bool ArgsContain( char const * args[], char const * str )
 {
    if ( (NULL == args) || (NULL == str) )
    {
@@ -200,7 +201,7 @@ STATIC bool ArgsContains( char const * args[], char const * str )
       {
          break;
       }
-      else if ( (strcmp( str, args[i] ) == 0) )
+      else if ( (strncmp( str, args[i], MAX_ARG_LEN ) == 0) )
       {
          ret_val = true;
          break;
