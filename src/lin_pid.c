@@ -277,29 +277,10 @@ STATIC bool GetID( char const * str,
                    bool pre_emptively_dec,
                    char * err_msg )
 {
-   enum ParserState_E
-   {
-      ParserInit,
-      ParserOneZeroIn,
-      ParserHexPrefix,
-      ParserIndeterminateOneDigitIn,
-      ParserIndeterminateTwoDigitsIn,
-      ParserDecDigits,
-      ParserHexDigits,
-      ParserTwoZerosIn,
-      ParserTwoDigitsAlreadyRead
-   } parser_state = ParserInit;
+   assert( (str != NULL) &&
+           (id  != NULL) &&
+           (!pre_emptively_dec || !pre_emptively_dec) );
 
-   // Check input validity
-   if ( (NULL == str) || (NULL == id) )
-   {
-      return false;
-   }
-
-   char first_digit = '\0';
-   char second_digit = '\0';
-   bool ishex = false;
-   bool isdec = false;
    bool ret_val = false;
    size_t idx = 0;
    size_t loop_limit_counter = 0;
@@ -307,27 +288,58 @@ STATIC bool GetID( char const * str,
    // Skip over any leading whitespace
    // TODO: Do I need to check for this? Can I trust that the terminal will not
    //       pass in white-space leading characters?
-   while ( (loop_limit_counter <= MAX_INPUT_CHARS) &&
-           (str[idx] != '\0') &&
-           (isblank( (int)str[idx] )) )
+   while (
+      /* x2 as max allowance of leading whitespace */
+      (loop_limit_counter <= (MAX_ARG_LEN * 2)) &&
+      (str[idx] != '\0') &&
+      (isblank( (int)str[idx] ))
+   )
    {
       idx++;
       loop_limit_counter++;
    }
    if ( str[idx] == '\0' )
    {
-      // TODO: Throw exception: only encountered whitespace
+      err_msg = "\n\033[31;1mError: Only encountered whitespace in input\033[0m\n";
       return false;
    }
 
    // Parser State Machine Time!
    loop_limit_counter = 0;
    bool exit_loop = false;
-   while ( (loop_limit_counter <= MAX_INPUT_CHARS) && /* Upper-bound on loop to prevent ∞ */
-           (str[idx] != '\0') && /* Keep going until we hit a terminating null character */
-           !exit_loop /* Redundant here but I like extra guard rails... */ )
+   while (
+      (loop_limit_counter <= MAX_ARG_LEN) &&
+      (str[idx] != '\0') && /* Continue until terminating null character */
+      !exit_loop /* Redundant here but I like extra guard rails */
+   )
    {
+      enum ParserState_E
+      {
+         ParserInit,
+         ParserOneZeroIn,
+         ParserHexPrefix,
+         ParserIndeterminateOneDigitIn,
+         ParserIndeterminateTwoDigitsIn,
+         ParserDecDigits,
+         ParserHexDigits,
+         ParserTwoZerosIn,
+         ParserTwoDigitsAlreadyRead
+      } parser_state = ParserInit;
+      char first_digit = '\0';
+      char second_digit = '\0';
+      bool ishex = pre_emptively_hex;
+      bool isdec = pre_emptively_dec;
+
       char ch = str[idx];
+
+      if ( pre_emptively_hex )
+      {
+         
+      }
+      else if ( pre_emptively_dec )
+      {
+
+      }
 
       switch (parser_state)
       {
