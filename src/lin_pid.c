@@ -1,6 +1,7 @@
 /*!
  * @file    lid_pid.c
- * @brief   Compute the PID given an ID, and sprinke some CLI and possibly a GUI on top.
+ * @brief   Compute the PID given an ID, and sprinke some CLI
+ *          and possibly a non-terminal GUI on top.
  * 
  * @author  Abdullah Almosalami @memphis242
  * @date    Wed Apr 9, 2025
@@ -18,9 +19,11 @@
 #include "lin_pid.h"
 
 /* Local Macro Definitions */
-// Put an upper cap on how many characters will be processed from the input stream.
+#define MAX_ARGS_TO_CHECK  5  // e.g., lin_pid XX --hex --quiet --no-new-line
+#define MAX_ARG_LEN        (strlen("--no-new-line"))
+#define MAX_ERR_MSG_LEN    100
 
-#define GET_BIT(x, n) ((x >> n) & 0x01)
+#define GET_BIT(x, n)      ((x >> n) & 0x01)
 
 #ifdef TEST
    #define STATIC // Set to nothing
@@ -61,12 +64,25 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 /* Private Function Prototypes */
 
 #ifndef NDEBUG
+
 STATIC int UInt8_Cmp( const void * a, const void * b );
+
+STATIC bool HasNullTermination( char * str );
+
 #endif
-STATIC bool GetID( char const * str, uint8_t * id );
+
+STATIC bool GetID( char const * str,
+                   uint8_t * id,
+                   bool pre_emptively_hex,
+                   bool pre_emptively_dec,
+                   char * err_msg );
+
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
-STATIC bool ArgsContain( char const * args[], char const * str );
+
+STATIC bool ArgsContain( char const * args[], char const * str, int argc );
+
 static void PrintHelpMsg(void);
+
 static void PrintReferenceTable(void);
 
 /* Meat of the Program */
@@ -77,74 +93,111 @@ int lin_pid_cli(int argc, char * argv[])
 int main(int argc, char * argv[])
 #endif
 {
-   /* Local variables */
-   uint8_t pid = 0xFFu;
-   uint8_t user_input;
-   int ret_val = EXIT_SUCCESS;
-
-   /* Get user input */
-   if ( argc >= 2 )
+   /* Early return opportunities */
+   if ( NULL == argv[1] )
    {
-      // First, check for --help or --table or -t
-      if ( NULL == argv[1] )
-      {
-         fprintf(stderr, "\033[31margv[1] is NULL!\033[0m");
-         ret_val = EXIT_FAILURE;
-      }
-      else if ( strcmp("--help", argv[1]) == 0 )
-      {
-         PrintHelpMsg();
-      }
-      else if
+      fprintf(stderr, "\033[31;1mError: argv[1] is NULL.\033[0m");
+
+      return EXIT_FAILURE;
+   }
+
+   else if ( argc > MAX_ARGS_TO_CHECK )
+   {
+      fprintf(stderr, "\033[31;1mError: Too many input arguments.\033[0m");
+
+      return EXIT_FAILURE;
+   }
+
+   else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
+   {
+      PrintHelpMsg();
+
+      return EXIT_SUCCESS;
+   }
+
+   else if
+   (
+      (2 == argc) &&
       (
          ( strcmp("--table", argv[1]) == 0 ) ||
          ( strcmp("-t",      argv[1]) == 0 )
       )
-      {
-         PrintReferenceTable();
-      }
-      else
-      {
-         // TODO: Support [hex | dec]
-         bool digits_read_successfully = GetID(argv[1], &user_input);
-         if ( !digits_read_successfully )
-         {
-            fprintf(stderr, "\n\033[31;1mInvalid user input.\033[0m\n");
-            ret_val = EXIT_FAILURE;
-         }
-         else
-         {
-            /* Process input */
-            if ( user_input > MAX_ID_ALLOWED )
-            {
-               fprintf(stderr, "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n", user_input);
-               return EXIT_FAILURE;
-            }
-            pid = user_input;
+   )
+   {
+      PrintReferenceTable();
 
-            /* Perform computation */
-            pid = ComputePID(pid);
-            // PID should be of a certain subset of possible 8-bit ints...
-            assert( (INVALID_PID == pid) ||
-                    (bsearch( &pid,
-                                SORTED_REFERENCE_PID_TABLE,
-                                sizeof(SORTED_REFERENCE_PID_TABLE)/sizeof(uint8_t),
-                                sizeof(uint8_t),
-                                UInt8_Cmp ) != NULL) );
-
-            /* Print Output */
-            printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
-            printf( "PID: \033[32m0x%02X\033[0m\n", pid );
-
-         }
-      }
+      return EXIT_SUCCESS;
    }
+
    else
    {
-      PrintHelpMsg();
+      bool ishex = false;
+      bool isdec = false;
+      uint8_t pid = 0xFFu;
+      uint8_t user_input;
+      bool digits_read_successfully;
+      char * err_msg = NULL;
+
+      if ( ArgsContain( argv, "--hex", argc ) ||
+           ArgsContain( argv, "-h"   , argc) )
+      {
+         ishex = true;
+      }
+
+      if ( ArgsContain( argv, "--dec", argc ) ||
+           ArgsContain( argv, "-d"   , argc) )
+      {
+         isdec = true;
+      }
+
+      if ( ishex && isdec )
+      {
+         fprintf(stderr, "\033[31;1mError: Can't use both hex and dec flags.\033[0m");
+
+         return EXIT_FAILURE;
+      }
+
+      digits_read_successfully = GetID(argv[1], &user_input, ishex, isdec, err_msg);
+      if ( !digits_read_successfully )
+      {
+         assert( (err_msg != NULL) && HasNullTermination(err_msg) );
+         fprintf(stderr, err_msg);
+
+         return EXIT_FAILURE;
+      }
+
+      /* Process input */
+      if ( user_input > MAX_ID_ALLOWED )
+      {
+         fprintf(
+                  stderr,
+                  "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n",
+                  user_input
+                );
+
+         return EXIT_FAILURE;
+      }
+
+      pid = user_input;
+
+      /* Perform computation */
+      pid = ComputePID(pid);
+
+      // PID should be of a certain subset of possible 8-bit ints...
+      assert( (INVALID_PID == pid) ||
+               (bsearch( &pid,
+                           SORTED_REFERENCE_PID_TABLE,
+                           sizeof(SORTED_REFERENCE_PID_TABLE)/sizeof(uint8_t),
+                           sizeof(uint8_t),
+                           UInt8_Cmp ) != NULL) );
+
+      /* Print Output */
+      printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
+      printf( "PID: \033[32m0x%02X\033[0m\n", pid );
+
    }
 
-   return ret_val;
+   return EXIT_SUCCESS;
 }
 
 /* Public Function Implementations */
@@ -183,19 +236,19 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-#define MAX_ARGS_TO_CHECK  5
-#define MAX_ARG_LEN        (strlen("--no-new-line"))
-STATIC bool ArgsContain( char const * args[], char const * str )
+STATIC bool ArgsContain( char const * args[], char const * str, int argc )
 {
-   if ( (NULL == args) || (NULL == str) )
-   {
-      return false;
-   }
+   // Assert instead of return false because this function is internal and we
+   // have control on what it is called with.
+   assert( (args != NULL) && (str != NULL) && (argc >= 2) );
 
    bool ret_val = false;
+   const uint8_t MAX_ARGS = (argc < MAX_ARGS_TO_CHECK) ?
+                              (uint8_t)argc :
+                              MAX_ARGS_TO_CHECK;
 
    // Scan through str
-   for ( uint8_t i = 0; i < MAX_ARGS_TO_CHECK; i++ )
+   for ( uint8_t i = 1; i < MAX_ARGS; i++ )
    {
       if ( args[i] == NULL )
       {
@@ -218,8 +271,11 @@ STATIC bool ArgsContain( char const * args[], char const * str )
 // Acceptable formats:
 // Hex:     0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z
 // Decimal: ZZd, ZZD
-#define MAX_INPUT_CHARS 5  // Enough to cover the possible formats + margin for growth
-STATIC bool GetID( char const * str, uint8_t * id )
+STATIC bool GetID( char const * str,
+                   uint8_t * id,
+                   bool pre_emptively_hex,
+                   bool pre_emptively_dec,
+                   char * err_msg )
 {
    enum ParserState_E
    {
@@ -522,10 +578,10 @@ static void PrintHelpMsg(void)
 
       "\nBasic Program usage:\n\n"
 
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[;3mto get the PID that corresponds to an ID.\033[0m\n"
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[35m(--quiet | -q)\033[0m \033[0m \033[35m[--no-new-line]\033[0m \033[;3msame as above but quieter and not colored.\033[0m\n"
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[35m[--help]\033[0m \033[;3mto print the help message.\033[0m\n"
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid.exe\033[0m \033[35m[(--table | -t)]\033[0m \033[;3mto print a full LIN ID vs PID table for reference.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[;3mto get the PID that corresponds to an ID.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[35m(--quiet | -q)\033[0m \033[0m \033[35m[--no-new-line]\033[0m \033[;3msame as above but quieter and not colored.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[--help]\033[0m \033[;3mto print the help message.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[(--table | -t)]\033[0m \033[;3mto print a full LIN ID vs PID table for reference.\033[0m\n"
 
       "\n\033[;3mNote that deviations from the above usage will result in an\033[0m \033[31;3merror message\033[0m.\n"
 
@@ -568,12 +624,27 @@ static void PrintReferenceTable(void)
 
 #ifndef NDEBUG
 
-int UInt8_Cmp( const void * a, const void * b )
+STATIC int UInt8_Cmp( const void * a, const void * b )
 {
    uint8_t * c = (uint8_t *)a;
    uint8_t * d = (uint8_t *)b;
 
    return ( *c - *d );
+}
+
+STATIC bool HasNullTermination( char * str )
+{
+   assert ( str != NULL );
+
+   for ( uint8_t i = 0; i < MAX_ERR_MSG_LEN; i++ )
+   {
+      if ( str[i] == '\0' )
+      {
+         return true;
+      }
+   }
+
+   return false;
 }
 
 #endif
