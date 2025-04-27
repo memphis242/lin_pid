@@ -192,8 +192,23 @@ int main(int argc, char * argv[])
                            UInt8_Cmp ) != NULL) );
 
       /* Print Output */
-      printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
-      printf( "PID: \033[32m0x%02X\033[0m\n", pid );
+      if ( ArgsContain(argv, "--quiet", argc) || ArgsContain(argv, "-q", argc) )
+      {
+         bool to_newline_or_not_to_newline = !ArgsContain(argv, "--no-new-line", argc);
+         if ( to_newline_or_not_to_newline )
+         {
+            printf("%02X\n", pid);
+         }
+         else
+         {
+            printf("%02X", pid);
+         }
+      }
+      else
+      {
+         printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
+         printf( "PID: \033[32m0x%02X\033[0m\n", pid );
+      }
 
    }
 
