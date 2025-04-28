@@ -79,7 +79,10 @@ STATIC bool GetID( char const * str,
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
-STATIC bool ArgsContain( char const * args[], char const * str, int argc );
+STATIC bool ArgsContain( char const * args[],
+                         char const * str,
+                         int argc,
+                         uint8_t * idx );
 
 static void PrintHelpMsg(void);
 
@@ -94,14 +97,7 @@ int main(int argc, char * argv[])
 #endif
 {
    /* Early return opportunities */
-   if ( NULL == argv[1] )
-   {
-      fprintf(stderr, "\033[31;1mError: argv[1] is NULL.\033[0m");
-
-      return EXIT_FAILURE;
-   }
-
-   else if ( argc > MAX_ARGS_TO_CHECK )
+   if ( argc > MAX_ARGS_TO_CHECK )
    {
       fprintf(stderr, "\033[31;1mError: Too many input arguments.\033[0m");
 
@@ -137,17 +133,21 @@ int main(int argc, char * argv[])
       uint8_t user_input;
       bool digits_read_successfully;
       char * err_msg = NULL;
+      uint8_t idx_of_arg = 0;
+      const char * id_arg = argv[1];
 
-      if ( ArgsContain( argv, "--hex", argc ) ||
-           ArgsContain( argv, "-h"   , argc) )
+      if ( ArgsContain( (const char **)argv, "--hex", argc, &idx_of_arg ) ||
+           ArgsContain( (const char **)argv, "-h"   , argc, &idx_of_arg ) )
       {
          ishex = true;
+         if ( 1 == idx_of_arg ) id_arg = argv[2];
       }
 
-      if ( ArgsContain( argv, "--dec", argc ) ||
-           ArgsContain( argv, "-d"   , argc) )
+      if ( ArgsContain( (const char **)argv, "--dec", argc, &idx_of_arg ) ||
+           ArgsContain( (const char **)argv, "-d"   , argc, &idx_of_arg ) )
       {
          isdec = true;
+         if ( 1 == idx_of_arg ) id_arg = argv[2];
       }
 
       if ( ishex && isdec )
@@ -157,7 +157,7 @@ int main(int argc, char * argv[])
          return EXIT_FAILURE;
       }
 
-      digits_read_successfully = GetID(argv[1], &user_input, ishex, isdec, err_msg);
+      digits_read_successfully = GetID(id_arg, &user_input, ishex, isdec, err_msg);
       if ( !digits_read_successfully )
       {
          assert( (err_msg != NULL) && HasNullTermination(err_msg) );
@@ -192,9 +192,14 @@ int main(int argc, char * argv[])
                            UInt8_Cmp ) != NULL) );
 
       /* Print Output */
-      if ( ArgsContain(argv, "--quiet", argc) || ArgsContain(argv, "-q", argc) )
+      if ( ArgsContain((const char **)argv, "--quiet", argc, &idx_of_arg) ||
+           ArgsContain((const char **)argv, "-q", argc, &idx_of_arg) )
       {
-         bool to_newline_or_not_to_newline = !ArgsContain(argv, "--no-new-line", argc);
+         bool to_newline_or_not_to_newline =
+            !ArgsContain((const char **)argv,
+               "--no-new-line",
+               argc,
+               &idx_of_arg);
          if ( to_newline_or_not_to_newline )
          {
             printf("%02X\n", pid);
@@ -251,11 +256,14 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-STATIC bool ArgsContain( char const * args[], char const * str, int argc )
+STATIC bool ArgsContain( char const * args[],
+                         char const * str,
+                         int argc,
+                         uint8_t * idx )
 {
    // Assert instead of return false because this function is internal and we
    // have control on what it is called with.
-   assert( (args != NULL) && (str != NULL) && (argc >= 2) );
+   assert( (args != NULL) && (str != NULL) && (argc >= 2) && (idx != NULL) );
 
    bool ret_val = false;
    const uint8_t MAX_ARGS = (argc < MAX_ARGS_TO_CHECK) ?
@@ -272,6 +280,7 @@ STATIC bool ArgsContain( char const * args[], char const * str, int argc )
       else if ( (strncmp( str, args[i], MAX_ARG_LEN ) == 0) )
       {
          ret_val = true;
+         *idx = i;
          break;
       }
       else
@@ -322,6 +331,10 @@ STATIC bool GetID( char const * str,
    // Parser State Machine Time!
    loop_limit_counter = 0;
    bool exit_loop = false;
+   char first_digit = '\0';
+   char second_digit = '\0';
+   bool ishex = pre_emptively_hex;
+   bool isdec = pre_emptively_dec;
    while (
       (loop_limit_counter <= MAX_ARG_LEN) &&
       (str[idx] != '\0') && /* Continue until terminating null character */
@@ -340,10 +353,6 @@ STATIC bool GetID( char const * str,
          ParserTwoZerosIn,
          ParserTwoDigitsAlreadyRead
       } parser_state = ParserInit;
-      char first_digit = '\0';
-      char second_digit = '\0';
-      bool ishex = pre_emptively_hex;
-      bool isdec = pre_emptively_dec;
 
       char ch = str[idx];
 
@@ -512,7 +521,7 @@ STATIC bool GetID( char const * str,
    assert( !(ishex && isdec) );
    
    // Post state machine processing
-   if ( loop_limit_counter >= MAX_INPUT_CHARS )
+   if ( loop_limit_counter >= MAX_ARG_LEN )
    {
       // TODO: Throw exception because we should have stopped sooner than that!
       // This means the string was not null-terminated.
@@ -605,8 +614,8 @@ static void PrintHelpMsg(void)
 
       "\nBasic Program usage:\n\n"
 
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[;3mto get the PID that corresponds to an ID.\033[0m\n"
-      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[35m(--quiet | -q)\033[0m \033[0m \033[35m[--no-new-line]\033[0m \033[;3msame as above but quieter and not colored.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[;3mto get the PID that corresponds to an ID.\033[0m\n"
+      "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[34;1m<hex or decimal number>\033[0m \033[35m[(--hex | -h) | (--dec | -d)]\033[0m \033[35m(--quiet | -q)\033[0m \033[0m \033[35m[--no-new-line]\033[0m \033[;3msame as above but quieter and not colored.\033[0m\n"
       "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[--help]\033[0m \033[;3mto print the help message.\033[0m\n"
       "\033[33m<path>/\033[0m\033[36;1mlin_pid\033[0m \033[35m[(--table | -t)]\033[0m \033[;3mto print a full LIN ID vs PID table for reference.\033[0m\n"
 
@@ -614,11 +623,11 @@ static void PrintHelpMsg(void)
 
       "\nSupported hexadecimal number formats:\n\n"
 
-         "\t0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, \033[;1mZZ\033[0m, Z, or \033[35mZZ (-h | --hex)\033[0m\n"
+         "\t0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, \033[;1mZZ\033[0m, Z, \033[35m(-h | --hex) ZZ\033[0m, or \033[35mZZ (-h | --hex)\033[0m\n"
 
       "\nSupported decimal number formats:\n\n"
 
-         "\tZZd, ZZD, or \033[35mZZ (-d | --dec)\033[0m\n"
+         "\tZZd, ZZD, \033[35m(-d | --dec) ZZ\033[0m, or \033[35mZZ (-d | --dec)\033[0m\n"
 
       "\nHere are some examples of basic usage:\n\n"
 
