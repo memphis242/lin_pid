@@ -75,7 +75,7 @@ STATIC bool GetID( char const * str,
                    uint8_t * id,
                    bool pre_emptively_hex,
                    bool pre_emptively_dec,
-                   char * err_msg );
+                   const char * err_msg );
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -161,7 +161,7 @@ int main(int argc, char * argv[])
       if ( !digits_read_successfully )
       {
          assert( (err_msg != NULL) && HasNullTermination(err_msg) );
-         fprintf(stderr, err_msg);
+         fprintf(stderr, "%100s", err_msg);
 
          return EXIT_FAILURE;
       }
@@ -299,7 +299,7 @@ STATIC bool GetID( char const * str,
                    uint8_t * id,
                    bool pre_emptively_hex,
                    bool pre_emptively_dec,
-                   char * err_msg )
+                   const char * err_msg )
 {
    assert( (str != NULL) &&
            (id  != NULL) &&
@@ -349,22 +349,30 @@ STATIC bool GetID( char const * str,
          ParserIndeterminateOneDigitIn,
          ParserIndeterminateTwoDigitsIn,
          ParserDecDigits,
+         ParserTwoDecDigits,
          ParserHexDigits,
          ParserTwoZerosIn,
-         ParserTwoDigitsAlreadyRead
-      } parser_state = ParserInit;
-
-      char ch = str[idx];
+         ParserTwoDigitsAlreadyRead,
+         ParserPreemptivelyHex,
+         ParserPreemptivelyDec,
+         ParserPreemptivelyDecOneZeroIn,
+         ParserPreemptivelyDecTwoZerosIn
+      } parser_state;
 
       if ( pre_emptively_hex )
       {
-         
+         parser_state = ParserPreemptivelyHex;
       }
       else if ( pre_emptively_dec )
       {
-
+         parser_state = ParserPreemptivelyDec;
+      }
+      else
+      {
+         parser_state = ParserInit;
       }
 
+      char ch = str[idx];
       switch (parser_state)
       {
          case ParserInit:
@@ -469,7 +477,36 @@ STATIC bool GetID( char const * str,
             break;
 
          case ParserDecDigits:
-            // TODO: Add in when I add support for -dec or --decimal flag
+            if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
+            {
+               // Hexadecimal number entered for decimal flag.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (second digit).\033[0m";
+            }
+            else if ( isdigit(ch) )
+            {
+               second_digit = ch;
+               parser_state = ParserTwoDecDigits;
+            }
+            else
+            {
+               // Invalid character encountered.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Second character invalid.\033[0m";
+            }
+            break;
+
+         case ParserTwoDecDigits:
+            // Two decimal digits will have already been read in...
+            if ( ('d' == ch) || ('D' == ch) )
+            {
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else
+            {
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Non-decimal character encountered after first two digits.\033[0m";
+            }
             break;
          
          case ParserHexDigits:
@@ -487,27 +524,113 @@ STATIC bool GetID( char const * str,
             break;
 
          case ParserTwoZerosIn:
-            if ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ||
-                 ('d' == ch) || ('D' == ch) )
+            if ( ( ishex &&
+                     ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) ) ||
+                 ( isdec &&
+                     ( ('d' == ch) || ('D' == ch) ) )
+               )
             {
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
             {
-               // TODO: Throw exception - too many 0s in a row.
+               err_msg = "\033[31;1mError: Too many digits in a row or invalid character encountered.\033[0m";
                exit_loop = true;
             }
             break;
 
          case ParserTwoDigitsAlreadyRead:
-            // TODO: Throw exception - too many digits passed in.
+            err_msg = "\033[31;1mTwo digits already read in, but still encountering more characters.\033[0m";
             exit_loop = true;
+            break;
+
+         case ParserPreemptivelyHex:
+            if ( '0' == ch )
+            {
+               parser_state = ParserOneZeroIn;
+            }
+            else if ( ('x' == ch) || ('X' == ch) )
+            {
+               parser_state = ParserHexPrefix;
+            }
+            else if ( isxdigit(ch) )
+            {
+               first_digit = ch;
+               parser_state = ParserHexDigits;
+            }
+            else
+            {
+               // Invalid character encountered.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+            }
+            break;
+
+         case ParserPreemptivelyDec:
+            if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
+            {
+               // Hexadecimal number entered for decimal flag.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (first digit).\033[0m";
+            }
+            else if ( '0' == ch )
+            {
+               parser_state = ParserPreemptivelyDecOneZeroIn;
+            }
+            else if ( isdigit(ch) )
+            {
+               first_digit = ch;
+               parser_state = ParserDecDigits;
+            }
+            else
+            {
+               // Invalid character encountered.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+            }
+            break;
+
+         case ParserPreemptivelyDecOneZeroIn:
+            if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
+            {
+               // Hexadecimal number entered for decimal flag.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Hexadecimal number entered for decimal setting.\033[0m";
+            }
+            else if ( '0' == ch )
+            {
+               parser_state = ParserPreemptivelyDecTwoZerosIn;
+            }
+            else if ( isdigit(ch) )
+            {
+               first_digit = ch;
+               parser_state = ParserDecDigits;
+            }
+            else
+            {
+               // Invalid character encountered.
+               exit_loop = true;
+               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+            }
+            break;
+
+         case ParserPreemptivelyDecTwoZerosIn:
+            if ( ('d' == ch) || ('D' == ch) )
+            {
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else
+            {
+               exit_loop = true;
+               err_msg = "\033[31;1mError: Invalid decimal number entered.\033[0m";
+            }
             break;
 
          default:
             break;
       }
       
+      // Do we need to exit the loop pre-emptively due to an erroneous situation?
       if ( exit_loop )
       {
          break;
@@ -523,45 +646,50 @@ STATIC bool GetID( char const * str,
    // Post state machine processing
    if ( loop_limit_counter >= MAX_ARG_LEN )
    {
-      // TODO: Throw exception because we should have stopped sooner than that!
-      // This means the string was not null-terminated.
+      err_msg = "\033[31;1mError: Too many characters encountered.\033[0m";
    }
    else if ( exit_loop )
    {
-      // Invalid digits were detected! Don't update ID.
+      // Something erroneous was detected. Don't update ID!
    }
    else
    {
       // We got valid digits! Let's get that ID.
       uint8_t most_significant_digit = 0xFF;
       uint8_t least_significant_digit = 0xFF;
+      // By this point, I assume we have at least one digit placed in first_digit.
+      // If nothing is in first_digit, nothing should also be in the second_digit.
+      assert( (first_digit != '\0') || (second_digit) == '\0' );
 
-      if ( (second_digit == '\0') && (first_digit != '\0') )
+      if ( (first_digit != '\0') && (second_digit == '\0') )
       {
-         // We only got one digit → assume it is hex
          most_significant_digit = 0x00u;
          bool conv = MyAtoI( first_digit, &least_significant_digit );
-         ishex = true;
-         // We should have handled the input well enough by here that the conversion runs successfully...
          assert( conv );
-         // Obtained digits should in-range at this point
          assert( (most_significant_digit == 0x00) && (least_significant_digit <= 0x0F) );
       }
       else if ( (first_digit != '\0') && (second_digit != '\0') )
       {
          bool conv1 = MyAtoI( first_digit, &most_significant_digit );
          bool conv2 = MyAtoI( second_digit, &least_significant_digit );
-         // We should have handled the input well enough by here that the conversion runs successfully...
          assert( conv1 && conv2 );
-         // Digits should be <= 0xF
          assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
+      }
+      else
+      {
+         most_significant_digit = 0;
+         least_significant_digit = 0;
       }
 
       // Digits obtained should be <= 0xF
       assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
 
       // Final step!
-      if ( ishex || !isdec )
+      if ( (0 == most_significant_digit) && (0 == least_significant_digit) )
+      {
+         *id = 0x00u;
+      }
+      else if ( ishex || !isdec )
       {
          *id = (uint8_t)( (most_significant_digit * 0x10) + least_significant_digit );
       }
@@ -572,6 +700,8 @@ STATIC bool GetID( char const * str,
 
       ret_val = true;
    }
+
+   (void)err_msg;
    
    return ret_val;
 }
