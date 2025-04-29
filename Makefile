@@ -263,10 +263,6 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	@echo "Compiling $<..."
 	$(CC) -c $(CFLAGS) $< -o $@
 	@echo
-	@echo "----------------------------------------"
-	@echo "Running static analysis on $<..."
-	@echo
-	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 # Make the directories if they don't already exist
 $(PATH_RESULTS):
