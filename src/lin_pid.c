@@ -67,7 +67,7 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 
 STATIC int UInt8_Cmp( const void * a, const void * b );
 
-STATIC bool HasNullTermination( char * str );
+STATIC bool HasNullTermination( const char * str );
 
 #endif
 
@@ -75,7 +75,7 @@ STATIC bool GetID( char const * str,
                    uint8_t * id,
                    bool pre_emptively_hex,
                    bool pre_emptively_dec,
-                   const char * err_msg );
+                   const char ** err_msg );
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -132,7 +132,7 @@ int main(int argc, char * argv[])
       uint8_t pid = 0xFFu;
       uint8_t user_input;
       bool digits_read_successfully;
-      char * err_msg = NULL;
+      const char * err_msg = NULL;
       uint8_t idx_of_arg = 0;
       const char * id_arg = argv[1];
 
@@ -157,11 +157,14 @@ int main(int argc, char * argv[])
          return EXIT_FAILURE;
       }
 
-      digits_read_successfully = GetID(id_arg, &user_input, ishex, isdec, err_msg);
+      digits_read_successfully = GetID(id_arg, &user_input, ishex, isdec, &err_msg);
       if ( !digits_read_successfully )
       {
          assert( (err_msg != NULL) && HasNullTermination(err_msg) );
-         fprintf(stderr, "%100s", err_msg);
+
+         fprintf(stderr, "\n");
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, err_msg);
+         fprintf(stderr, "\n\n");
 
          return EXIT_FAILURE;
       }
@@ -299,7 +302,7 @@ STATIC bool GetID( char const * str,
                    uint8_t * id,
                    bool pre_emptively_hex,
                    bool pre_emptively_dec,
-                   const char * err_msg )
+                   const char ** err_msg )
 {
    assert( (str != NULL) &&
            (id  != NULL) &&
@@ -324,7 +327,7 @@ STATIC bool GetID( char const * str,
    }
    if ( str[idx] == '\0' )
    {
-      err_msg = "\n\033[31;1mError: Only encountered whitespace in input\033[0m\n";
+      *err_msg = "\n\033[31;1mError: Only encountered whitespace in input\033[0m\n";
       return false;
    }
 
@@ -430,8 +433,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character detected
-               // TODO: Throw exception - invalid character
+               *err_msg = "\033[31;1mError: Invalid character detected after hex determination.\033[0m";
                exit_loop = true;
             }
             break;
@@ -452,8 +454,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character detected
-               // TODO: Throw exception - invalid character
+               *err_msg = "\033[31;1mError: Invalid character detected (second digit).\033[0m";
                exit_loop = true;
             }
             break;
@@ -471,7 +472,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // TODO: Throw exception - invalid character sequence
+               *err_msg = "\033[31;1mError: Too many digits entered.\033[0m";
                exit_loop = true;
             }
             break;
@@ -481,7 +482,7 @@ STATIC bool GetID( char const * str,
             {
                // Hexadecimal number entered for decimal flag.
                exit_loop = true;
-               err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (second digit).\033[0m";
+               *err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (second digit).\033[0m";
             }
             else if ( isdigit(ch) )
             {
@@ -492,7 +493,7 @@ STATIC bool GetID( char const * str,
             {
                // Invalid character encountered.
                exit_loop = true;
-               err_msg = "\033[31;1mError: Second character invalid.\033[0m";
+               *err_msg = "\033[31;1mError: Second character invalid.\033[0m";
             }
             break;
 
@@ -505,7 +506,7 @@ STATIC bool GetID( char const * str,
             else
             {
                exit_loop = true;
-               err_msg = "\033[31;1mError: Non-decimal character encountered after first two digits.\033[0m";
+               *err_msg = "\033[31;1mError: Non-decimal character encountered after first two digits.\033[0m";
             }
             break;
          
@@ -517,8 +518,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character detected
-               // TODO: Throw exception - invalid character
+               *err_msg = "\033[31;1mError: Invalid character detected (second digit).\033[0m";
                exit_loop = true;
             }
             break;
@@ -534,13 +534,13 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               err_msg = "\033[31;1mError: Too many digits in a row or invalid character encountered.\033[0m";
+               *err_msg = "\033[31;1mError: Too many digits in a row or invalid character encountered.\033[0m";
                exit_loop = true;
             }
             break;
 
          case ParserTwoDigitsAlreadyRead:
-            err_msg = "\033[31;1mTwo digits already read in, but still encountering more characters.\033[0m";
+            *err_msg = "\033[31;1mTwo digits already read in, but still encountering more characters.\033[0m";
             exit_loop = true;
             break;
 
@@ -562,7 +562,7 @@ STATIC bool GetID( char const * str,
             {
                // Invalid character encountered.
                exit_loop = true;
-               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
@@ -571,7 +571,7 @@ STATIC bool GetID( char const * str,
             {
                // Hexadecimal number entered for decimal flag.
                exit_loop = true;
-               err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (first digit).\033[0m";
+               *err_msg = "\033[31;1mError: Hexadecimal character encountered under decimal settings (first digit).\033[0m";
             }
             else if ( '0' == ch )
             {
@@ -586,7 +586,7 @@ STATIC bool GetID( char const * str,
             {
                // Invalid character encountered.
                exit_loop = true;
-               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
@@ -595,7 +595,7 @@ STATIC bool GetID( char const * str,
             {
                // Hexadecimal number entered for decimal flag.
                exit_loop = true;
-               err_msg = "\033[31;1mError: Hexadecimal number entered for decimal setting.\033[0m";
+               *err_msg = "\033[31;1mError: Hexadecimal number entered for decimal setting.\033[0m";
             }
             else if ( '0' == ch )
             {
@@ -610,7 +610,7 @@ STATIC bool GetID( char const * str,
             {
                // Invalid character encountered.
                exit_loop = true;
-               err_msg = "\033[31;1mError: First character invalid.\033[0m";
+               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
@@ -622,7 +622,7 @@ STATIC bool GetID( char const * str,
             else
             {
                exit_loop = true;
-               err_msg = "\033[31;1mError: Invalid decimal number entered.\033[0m";
+               *err_msg = "\033[31;1mError: Invalid decimal number entered.\033[0m";
             }
             break;
 
@@ -646,7 +646,7 @@ STATIC bool GetID( char const * str,
    // Post state machine processing
    if ( loop_limit_counter >= MAX_ARG_LEN )
    {
-      err_msg = "\033[31;1mError: Too many characters encountered.\033[0m";
+      *err_msg = "\033[31;1mError: Too many characters encountered.\033[0m";
    }
    else if ( exit_loop )
    {
@@ -804,7 +804,7 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
    return ( *c - *d );
 }
 
-STATIC bool HasNullTermination( char * str )
+STATIC bool HasNullTermination( const char * str )
 {
    assert ( str != NULL );
 
