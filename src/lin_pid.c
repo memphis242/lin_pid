@@ -306,7 +306,7 @@ STATIC bool GetID( char const * str,
 {
    assert( (str != NULL) &&
            (id  != NULL) &&
-           (!pre_emptively_dec || !pre_emptively_dec) );
+           (!pre_emptively_hex || !pre_emptively_dec) );
 
    bool ret_val = false;
    size_t idx = 0;
