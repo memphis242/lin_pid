@@ -99,7 +99,9 @@ int main(int argc, char * argv[])
    /* Early return opportunities */
    if ( argc > MAX_ARGS_TO_CHECK )
    {
+      fprintf(stderr, "\n");
       fprintf(stderr, "\033[31;1mError: Too many input arguments.\033[0m");
+      fprintf(stderr, "\n\n");
 
       return EXIT_FAILURE;
    }
@@ -152,7 +154,9 @@ int main(int argc, char * argv[])
 
       if ( ishex && isdec )
       {
+         fprintf(stderr, "\n");
          fprintf(stderr, "\033[31;1mError: Can't use both hex and dec flags.\033[0m");
+         fprintf(stderr, "\n\n");
 
          return EXIT_FAILURE;
       }
@@ -172,11 +176,13 @@ int main(int argc, char * argv[])
       /* Process input */
       if ( user_input > MAX_ID_ALLOWED )
       {
+         fprintf(stderr, "\n");
          fprintf(
                   stderr,
                   "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n",
                   user_input
                 );
+         fprintf(stderr, "\n\n");
 
          return EXIT_FAILURE;
       }
@@ -216,6 +222,7 @@ int main(int argc, char * argv[])
       {
          printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
          printf( "PID: \033[32m0x%02X\033[0m\n", pid );
+         printf("\n");
       }
 
    }
@@ -755,7 +762,7 @@ static void PrintHelpMsg(void)
          "\n\t\033[35m--hex\033[0m or \033[35m-h\033[0m for \033[;3mhexadecimal (base-16)\033[0m entries"
          "\n\t\033[35m--dec\033[0m or \033[35m-d\033[0m for \033[;3mdecimal (base-10)\033[0m entries"
 
-      "\n\n\033[;1mNote\033[0m that the \033[35mFORMAT\033[0m flag can actually be placed either before \033[;3mor\033[0m after the number entry, but \033[;3mnot both.\033[0m"
+      "\n\n\033[;3mNote that the\033[0m \033[35mFORMAT\033[0m \033[;3mflag can actually be placed either \033[;1mbefore or after\033[0m \033[;3mthe number entry, but\033[0m \033[;1mnot both.\033[0m"
 
       "\n\nSupported hexadecimal number formats:\n\n"
 
@@ -775,7 +782,7 @@ static void PrintHelpMsg(void)
 
       "\n\033[;3mNote that two digits entries\033[0m \033[;4mwithout a prefix/suffix\033[0m, \033[;3mby default, are assumed to be\033[0m \033[;1mhexadecimal\033[0m \033[;3munless the\033[0m \033[35m--dec\033[0m or \033[35m-d\033[0m \033[;3mflag is specified.\033[0m\n"
 
-      "\nContact \033[35m@memphis242\033[0m on GitHub or raise an issue in the \033[35;4mgithub.com/memphis242/lin_pid\033[0m repository if confusion remains. Cheers!\n\n"
+      "\nContact \033[35m@memphis242\033[0m on GitHub or raise an issue in the \033[35;4mgithub.com/memphis242/lin_pid\033[0m repository if confusion remains or issues are encountered. Cheers!\n\n"
    );
 }
 
