@@ -332,49 +332,49 @@ STATIC bool GetID( char const * str,
    }
 
    // Parser State Machine Time!
+   enum ParserState_E
+   {
+      ParserInit,
+      ParserOneZeroIn,
+      ParserHexPrefix,
+      ParserIndeterminateOneDigitIn,
+      ParserIndeterminateTwoDigitsIn,
+      ParserDecDigits,
+      ParserTwoDecDigits,
+      ParserHexDigits,
+      ParserTwoZerosIn,
+      ParserTwoDigitsAlreadyRead,
+      ParserPreemptivelyHex,
+      ParserPreemptivelyDec,
+      ParserPreemptivelyDecOneZeroIn,
+      ParserPreemptivelyDecTwoZerosIn
+   } parser_state;
    loop_limit_counter = 0;
    bool exit_loop = false;
    char first_digit = '\0';
    char second_digit = '\0';
    bool ishex = pre_emptively_hex;
    bool isdec = pre_emptively_dec;
+
+   if ( pre_emptively_hex )
+   {
+      parser_state = ParserPreemptivelyHex;
+   }
+   else if ( pre_emptively_dec )
+   {
+      parser_state = ParserPreemptivelyDec;
+   }
+   else
+   {
+      parser_state = ParserInit;
+   }
+
    while (
       (loop_limit_counter <= MAX_ARG_LEN) &&
       (str[idx] != '\0') && /* Continue until terminating null character */
       !exit_loop /* Redundant here but I like extra guard rails */
    )
    {
-      enum ParserState_E
-      {
-         ParserInit,
-         ParserOneZeroIn,
-         ParserHexPrefix,
-         ParserIndeterminateOneDigitIn,
-         ParserIndeterminateTwoDigitsIn,
-         ParserDecDigits,
-         ParserTwoDecDigits,
-         ParserHexDigits,
-         ParserTwoZerosIn,
-         ParserTwoDigitsAlreadyRead,
-         ParserPreemptivelyHex,
-         ParserPreemptivelyDec,
-         ParserPreemptivelyDecOneZeroIn,
-         ParserPreemptivelyDecTwoZerosIn
-      } parser_state;
-
-      if ( pre_emptively_hex )
-      {
-         parser_state = ParserPreemptivelyHex;
-      }
-      else if ( pre_emptively_dec )
-      {
-         parser_state = ParserPreemptivelyDec;
-      }
-      else
-      {
-         parser_state = ParserInit;
-      }
-
       char ch = str[idx];
       switch (parser_state)
       {
