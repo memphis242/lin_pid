@@ -62,16 +62,37 @@ MAIN_TARGET_NAME = lin_pid
 # Compiler setup
 CROSS	= 
 CC = $(CROSS)gcc
+
 COMPILER_WARNING_FLAGS = \
-    -Wall -Wextra -Wpedantic \
+    -Wall -Wextra -Wpedantic -pedantic-errors \
     -Wconversion -Wdouble-promotion -Wnull-dereference \
     -Wwrite-strings -Wformat=2 -Wformat-overflow=2 \
-    -Wformat-signedness -Wuseless-cast \
+    -Wformat-signedness -Wuseless-cast -Wstrict-prototypes \
     -Wcast-align=strict -Wimplicit-fallthrough=3 -Wswitch-default \
     -Wswitch-enum -Wfloat-equal -Wuse-after-free=2 \
     -Wdeprecated-declarations -Wmissing-prototypes -Wparentheses \
     -Wreturn-type -Wlogical-op -Wstrict-aliasing \
-    -Wuninitialized -Wmaybe-uninitialized -Wshadow
+    -Wuninitialized -Wmaybe-uninitialized -Wshadow \
+	 -Wduplicated-cond -Wduplicated-branches \
+	 -Walloc-zero -Walloc-size
+
+# Includes some -Wno-... flags for warnings that I'd normally want for my lib
+# src but **not** for my test file, which intentionally has all sorts of
+# naughty shenanigans going on
+COMPILER_WARNINGS_TEST_BUILD = \
+    -Wall -Wextra -Wpedantic \
+    -Wconversion -Wdouble-promotion -Wnull-dereference \
+    -Wwrite-strings -Wformat=2 -Wformat-overflow=2 \
+    -Wformat-signedness \
+    -Wcast-align=strict -Wimplicit-fallthrough=3 -Wswitch-default \
+    -Wswitch-enum -Wfloat-equal -Wuse-after-free=2 \
+    -Wdeprecated-declarations -Wmissing-prototypes -Wparentheses \
+    -Wreturn-type -Wlogical-op -Wstrict-aliasing \
+    -Wuninitialized -Wmaybe-uninitialized -Wshadow \
+    -Wsuggest-attribute=const \
+    -Walloc-zero -Walloc-size \
+    -Wno-analyzer-use-of-uninitialized-value -Wno-uninitialized \
+    -Wno-maybe-uninitialized
 
 # Consider -Wmismatched-dealloc
 COMPILER_SANITIZERS = -fsanitize=bool -fsanitize=undefined -fsanitize-trap
