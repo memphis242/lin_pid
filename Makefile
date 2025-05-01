@@ -236,7 +236,7 @@ $(PATH_OBJECT_FILES)lin_pid_sscanf.o: $(PATH_BENCHMARK)lin_pid_sscanf.c
 	@echo "----------------------------------------"
 	@echo "Running static analysis on $<..."
 	@echo
-	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
+	cppcheck --check-level=exhaustive --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
@@ -248,7 +248,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo "----------------------------------------"
 	@echo "Running static analysis on $<..."
 	@echo
-	cppcheck --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
+	cppcheck --check-level=exhaustive --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo
