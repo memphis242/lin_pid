@@ -13,7 +13,6 @@
 /* File Inclusions */
 #include <stdlib.h>
 #include <stdint.h>
-// TODO: Exceptions
 
 /* Public Macro Definitions */
 #define LIN_2p0_MAX_ID  0x3Fu
@@ -21,6 +20,16 @@
 #define INVALID_PID     0x00u
 
 /* Public Datatypes */
+#define LIN_PID_EXCEPTION(e, msg)   e,
+
+enum LIN_PID_Result_E
+{
+   // Do not manually place more enums before the inclusion!
+   #include "lin_pid_exceptions.h"
+   NUM_OF_EXCEPTIONS
+};
+
+#undef LIN_PID_EXCEPTION
 
 /* Public API */
 

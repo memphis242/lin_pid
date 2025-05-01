@@ -61,21 +61,27 @@ static const uint8_t SORTED_REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 };
 #endif
 
+#define LIN_PID_EXCEPTION(enum, err_msg) "\n\033[31;1mError: " err_msg "\033[0m\n\n",
+
+static const char * ErrorMsgs[NUM_OF_EXCEPTIONS] =
+{
+   #include "lin_pid_exceptions.h"
+};
+
+#undef LIN_PID_EXCEPTION
+
 /* Private Function Prototypes */
 
 #ifndef NDEBUG
 
 STATIC int UInt8_Cmp( const void * a, const void * b );
 
-STATIC bool HasNullTermination( const char * str );
-
 #endif
 
-STATIC bool GetID( char const * str,
-                   uint8_t * id,
-                   bool pre_emptively_hex,
-                   bool pre_emptively_dec,
-                   const char ** err_msg );
+STATIC enum LIN_PID_Result_E GetID( char const * str,
+                                    uint8_t * id,
+                                    bool pre_emptively_hex,
+                                    bool pre_emptively_dec );
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -99,17 +105,13 @@ int main(int argc, char * argv[])
    /* Early return opportunities */
    if ( argc > MAX_ARGS_TO_CHECK )
    {
-      fprintf(stderr, "\n");
-      fprintf(stderr, "\033[31;1mError: Too many input arguments.\033[0m");
-      fprintf(stderr, "\n\n");
-
+      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[TooManyInputArgs]);
       return EXIT_FAILURE;
    }
 
    else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
    {
       PrintHelpMsg();
-
       return EXIT_SUCCESS;
    }
 
@@ -123,7 +125,6 @@ int main(int argc, char * argv[])
    )
    {
       PrintReferenceTable();
-
       return EXIT_SUCCESS;
    }
 
@@ -133,8 +134,7 @@ int main(int argc, char * argv[])
       bool isdec = false;
       uint8_t pid = 0xFFu;
       uint8_t user_input;
-      bool digits_read_successfully;
-      const char * err_msg = NULL;
+      enum LIN_PID_Result_E result_status;
       uint8_t idx_of_arg = 0;
       const char * id_arg = argv[1];
 
@@ -154,36 +154,23 @@ int main(int argc, char * argv[])
 
       if ( ishex && isdec )
       {
-         fprintf(stderr, "\n");
-         fprintf(stderr, "\033[31;1mError: Can't use both hex and dec flags.\033[0m");
-         fprintf(stderr, "\n\n");
-
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[HexAndDecFlagsSimultaneouslyUsed]);
          return EXIT_FAILURE;
       }
 
-      digits_read_successfully = GetID(id_arg, &user_input, ishex, isdec, &err_msg);
-      if ( !digits_read_successfully )
+      /* Now try to get the ID the user provided... */
+      result_status = GetID(id_arg, &user_input, ishex, isdec);
+      assert( ((int)result_status >= 0) && ((int)result_status < NUM_OF_EXCEPTIONS) );
+      if ( GoodResult != result_status )
       {
-         assert( (err_msg != NULL) && HasNullTermination(err_msg) );
-
-         fprintf(stderr, "\n");
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, err_msg);
-         fprintf(stderr, "\n\n");
-
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[result_status]);
          return EXIT_FAILURE;
       }
 
       /* Process input */
       if ( user_input > MAX_ID_ALLOWED )
       {
-         fprintf(stderr, "\n");
-         fprintf(
-                  stderr,
-                  "\n\033[31mID is out of range! \033[31;1mID: 0x%-5X\033[0m\n",
-                  user_input
-                );
-         fprintf(stderr, "\n\n");
-
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[ID_OOR]);
          return EXIT_FAILURE;
       }
 
@@ -204,12 +191,7 @@ int main(int argc, char * argv[])
       if ( ArgsContain((const char **)argv, "--quiet", argc, &idx_of_arg) ||
            ArgsContain((const char **)argv, "-q", argc, &idx_of_arg) )
       {
-         bool to_newline_or_not_to_newline =
-            !ArgsContain((const char **)argv,
-               "--no-new-line",
-               argc,
-               &idx_of_arg);
-         if ( to_newline_or_not_to_newline )
+         if ( !ArgsContain( (const char **)argv, "--no-new-line", argc, &idx_of_arg ) )
          {
             printf("%02X\n", pid);
          }
@@ -220,8 +202,8 @@ int main(int argc, char * argv[])
       }
       else
       {
-         printf( "\nID:  \033[36m0x%02X\033[0m\n", user_input );
-         printf( "PID: \033[32m0x%02X\033[0m\n", pid );
+         printf( "\nID:  \033[36m" "0x%02X" "\033[0m\n", user_input );
+         printf( "PID: \033[32m"   "0x%02X" "\033[0m\n", pid );
          printf("\n");
       }
 
@@ -305,17 +287,16 @@ STATIC bool ArgsContain( char const * args[],
 // Acceptable formats:
 // Hex:     0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z
 // Decimal: ZZd, ZZD
-STATIC bool GetID( char const * str,
-                   uint8_t * id,
-                   bool pre_emptively_hex,
-                   bool pre_emptively_dec,
-                   const char ** err_msg )
+STATIC enum LIN_PID_Result_E GetID( char const * str,
+                                    uint8_t * id,
+                                    bool pre_emptively_hex,
+                                    bool pre_emptively_dec )
 {
    assert( (str != NULL) &&
            (id  != NULL) &&
            (!pre_emptively_hex || !pre_emptively_dec) );
 
-   bool ret_val = false;
+   enum LIN_PID_Result_E result = GoodResult;
    size_t idx = 0;
    size_t loop_limit_counter = 0;
 
@@ -334,8 +315,7 @@ STATIC bool GetID( char const * str,
    }
    if ( str[idx] == '\0' )
    {
-      *err_msg = "\n\033[31;1mError: Only encountered whitespace in input\033[0m\n";
-      return false;
+      return WhiteSpaceOnlyIDArg;
    }
 
    // Parser State Machine Time!
@@ -414,7 +394,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // TODO: Throw exception - invalid character
+               result = InvalidCharacterEncountered_FirstChar;
                exit_loop = true;
             }
             break;
@@ -440,7 +420,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               *err_msg = "\033[31;1mError: Invalid character detected after hex determination.\033[0m";
+               result = InvalidDigitEncountered_FirstDigit;
                exit_loop = true;
             }
             break;
@@ -461,7 +441,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               *err_msg = "\033[31;1mError: Invalid character detected (second digit).\033[0m";
+               result = InvalidDigitEncountered_SecondDigit;
                exit_loop = true;
             }
             break;
@@ -479,7 +459,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               *err_msg = "\033[31;1mError: Too many digits entered.\033[0m";
+               result = TooManyDigitsEntered;
                exit_loop = true;
             }
             break;
@@ -487,9 +467,8 @@ STATIC bool GetID( char const * str,
          case ParserDecDigits:
             if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
             {
-               // Hexadecimal number entered for decimal flag.
+               result = HexDigitEncounteredUnderDecSetting_SecondDigit;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Hexadecimal digit encountered under decimal settings (second digit).\033[0m";
             }
             else if ( isdigit(ch) )
             {
@@ -498,9 +477,8 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character encountered.
+               result = InvalidDigitEncountered_SecondDigit;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Second character invalid.\033[0m";
             }
             break;
 
@@ -512,8 +490,8 @@ STATIC bool GetID( char const * str,
             }
             else
             {
+               result = InvalidDecimalSuffixEncountered;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Non-decimal character encountered after first two digits.\033[0m";
             }
             break;
          
@@ -525,7 +503,7 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               *err_msg = "\033[31;1mError: Invalid character detected (second digit).\033[0m";
+               result = InvalidDigitEncountered_SecondDigit;
                exit_loop = true;
             }
             break;
@@ -541,13 +519,13 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               *err_msg = "\033[31;1mError: Too many digits in a row or invalid character encountered.\033[0m";
+               result = TooManyDigitsEntered;
                exit_loop = true;
             }
             break;
 
          case ParserTwoDigitsAlreadyRead:
-            *err_msg = "\033[31;1mTwo digits already read in, but still encountering more characters.\033[0m";
+            result = TooManyDigitsEntered;
             exit_loop = true;
             break;
 
@@ -567,18 +545,16 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character encountered.
+               result = InvalidCharacterEncountered_FirstChar;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
          case ParserPreemptivelyDec:
             if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
             {
-               // Hexadecimal number entered for decimal flag.
+               result = HexDigitEncounteredUnderDecSetting_FirstDigit;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Hexadecimal character encountered under decimal settings (first digit).\033[0m";
             }
             else if ( '0' == ch )
             {
@@ -591,18 +567,16 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character encountered.
+               result = InvalidCharacterEncountered_FirstChar;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
          case ParserPreemptivelyDecOneZeroIn:
             if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
             {
-               // Hexadecimal number entered for decimal flag.
+               result = HexDigitEncounteredUnderDecSetting_SecondDigit;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Hexadecimal number entered for decimal setting.\033[0m";
             }
             else if ( '0' == ch )
             {
@@ -615,9 +589,8 @@ STATIC bool GetID( char const * str,
             }
             else
             {
-               // Invalid character encountered.
+               result = InvalidCharacterEncountered_SecondChar;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: First character invalid.\033[0m";
             }
             break;
 
@@ -628,8 +601,8 @@ STATIC bool GetID( char const * str,
             }
             else
             {
+               result = InvalidDecimalSuffixEncountered;
                exit_loop = true;
-               *err_msg = "\033[31;1mError: Invalid decimal number entered.\033[0m";
             }
             break;
 
@@ -653,7 +626,7 @@ STATIC bool GetID( char const * str,
    // Post state machine processing
    if ( loop_limit_counter >= MAX_ARG_LEN )
    {
-      *err_msg = "\033[31;1mError: Too many characters encountered.\033[0m";
+      result = TooManyDigitsEntered;
    }
    else if ( exit_loop )
    {
@@ -704,13 +677,9 @@ STATIC bool GetID( char const * str,
       {
          *id = (uint8_t)( (most_significant_digit * 10) + least_significant_digit );
       }
-
-      ret_val = true;
    }
-
-   (void)err_msg;
    
-   return ret_val;
+   return result;
 }
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit)
@@ -809,21 +778,6 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
    uint8_t * d = (uint8_t *)b;
 
    return ( *c - *d );
-}
-
-STATIC bool HasNullTermination( const char * str )
-{
-   assert ( str != NULL );
-
-   for ( uint8_t i = 0; i < MAX_ERR_MSG_LEN; i++ )
-   {
-      if ( str[i] == '\0' )
-      {
-         return true;
-      }
-   }
-
-   return false;
 }
 
 #endif
