@@ -20,6 +20,7 @@
 
 /* Local Macro Definitions */
 #define MAX_ARGS_TO_CHECK  5  // e.g., lin_pid XX --hex --quiet --no-new-line
+#define MAX_NUM_LEN        (strlen("0x3F") + 1)
 #define MAX_ARG_LEN        (strlen("--no-new-line"))
 #define MAX_ERR_MSG_LEN    100
 
@@ -285,7 +286,7 @@ STATIC bool ArgsContain( char const * args[],
 }
 
 // Acceptable formats:
-// Hex:     0xZZ, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ, ZZ, Z
+// Hex:     0xZZ, Z, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
 // Decimal: ZZd, ZZD
 STATIC enum LIN_PID_Result_E GetID( char const * str,
                                     uint8_t * id,
@@ -305,7 +306,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    //       pass in white-space leading characters?
    while (
       /* x2 as max allowance of leading whitespace */
-      (loop_limit_counter <= (MAX_ARG_LEN * 2)) &&
+      (loop_limit_counter <= (MAX_NUM_LEN * 2)) &&
       (str[idx] != '\0') &&
       (isblank( (int)str[idx] ))
    )
@@ -357,7 +358,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    }
 
    while (
-      (loop_limit_counter <= MAX_ARG_LEN) &&
+      (loop_limit_counter <= MAX_NUM_LEN) &&
       (str[idx] != '\0') && /* Continue until terminating null character */
       !exit_loop /* Redundant here but I like extra guard rails */
    )
@@ -624,7 +625,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    assert( !(ishex && isdec) );
    
    // Post state machine processing
-   if ( loop_limit_counter >= MAX_ARG_LEN )
+   if ( loop_limit_counter >= MAX_NUM_LEN )
    {
       result = TooManyDigitsEntered;
    }
