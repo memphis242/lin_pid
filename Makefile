@@ -8,18 +8,24 @@ TARGET_EXTENSION=exe
 # Set the OS-specific tool cmds / executable extensions
 ifeq ($(OS),Windows_NT)
 
-ifeq ($(shell uname -s),) # not in a bash-like shell
-CLEANUP = del /F /Q
-MKDIR = mkdir
-else # in a bash-like shell, like msys
-CLEANUP = rm -f
-MKDIR = mkdir -p
-endif
+  TARGET_EXTENSION = exe
+  STATIC_LIB_EXTENSION = lib
+
+  ifeq ($(shell uname -s),) # not in a bash-like shell
+    CLEANUP = del /F /Q
+    MKDIR = mkdir
+  else # in a bash-like shell, like msys
+    CLEANUP = rm -f
+    MKDIR = mkdir -p
+  endif
 
 else
-CLEANUP = rm -f
-MKDIR = mkdir -p
-TARGET_EXTENSION=out
+
+  TARGET_EXTENSION = out
+  STATIC_LIB_EXTENSION = a
+  CLEANUP = rm -f
+  MKDIR = mkdir -p
+
 endif
 
 # Relevant paths
@@ -80,7 +86,7 @@ COMPILER_WARNING_FLAGS = \
 # src but **not** for my test file, which intentionally has all sorts of
 # naughty shenanigans going on
 COMPILER_WARNINGS_TEST_BUILD = \
-    -Wall -Wextra -Wpedantic \
+    -Wall -Wextra -Wpedantic -pedantic-errors \
     -Wconversion -Wdouble-promotion -Wnull-dereference \
     -Wwrite-strings -Wformat=2 -Wformat-overflow=2 \
     -Wformat-signedness \
