@@ -11,10 +11,16 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
 #include "unity.h"
 #include "lin_pid.h"
 
 /* Local Macro Definitions */
+#define MAX_ARGS_TO_CHECK  5  // e.g., lin_pid XX --hex --quiet --no-new-line
+#define MAX_NUM_LEN        6  // strlen("0x3F") + 1
+#define MAX_ARG_LEN        (strlen("--no-new-line"))
+#define MAX_ERR_MSG_LEN    100
 
 /* Datatypes */
 
@@ -35,6 +41,26 @@ static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 void setUp(void);
 void tearDown(void);
 void Test_FullRangeOfValidIDs(void);
+// Acceptable formats:
+// Hex:     0xZZ, ZZ, Z, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
+// Decimal: ZZd, ZZD
+void Test_GetID_HexRange_0xZZ_Format(void);
+void Test_GetID_HexRange_ZZ_Default_Format(void);
+void Test_GetID_HexRange_ZZh_Format(void);
+void Test_GetID_HexRange_ZZH_Format(void);
+void Test_GetID_HexRange_ZZx_Format(void);
+void Test_GetID_HexRange_ZZX_Format(void);
+void Test_GetID_HexRange_xZZ_Format(void);
+void Test_GetID_HexRange_XZZ_Format(void);
+void Test_GetID_DecRange_ZZd_Format(void);
+void Test_GetID_DecRange_ZZD_Format(void);
+void Test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void);
+
+/* Extern Functions */
+extern enum LIN_PID_Result_E GetID( char const * str,
+                                    uint8_t * id,
+                                    bool pre_emptively_hex,
+                                    bool pre_emptively_dec );
 
 /* Meat of the Program */
 
@@ -43,6 +69,7 @@ int main(void)
    UNITY_BEGIN();
    
    RUN_TEST(Test_FullRangeOfValidIDs);
+   RUN_TEST(Test_GetID_HexRange_0xZZ_Format);
 
    return UNITY_END();
 }
@@ -63,6 +90,22 @@ void Test_FullRangeOfValidIDs(void)
    for ( uint8_t i = 0; i < MAX_ID_ALLOWED; i++ )
    {
       TEST_ASSERT_EQUAL_UINT8( REFERENCE_PID_TABLE[i], ComputePID(i) );
+   }
+}
+
+void Test_GetID_HexRange_0xZZ_Format(void)
+{
+   for ( uint8_t id = 0; id < MAX_ID_ALLOWED; id++ )
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t computed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%X", id);
+      result = GetID(str, &computed_id, false, false);
+
+      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
    }
 }
 
