@@ -23,3 +23,4 @@
  LIN_PID_EXCEPTION( InvalidDecimalSuffixEncountered,                 "Invalid decimal suffix encountered. Possibly too many digits." )
  LIN_PID_EXCEPTION( DuplicateFormatFlagsUsed,                        "Duplicate format flag detected. Please only specify (-d | --dec) or (-h | --hex) once." )
  LIN_PID_EXCEPTION( InvalidFlagDetected,                             "Invalid flag detected. Please use only from the following: -d, --dec, -h, --hex, --no-new-line, --quiet, -q, -t, --table, --help" )
+ LIN_PID_EXCEPTION( InvalidPositionOfNumber,                         "Number was not placed properly. It needs to either be the first or second argument." )

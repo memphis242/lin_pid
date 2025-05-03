@@ -158,7 +158,7 @@ int main(int argc, char * argv[])
       uint8_t pid = 0xFFu;
       uint8_t user_input;
       enum LIN_PID_Result_E result_status;
-      const char * id_arg = argv[1];
+      const char * id_arg = NULL;
 
       // Check format arguments
       uint8_t idx_of_arg_h   = 0;
@@ -183,13 +183,37 @@ int main(int argc, char * argv[])
       if ( (arg_count_h > 0) || (arg_count_hex > 0) )
       {
          ishex = true;
-         if ( (1 == idx_of_arg_h) || (1 == idx_of_arg_hex) ) id_arg = argv[2];
+         if ( ( (1 == idx_of_arg_h) || (1 == idx_of_arg_hex) ) && argv[2][0] != '-' )
+         {
+            id_arg = argv[2];
+         }
+         else if ( ( (2 == idx_of_arg_h) || (2 == idx_of_arg_hex) ) && argv[1][0] != '-' )
+         {
+            id_arg = argv[1];
+         }
+         else
+         {
+            fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidPositionOfNumber]);
+            return EXIT_FAILURE;
+         }
       }
 
       if ( (arg_count_d > 0) || (arg_count_dec > 0) )
       {
          isdec = true;
-         if ( (1 == idx_of_arg_d) || (1 == idx_of_arg_dec) ) id_arg = argv[2];
+         if ( ( (1 == idx_of_arg_d) || (1 == idx_of_arg_dec) ) && argv[2][0] != '-' )
+         {
+            id_arg = argv[2];
+         }
+         else if ( ( (2 == idx_of_arg_d) || (2 == idx_of_arg_dec) ) && argv[1][0] != '-' )
+         {
+            id_arg = argv[1];
+         }
+         else
+         {
+            fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidPositionOfNumber]);
+            return EXIT_FAILURE;
+         }
       }
 
       if ( ishex && isdec )
@@ -197,6 +221,8 @@ int main(int argc, char * argv[])
          fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[HexAndDecFlagsSimultaneouslyUsed]);
          return EXIT_FAILURE;
       }
+
+      assert(id_arg != NULL);
 
       /* Now try to get the ID the user provided... */
       result_status = GetID(id_arg, &user_input, ishex, isdec);
