@@ -426,6 +426,16 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
                }
                first_digit = ch;
             }
+            else if ( ('h' == ch) || ('H' == ch) )
+            {
+               ishex = true;
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else if ( ('d' == ch) || ('D' == ch) )
+            {
+               isdec = true;
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
             else
             {
                result = InvalidDigitEncountered_SecondDigit;
