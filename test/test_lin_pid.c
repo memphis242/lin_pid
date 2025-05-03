@@ -78,8 +78,8 @@ void test_GetID_HexRange_Zx_Format(void);
 void test_GetID_HexRange_ZX_Format(void);
 void test_GetID_HexRange_xZ_Format(void);
 void test_GetID_HexRange_XZ_Format(void);
-void test_GetID_DecRange_Zd_Format(void);
-void test_GetID_DecRange_ZD_Format(void);
+void test_GetID_NumRange_Zd_Format(void);
+void test_GetID_NumRange_ZD_Format(void);
 void test_GetID_DecRange_Z_Format_PreemptivelyDec(void);
 
 /* Extern Functions */
@@ -128,8 +128,8 @@ int main(void)
    RUN_TEST(test_GetID_HexRange_ZX_Format);
    RUN_TEST(test_GetID_HexRange_xZ_Format);
    RUN_TEST(test_GetID_HexRange_XZ_Format);
-   RUN_TEST(test_GetID_DecRange_Zd_Format);
-   RUN_TEST(test_GetID_DecRange_ZD_Format);
+   RUN_TEST(test_GetID_NumRange_Zd_Format);
+   RUN_TEST(test_GetID_NumRange_ZD_Format);
    RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
 
 
@@ -643,9 +643,9 @@ void test_GetID_HexRange_XZ_Format(void)
    }
 }
 
-void test_GetID_DecRange_Zd_Format(void)
+void test_GetID_NumRange_Zd_Format(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -655,13 +655,15 @@ void test_GetID_DecRange_Zd_Format(void)
       result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+      // By default, these single digit + 'd' entries are assumed to actually
+      // be hexadecimal numbers /w the least signficant digit being 'd' (i.e., 13).
+      TEST_ASSERT_EQUAL_UINT8( (id * 0x10) + 0xD, parsed_id );
    }
 }
 
-void test_GetID_DecRange_ZD_Format(void)
+void test_GetID_NumRange_ZD_Format(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -671,7 +673,9 @@ void test_GetID_DecRange_ZD_Format(void)
       result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+      // By default, these single digit + 'D' entries are assumed to actually
+      // be hexadecimal numbers /w the least signficant digit being 'D' (i.e., 13).
+      TEST_ASSERT_EQUAL_UINT8( (id * 0x10) + 0xD, parsed_id );
    }
 }
 

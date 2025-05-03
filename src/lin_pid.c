@@ -810,6 +810,10 @@ static void PrintHelpMsg(void)
 
          "\tZZd, ZZD, \033[35m(-d | --dec) ZZ\033[0m, or \033[35mZZ (-d | --dec)\033[0m\n"
 
+         "\n\t\033[;3mNote that single digit entires without \033[35m-d\033[0m \033[;3mor\033[0m \033[35m--dec\033[0m \033[;3mwill be taken as hexadecimal numbers no matter what.\033[0m\n"
+         "\t\033[;3mFor example, the entry \"1d\" is interpreted as the hexadecimal number \"0x1D\", not a decimal number 1.\033[0m\n"
+         "\t\033[;3mThe 'd' suffix there is indistinguishable from the hexadecimal digit 'd', and this program defaults to hex in these situations.\033[0m\n"
+
       "\nHere are some \033[32mexamples\033[0m of basic usage:\n\n"
 
          "\t\033[0m\033[36;1mlin_pid\033[0m \033[34;1m0x27\033[0m\033[0m --> \033[3m0xE7 will be included in the reply as the corresponding PID\n"
