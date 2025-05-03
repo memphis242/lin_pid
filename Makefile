@@ -140,6 +140,9 @@ endif
 # Compile up linker flags
 LDFLAGS += $(DIAGNOSTIC_FLAGS)
 
+# CppCheck Flags
+CPPCHECK_FLAGS = --check-level=exhaustive --cppcheck-build-dir=$(PATH_BUILD)
+
 ############################# The Rules & Recipes ##############################
 
 .PHONY: target
@@ -263,7 +266,7 @@ $(PATH_OBJECT_FILES)lin_pid_sscanf.o: $(PATH_BENCHMARK)lin_pid_sscanf.c
 	@echo "----------------------------------------"
 	@echo "Running static analysis on $<..."
 	@echo
-	cppcheck --check-level=exhaustive --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
+	cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
@@ -275,7 +278,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo "----------------------------------------"
 	@echo "Running static analysis on $<..."
 	@echo
-	cppcheck --check-level=exhaustive --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
+	cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python colorize_cppcheck.py
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo

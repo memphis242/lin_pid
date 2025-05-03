@@ -8,3 +8,8 @@
 
 # VSCode
 .vscode/*
+
+# CppCheck
+*.a1
+*.snalyzerinfo
+*.s1
