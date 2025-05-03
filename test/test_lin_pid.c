@@ -164,14 +164,14 @@ void test_GetID_HexRange_0xZZ_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "0x%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -180,14 +180,14 @@ void test_GetID_HexRange_ZZ_Default_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -196,14 +196,14 @@ void test_GetID_HexRange_ZZh_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%Xh", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -212,14 +212,14 @@ void test_GetID_HexRange_ZZH_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%XH", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -228,14 +228,14 @@ void test_GetID_HexRange_ZZx_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%Xx", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -244,14 +244,14 @@ void test_GetID_HexRange_ZZX_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%XX", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -260,14 +260,14 @@ void test_GetID_HexRange_xZZ_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "x%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -276,14 +276,14 @@ void test_GetID_HexRange_XZZ_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "X%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -292,14 +292,14 @@ void test_GetID_DecRange_ZZd_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%dd", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -308,14 +308,14 @@ void test_GetID_DecRange_ZZD_Format(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%dD", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -324,14 +324,14 @@ void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%d", id);
-      result = GetID(str, &computed_id, false, true);
+      result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -342,14 +342,14 @@ void test_GetID_HexRange_0x0Z_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "0x%02X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -358,14 +358,14 @@ void test_GetID_HexRange_0Z_Default_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -374,14 +374,14 @@ void test_GetID_HexRange_0Zh_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02Xh", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -390,14 +390,14 @@ void test_GetID_HexRange_0ZH_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02XH", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -406,14 +406,14 @@ void test_GetID_HexRange_0Zx_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02Xx", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -422,14 +422,14 @@ void test_GetID_HexRange_0ZX_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02XX", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -438,14 +438,14 @@ void test_GetID_HexRange_x0Z_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "x%02X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -454,14 +454,14 @@ void test_GetID_HexRange_X0Z_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "X%02X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -470,14 +470,14 @@ void test_GetID_DecRange_0Zd_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02dd", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -486,14 +486,14 @@ void test_GetID_DecRange_0ZD_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02dD", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -502,14 +502,14 @@ void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02d", id);
-      result = GetID(str, &computed_id, false, true);
+      result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -520,14 +520,14 @@ void test_GetID_HexRange_0xZ_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "0x%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -536,14 +536,14 @@ void test_GetID_HexRange_Z_Default_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -552,14 +552,14 @@ void test_GetID_HexRange_Zh_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%Xh", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -568,14 +568,14 @@ void test_GetID_HexRange_ZH_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%XH", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -584,14 +584,14 @@ void test_GetID_HexRange_Zx_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%Xx", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -600,14 +600,14 @@ void test_GetID_HexRange_ZX_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%XX", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -616,14 +616,14 @@ void test_GetID_HexRange_xZ_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "x%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -632,14 +632,14 @@ void test_GetID_HexRange_XZ_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "X%X", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -648,14 +648,14 @@ void test_GetID_DecRange_Zd_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%dd", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -664,14 +664,14 @@ void test_GetID_DecRange_ZD_Format(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%dD", id);
-      result = GetID(str, &computed_id, false, false);
+      result = GetID(str, &parsed_id, false, false);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
@@ -680,14 +680,14 @@ void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
-      uint8_t computed_id;
+      uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%d", id);
-      result = GetID(str, &computed_id, false, true);
+      result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
-      TEST_ASSERT_EQUAL_UINT8( id, computed_id );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
