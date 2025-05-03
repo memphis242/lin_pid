@@ -22,7 +22,7 @@
 #define MAX_ARGS_TO_CHECK  5  // e.g., lin_pid XX --hex --quiet --no-new-line
 #define MAX_NUM_LEN        (strlen("0x3F") + 1)
 #define MAX_ARG_LEN        (strlen("--no-new-line"))
-#define MAX_ERR_MSG_LEN    100
+#define MAX_ERR_MSG_LEN    250
 
 #define GET_BIT(x, n)      ((x >> n) & 0x01)
 
@@ -71,6 +71,20 @@ static const char * ErrorMsgs[NUM_OF_EXCEPTIONS] =
 
 #undef LIN_PID_EXCEPTION
 
+STATIC const char * AcceptableFlags[] =
+{
+   "--hex",
+   "-h",
+   "--dec",
+   "-d",
+   "--quiet",
+   "-q",
+   "--table",
+   "-t",
+   "--help",
+   "--no-new-line"
+};
+
 /* Private Function Prototypes */
 
 #ifndef NDEBUG
@@ -86,10 +100,12 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
-STATIC bool ArgsContain( char const * args[],
-                         char const * str,
-                         int argc,
-                         uint8_t * idx );
+STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc );
+
+STATIC size_t ArgOccurrenceCount( char const * args[],
+                                  char const * str,
+                                  int argc,
+                                  uint8_t * idx_of_first_occurrence );
 
 static void PrintHelpMsg(void);
 
@@ -107,6 +123,12 @@ int main(int argc, char * argv[])
    if ( argc > MAX_ARGS_TO_CHECK )
    {
       fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[TooManyInputArgs]);
+      return EXIT_FAILURE;
+   }
+
+   else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
+   {
+      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
       return EXIT_FAILURE;
    }
 
@@ -136,21 +158,38 @@ int main(int argc, char * argv[])
       uint8_t pid = 0xFFu;
       uint8_t user_input;
       enum LIN_PID_Result_E result_status;
-      uint8_t idx_of_arg = 0;
       const char * id_arg = argv[1];
 
-      if ( ArgsContain( (const char **)argv, "--hex", argc, &idx_of_arg ) ||
-           ArgsContain( (const char **)argv, "-h"   , argc, &idx_of_arg ) )
+      // Check format arguments
+      uint8_t idx_of_arg_h   = 0;
+      uint8_t idx_of_arg_hex = 0;
+      uint8_t idx_of_arg_d   = 0;
+      uint8_t idx_of_arg_dec = 0;
+      size_t arg_count_h   = ArgOccurrenceCount( (const char **)argv, "-h",    argc, &idx_of_arg_h );
+      size_t arg_count_hex = ArgOccurrenceCount( (const char **)argv, "--hex", argc, &idx_of_arg_hex );
+      size_t arg_count_d   = ArgOccurrenceCount( (const char **)argv, "-d",    argc, &idx_of_arg_d );
+      size_t arg_count_dec = ArgOccurrenceCount( (const char **)argv, "--dec", argc, &idx_of_arg_dec );
+
+      if ( ( (arg_count_h > 0) && (arg_count_hex > 0) ) ||
+             (arg_count_h > 1) || (arg_count_hex > 1) ||
+             (arg_count_d > 1) || (arg_count_dec > 1) ||
+           ( (arg_count_d > 0) && (arg_count_dec > 0) )
+         )
       {
-         ishex = true;
-         if ( 1 == idx_of_arg ) id_arg = argv[2];
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[DuplicateFormatFlagsUsed]);
+         return EXIT_FAILURE;
       }
 
-      if ( ArgsContain( (const char **)argv, "--dec", argc, &idx_of_arg ) ||
-           ArgsContain( (const char **)argv, "-d"   , argc, &idx_of_arg ) )
+      if ( (arg_count_h > 0) || (arg_count_hex > 0) )
+      {
+         ishex = true;
+         if ( (1 == idx_of_arg_h) || (1 == idx_of_arg_hex) ) id_arg = argv[2];
+      }
+
+      if ( (arg_count_d > 0) || (arg_count_dec > 0) )
       {
          isdec = true;
-         if ( 1 == idx_of_arg ) id_arg = argv[2];
+         if ( (1 == idx_of_arg_d) || (1 == idx_of_arg_dec) ) id_arg = argv[2];
       }
 
       if ( ishex && isdec )
@@ -189,10 +228,10 @@ int main(int argc, char * argv[])
                            UInt8_Cmp ) != NULL) );
 
       /* Print Output */
-      if ( ArgsContain((const char **)argv, "--quiet", argc, &idx_of_arg) ||
-           ArgsContain((const char **)argv, "-q", argc, &idx_of_arg) )
+      if ( (ArgOccurrenceCount((const char **)argv, "--quiet", argc, NULL) > 0) ||
+           (ArgOccurrenceCount((const char **)argv, "-q", argc, NULL) > 0) )
       {
-         if ( !ArgsContain( (const char **)argv, "--no-new-line", argc, &idx_of_arg ) )
+         if ( (ArgOccurrenceCount((const char **)argv, "--no-new-line", argc, NULL) == 0) )
          {
             printf("%02X\n", pid);
          }
@@ -249,32 +288,70 @@ uint8_t ComputePID(uint8_t id)
    return pid;
 }
 
-STATIC bool ArgsContain( char const * args[],
-                         char const * str,
-                         int argc,
-                         uint8_t * idx )
+STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
+{
+   assert( (args != NULL) && (argc >= 1) );
+
+   for ( uint8_t i = 1; i < argc; i++ )
+   {
+      if ( args[i] == NULL )
+      {
+         break;
+      }
+      else
+      {
+         bool valid_arg = false;
+         for ( size_t j = 0; j < (sizeof(AcceptableFlags) / sizeof(char *)); j++ )
+         {
+            if ( (strncmp( AcceptableFlags[j], args[i], MAX_ARG_LEN ) == 0) ||
+                 (args[i][0] != '-') )
+            {
+               valid_arg = true;
+               break;
+            }
+         }
+
+         if ( !valid_arg )
+         {
+            return false;
+         }
+      }
+   }
+
+   return true;
+}
+
+STATIC size_t ArgOccurrenceCount( char const * args[],
+                                  char const * str,
+                                  int argc,
+                                  uint8_t * idx_of_first_occurrence )
 {
    // Assert instead of return false because this function is internal and we
    // have control on what it is called with.
-   assert( (args != NULL) && (str != NULL) && (argc >= 2) && (idx != NULL) );
+   assert( (args != NULL) && (str != NULL) && (argc >= 2) );
 
-   bool ret_val = false;
+   size_t count = 0;
+   bool found_occurrence = false;
    const uint8_t MAX_ARGS = (argc < MAX_ARGS_TO_CHECK) ?
                               (uint8_t)argc :
                               MAX_ARGS_TO_CHECK;
 
-   // Scan through str
+   // Scan through arguments
    for ( uint8_t i = 1; i < MAX_ARGS; i++ )
    {
       if ( args[i] == NULL )
       {
          break;
       }
-      else if ( (strncmp( str, args[i], MAX_ARG_LEN ) == 0) )
+      else if ( !found_occurrence && (strncmp( str, args[i], MAX_ARG_LEN ) == 0) )
       {
-         ret_val = true;
-         *idx = i;
-         break;
+         count++;
+         found_occurrence = true;
+         if ( idx_of_first_occurrence != NULL ) *idx_of_first_occurrence = i;
+      }
+      else if ( strncmp( str, args[i], MAX_ARG_LEN ) == 0 )
+      {
+         count++;
       }
       else
       {
@@ -282,7 +359,9 @@ STATIC bool ArgsContain( char const * args[],
       }
    }
 
-   return ret_val;
+   assert( (found_occurrence && (count > 0)) || (!found_occurrence && (count == 0)) );
+
+   return count;
 }
 
 // Acceptable formats:
