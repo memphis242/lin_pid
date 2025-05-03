@@ -536,7 +536,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             if ( isxdigit(ch) )
             {
                second_digit = ch;
-               parser_state = ParserTwoDigitsAlreadyRead;
+               parser_state = ParserTwoHexDigits;
             }
             else if ( ('x' == ch) || ('X' == ch) ||
                       ('h' == ch) || ('H' == ch) )

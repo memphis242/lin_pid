@@ -161,7 +161,7 @@ void test_FullRangeOfValidIDs(void)
 
 void test_GetID_HexRange_0xZZ_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -177,7 +177,7 @@ void test_GetID_HexRange_0xZZ_Format(void)
 
 void test_GetID_HexRange_ZZ_Default_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -193,7 +193,7 @@ void test_GetID_HexRange_ZZ_Default_Format(void)
 
 void test_GetID_HexRange_ZZh_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -202,14 +202,14 @@ void test_GetID_HexRange_ZZh_Format(void)
       snprintf(str, MAX_NUM_LEN, "%Xh", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
 
 void test_GetID_HexRange_ZZH_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -225,7 +225,7 @@ void test_GetID_HexRange_ZZH_Format(void)
 
 void test_GetID_HexRange_ZZx_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -241,7 +241,7 @@ void test_GetID_HexRange_ZZx_Format(void)
 
 void test_GetID_HexRange_ZZX_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -257,7 +257,7 @@ void test_GetID_HexRange_ZZX_Format(void)
 
 void test_GetID_HexRange_xZZ_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -273,7 +273,7 @@ void test_GetID_HexRange_xZZ_Format(void)
 
 void test_GetID_HexRange_XZZ_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < UINT8_MAX; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -289,7 +289,7 @@ void test_GetID_HexRange_XZZ_Format(void)
 
 void test_GetID_DecRange_ZZd_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -305,7 +305,7 @@ void test_GetID_DecRange_ZZd_Format(void)
 
 void test_GetID_DecRange_ZZD_Format(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -321,7 +321,7 @@ void test_GetID_DecRange_ZZD_Format(void)
 
 void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
 {
-   for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
+   for ( uint8_t id = 0x10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
