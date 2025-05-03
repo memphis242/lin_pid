@@ -266,6 +266,11 @@ int main(int argc, char * argv[])
             printf("%02X", pid);
          }
       }
+      else if ( (ArgOccurrenceCount((const char **)argv, "--no-new-line", argc, NULL) > 0) )
+      {
+         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[CantUseNoNewLineWithoutQuiet]);
+         return EXIT_FAILURE;
+      }
       else
       {
          printf( "\nID:  \033[36m" "0x%02X" "\033[0m\n", user_input );
