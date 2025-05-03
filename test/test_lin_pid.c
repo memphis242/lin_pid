@@ -40,47 +40,47 @@ static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 /* Forward Function Declarations */
 void setUp(void);
 void tearDown(void);
-void Test_FullRangeOfValidIDs(void);
+void test_FullRangeOfValidIDs(void);
 
 // Acceptable formats:
 // Hex:     0xZZ, ZZ, Z, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
 // Decimal: ZZd, ZZD
 
-void Test_GetID_HexRange_0xZZ_Format(void);
-void Test_GetID_HexRange_ZZ_Default_Format(void);
-void Test_GetID_HexRange_ZZh_Format(void);
-void Test_GetID_HexRange_ZZH_Format(void);
-void Test_GetID_HexRange_ZZx_Format(void);
-void Test_GetID_HexRange_ZZX_Format(void);
-void Test_GetID_HexRange_xZZ_Format(void);
-void Test_GetID_HexRange_XZZ_Format(void);
-void Test_GetID_DecRange_ZZd_Format(void);
-void Test_GetID_DecRange_ZZD_Format(void);
-void Test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void);
+void test_GetID_HexRange_0xZZ_Format(void);
+void test_GetID_HexRange_ZZ_Default_Format(void);
+void test_GetID_HexRange_ZZh_Format(void);
+void test_GetID_HexRange_ZZH_Format(void);
+void test_GetID_HexRange_ZZx_Format(void);
+void test_GetID_HexRange_ZZX_Format(void);
+void test_GetID_HexRange_xZZ_Format(void);
+void test_GetID_HexRange_XZZ_Format(void);
+void test_GetID_DecRange_ZZd_Format(void);
+void test_GetID_DecRange_ZZD_Format(void);
+void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void);
 
-void Test_GetID_HexRange_0x0Z_Format(void);
-void Test_GetID_HexRange_0Z_Default_Format(void);
-void Test_GetID_HexRange_0Zh_Format(void);
-void Test_GetID_HexRange_0ZH_Format(void);
-void Test_GetID_HexRange_0Zx_Format(void);
-void Test_GetID_HexRange_0ZX_Format(void);
-void Test_GetID_HexRange_x0Z_Format(void);
-void Test_GetID_HexRange_X0Z_Format(void);
-void Test_GetID_DecRange_0Zd_Format(void);
-void Test_GetID_DecRange_0ZD_Format(void);
-void Test_GetID_DecRange_0Z_Format_PreemptivelyDec(void);
+void test_GetID_HexRange_0x0Z_Format(void);
+void test_GetID_HexRange_0Z_Default_Format(void);
+void test_GetID_HexRange_0Zh_Format(void);
+void test_GetID_HexRange_0ZH_Format(void);
+void test_GetID_HexRange_0Zx_Format(void);
+void test_GetID_HexRange_0ZX_Format(void);
+void test_GetID_HexRange_x0Z_Format(void);
+void test_GetID_HexRange_X0Z_Format(void);
+void test_GetID_DecRange_0Zd_Format(void);
+void test_GetID_DecRange_0ZD_Format(void);
+void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void);
 
-void Test_GetID_HexRange_0xZ_Format(void);
-void Test_GetID_HexRange_Z_Default_Format(void);
-void Test_GetID_HexRange_Zh_Format(void);
-void Test_GetID_HexRange_ZH_Format(void);
-void Test_GetID_HexRange_Zx_Format(void);
-void Test_GetID_HexRange_ZX_Format(void);
-void Test_GetID_HexRange_xZ_Format(void);
-void Test_GetID_HexRange_XZ_Format(void);
-void Test_GetID_DecRange_Zd_Format(void);
-void Test_GetID_DecRange_ZD_Format(void);
-void Test_GetID_DecRange_Z_Format_PreemptivelyDec(void);
+void test_GetID_HexRange_0xZ_Format(void);
+void test_GetID_HexRange_Z_Default_Format(void);
+void test_GetID_HexRange_Zh_Format(void);
+void test_GetID_HexRange_ZH_Format(void);
+void test_GetID_HexRange_Zx_Format(void);
+void test_GetID_HexRange_ZX_Format(void);
+void test_GetID_HexRange_xZ_Format(void);
+void test_GetID_HexRange_XZ_Format(void);
+void test_GetID_DecRange_Zd_Format(void);
+void test_GetID_DecRange_ZD_Format(void);
+void test_GetID_DecRange_Z_Format_PreemptivelyDec(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
@@ -94,43 +94,43 @@ int main(void)
 {
    UNITY_BEGIN();
    
-   RUN_TEST(Test_FullRangeOfValidIDs);
+   RUN_TEST(test_FullRangeOfValidIDs);
 
-   RUN_TEST(Test_GetID_HexRange_0xZZ_Format);
-   RUN_TEST(Test_GetID_HexRange_ZZ_Default_Format);
-   RUN_TEST(Test_GetID_HexRange_ZZh_Format);
-   RUN_TEST(Test_GetID_HexRange_ZZH_Format);
-   RUN_TEST(Test_GetID_HexRange_ZZx_Format);
-   RUN_TEST(Test_GetID_HexRange_ZZX_Format);
-   RUN_TEST(Test_GetID_HexRange_xZZ_Format);
-   RUN_TEST(Test_GetID_HexRange_XZZ_Format);
-   RUN_TEST(Test_GetID_DecRange_ZZd_Format);
-   RUN_TEST(Test_GetID_DecRange_ZZD_Format);
-   RUN_TEST(Test_GetID_DecRange_ZZ_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_HexRange_0xZZ_Format);
+   RUN_TEST(test_GetID_HexRange_ZZ_Default_Format);
+   RUN_TEST(test_GetID_HexRange_ZZh_Format);
+   RUN_TEST(test_GetID_HexRange_ZZH_Format);
+   RUN_TEST(test_GetID_HexRange_ZZx_Format);
+   RUN_TEST(test_GetID_HexRange_ZZX_Format);
+   RUN_TEST(test_GetID_HexRange_xZZ_Format);
+   RUN_TEST(test_GetID_HexRange_XZZ_Format);
+   RUN_TEST(test_GetID_DecRange_ZZd_Format);
+   RUN_TEST(test_GetID_DecRange_ZZD_Format);
+   RUN_TEST(test_GetID_DecRange_ZZ_Format_PreemptivelyDec);
 
-   RUN_TEST(Test_GetID_HexRange_0x0Z_Format);
-   RUN_TEST(Test_GetID_HexRange_0Z_Default_Format);
-   RUN_TEST(Test_GetID_HexRange_0Zh_Format);
-   RUN_TEST(Test_GetID_HexRange_0ZH_Format);
-   RUN_TEST(Test_GetID_HexRange_0Zx_Format);
-   RUN_TEST(Test_GetID_HexRange_0ZX_Format);
-   RUN_TEST(Test_GetID_HexRange_x0Z_Format);
-   RUN_TEST(Test_GetID_HexRange_X0Z_Format);
-   RUN_TEST(Test_GetID_DecRange_0Zd_Format);
-   RUN_TEST(Test_GetID_DecRange_0ZD_Format);
-   RUN_TEST(Test_GetID_DecRange_0Z_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_HexRange_0x0Z_Format);
+   RUN_TEST(test_GetID_HexRange_0Z_Default_Format);
+   RUN_TEST(test_GetID_HexRange_0Zh_Format);
+   RUN_TEST(test_GetID_HexRange_0ZH_Format);
+   RUN_TEST(test_GetID_HexRange_0Zx_Format);
+   RUN_TEST(test_GetID_HexRange_0ZX_Format);
+   RUN_TEST(test_GetID_HexRange_x0Z_Format);
+   RUN_TEST(test_GetID_HexRange_X0Z_Format);
+   RUN_TEST(test_GetID_DecRange_0Zd_Format);
+   RUN_TEST(test_GetID_DecRange_0ZD_Format);
+   RUN_TEST(test_GetID_DecRange_0Z_Format_PreemptivelyDec);
 
-   RUN_TEST(Test_GetID_HexRange_0xZ_Format);
-   RUN_TEST(Test_GetID_HexRange_Z_Default_Format);
-   RUN_TEST(Test_GetID_HexRange_Zh_Format);
-   RUN_TEST(Test_GetID_HexRange_ZH_Format);
-   RUN_TEST(Test_GetID_HexRange_Zx_Format);
-   RUN_TEST(Test_GetID_HexRange_ZX_Format);
-   RUN_TEST(Test_GetID_HexRange_xZ_Format);
-   RUN_TEST(Test_GetID_HexRange_XZ_Format);
-   RUN_TEST(Test_GetID_DecRange_Zd_Format);
-   RUN_TEST(Test_GetID_DecRange_ZD_Format);
-   RUN_TEST(Test_GetID_DecRange_Z_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_HexRange_0xZ_Format);
+   RUN_TEST(test_GetID_HexRange_Z_Default_Format);
+   RUN_TEST(test_GetID_HexRange_Zh_Format);
+   RUN_TEST(test_GetID_HexRange_ZH_Format);
+   RUN_TEST(test_GetID_HexRange_Zx_Format);
+   RUN_TEST(test_GetID_HexRange_ZX_Format);
+   RUN_TEST(test_GetID_HexRange_xZ_Format);
+   RUN_TEST(test_GetID_HexRange_XZ_Format);
+   RUN_TEST(test_GetID_DecRange_Zd_Format);
+   RUN_TEST(test_GetID_DecRange_ZD_Format);
+   RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
 
 
    return UNITY_END();
@@ -149,7 +149,7 @@ void tearDown(void)
 
 /******************************************************************************/
 
-void Test_FullRangeOfValidIDs(void)
+void test_FullRangeOfValidIDs(void)
 {
    for ( uint8_t i = 0; i < MAX_ID_ALLOWED; i++ )
    {
@@ -159,7 +159,7 @@ void Test_FullRangeOfValidIDs(void)
 
 /******************************************************************************/
 
-void Test_GetID_HexRange_0xZZ_Format(void)
+void test_GetID_HexRange_0xZZ_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -175,7 +175,7 @@ void Test_GetID_HexRange_0xZZ_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZZ_Default_Format(void)
+void test_GetID_HexRange_ZZ_Default_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -191,7 +191,7 @@ void Test_GetID_HexRange_ZZ_Default_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZZh_Format(void)
+void test_GetID_HexRange_ZZh_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -207,7 +207,7 @@ void Test_GetID_HexRange_ZZh_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZZH_Format(void)
+void test_GetID_HexRange_ZZH_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -223,7 +223,7 @@ void Test_GetID_HexRange_ZZH_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZZx_Format(void)
+void test_GetID_HexRange_ZZx_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -239,7 +239,7 @@ void Test_GetID_HexRange_ZZx_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZZX_Format(void)
+void test_GetID_HexRange_ZZX_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -255,7 +255,7 @@ void Test_GetID_HexRange_ZZX_Format(void)
    }
 }
 
-void Test_GetID_HexRange_xZZ_Format(void)
+void test_GetID_HexRange_xZZ_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -271,7 +271,7 @@ void Test_GetID_HexRange_xZZ_Format(void)
    }
 }
 
-void Test_GetID_HexRange_XZZ_Format(void)
+void test_GetID_HexRange_XZZ_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -287,7 +287,7 @@ void Test_GetID_HexRange_XZZ_Format(void)
    }
 }
 
-void Test_GetID_DecRange_ZZd_Format(void)
+void test_GetID_DecRange_ZZd_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -303,7 +303,7 @@ void Test_GetID_DecRange_ZZd_Format(void)
    }
 }
 
-void Test_GetID_DecRange_ZZD_Format(void)
+void test_GetID_DecRange_ZZD_Format(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -319,7 +319,7 @@ void Test_GetID_DecRange_ZZD_Format(void)
    }
 }
 
-void Test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
+void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
 {
    for ( uint8_t id = 0x10; id < MAX_ID_ALLOWED; id++ )
    {
@@ -337,7 +337,7 @@ void Test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
 
 /******************************************************************************/
 
-void Test_GetID_HexRange_0x0Z_Format(void)
+void test_GetID_HexRange_0x0Z_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -353,7 +353,7 @@ void Test_GetID_HexRange_0x0Z_Format(void)
    }
 }
 
-void Test_GetID_HexRange_0Z_Default_Format(void)
+void test_GetID_HexRange_0Z_Default_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -369,7 +369,7 @@ void Test_GetID_HexRange_0Z_Default_Format(void)
    }
 }
 
-void Test_GetID_HexRange_0Zh_Format(void)
+void test_GetID_HexRange_0Zh_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -385,7 +385,7 @@ void Test_GetID_HexRange_0Zh_Format(void)
    }
 }
 
-void Test_GetID_HexRange_0ZH_Format(void)
+void test_GetID_HexRange_0ZH_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -401,7 +401,7 @@ void Test_GetID_HexRange_0ZH_Format(void)
    }
 }
 
-void Test_GetID_HexRange_0Zx_Format(void)
+void test_GetID_HexRange_0Zx_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -417,7 +417,7 @@ void Test_GetID_HexRange_0Zx_Format(void)
    }
 }
 
-void Test_GetID_HexRange_0ZX_Format(void)
+void test_GetID_HexRange_0ZX_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -433,7 +433,7 @@ void Test_GetID_HexRange_0ZX_Format(void)
    }
 }
 
-void Test_GetID_HexRange_x0Z_Format(void)
+void test_GetID_HexRange_x0Z_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -449,7 +449,7 @@ void Test_GetID_HexRange_x0Z_Format(void)
    }
 }
 
-void Test_GetID_HexRange_X0Z_Format(void)
+void test_GetID_HexRange_X0Z_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -465,7 +465,7 @@ void Test_GetID_HexRange_X0Z_Format(void)
    }
 }
 
-void Test_GetID_DecRange_0Zd_Format(void)
+void test_GetID_DecRange_0Zd_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -481,7 +481,7 @@ void Test_GetID_DecRange_0Zd_Format(void)
    }
 }
 
-void Test_GetID_DecRange_0ZD_Format(void)
+void test_GetID_DecRange_0ZD_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -497,7 +497,7 @@ void Test_GetID_DecRange_0ZD_Format(void)
    }
 }
 
-void Test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
+void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -515,7 +515,7 @@ void Test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
 
 /******************************************************************************/
 
-void Test_GetID_HexRange_0xZ_Format(void)
+void test_GetID_HexRange_0xZ_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -531,7 +531,7 @@ void Test_GetID_HexRange_0xZ_Format(void)
    }
 }
 
-void Test_GetID_HexRange_Z_Default_Format(void)
+void test_GetID_HexRange_Z_Default_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -547,7 +547,7 @@ void Test_GetID_HexRange_Z_Default_Format(void)
    }
 }
 
-void Test_GetID_HexRange_Zh_Format(void)
+void test_GetID_HexRange_Zh_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -563,7 +563,7 @@ void Test_GetID_HexRange_Zh_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZH_Format(void)
+void test_GetID_HexRange_ZH_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -579,7 +579,7 @@ void Test_GetID_HexRange_ZH_Format(void)
    }
 }
 
-void Test_GetID_HexRange_Zx_Format(void)
+void test_GetID_HexRange_Zx_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -595,7 +595,7 @@ void Test_GetID_HexRange_Zx_Format(void)
    }
 }
 
-void Test_GetID_HexRange_ZX_Format(void)
+void test_GetID_HexRange_ZX_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -611,7 +611,7 @@ void Test_GetID_HexRange_ZX_Format(void)
    }
 }
 
-void Test_GetID_HexRange_xZ_Format(void)
+void test_GetID_HexRange_xZ_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -627,7 +627,7 @@ void Test_GetID_HexRange_xZ_Format(void)
    }
 }
 
-void Test_GetID_HexRange_XZ_Format(void)
+void test_GetID_HexRange_XZ_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -643,7 +643,7 @@ void Test_GetID_HexRange_XZ_Format(void)
    }
 }
 
-void Test_GetID_DecRange_Zd_Format(void)
+void test_GetID_DecRange_Zd_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -659,7 +659,7 @@ void Test_GetID_DecRange_Zd_Format(void)
    }
 }
 
-void Test_GetID_DecRange_ZD_Format(void)
+void test_GetID_DecRange_ZD_Format(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
@@ -675,7 +675,7 @@ void Test_GetID_DecRange_ZD_Format(void)
    }
 }
 
-void Test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
+void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
 {
    for ( uint8_t id = 0; id < 0x10; id++ )
    {
