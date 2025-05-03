@@ -11,7 +11,7 @@
  LIN_PID_EXCEPTION( GoodResult,                                      "Good result ☺" )
  LIN_PID_EXCEPTION( TooManyInputArgs,                                "Too many input arguments." )
  LIN_PID_EXCEPTION( HexAndDecFlagsSimultaneouslyUsed,                "Can't use both hex and dec format flags simultaneously." )
- LIN_PID_EXCEPTION( ID_OOR,                                          "ID is out of range." )
+ LIN_PID_EXCEPTION( ID_OOR,                                          "ID is out of range. Enter a number between 0 and 63d (0x3F)." )
  LIN_PID_EXCEPTION( WhiteSpaceOnlyIDArg,                             "Only encountered whitespace in input." )
  LIN_PID_EXCEPTION( InvalidCharacterEncountered_FirstChar,           "Invalid character encountered (first character)." )
  LIN_PID_EXCEPTION( InvalidCharacterEncountered_SecondChar,          "Invalid character encountered (first character)." )
