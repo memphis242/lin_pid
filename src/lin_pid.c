@@ -330,6 +330,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
       ParserDecDigits,
       ParserTwoDecDigits,
       ParserHexDigits,
+      ParserTwoHexDigits,
       ParserTwoZerosIn,
       ParserTwoDigitsAlreadyRead,
       ParserPreemptivelyHex,
@@ -410,6 +411,25 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             {
                ishex = true;
                parser_state = ParserHexPrefix;
+            }
+            else if ( isxdigit(ch) )
+            {
+               if ( !isdigit(ch) )
+               {
+                  // Must be a uniquely hex digit
+                  ishex = true;
+                  parser_state = ParserTwoHexDigits;
+               }
+               else
+               {
+                  parser_state = ParserIndeterminateTwoDigitsIn;
+               }
+               first_digit = ch;
+            }
+            else
+            {
+               result = InvalidDigitEncountered_SecondDigit;
+               exit_loop = true;
             }
             break;
 
@@ -521,6 +541,20 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             }
             break;
 
+         case ParserTwoHexDigits:
+            // Two hex digits will have already been read in...
+            if ( ('x' == ch) || ('X' == ch) ||
+                 ('h' == ch) || ('H' == ch) )
+            {
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else
+            {
+               result = InvalidDecimalSuffixEncountered;
+               exit_loop = true;
+            }
+            break;
+
          case ParserTwoZerosIn:
             if ( ( ishex &&
                      ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) ) ||
@@ -528,6 +562,18 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
                      ( ('d' == ch) || ('D' == ch) ) )
                )
             {
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else if ( !isdec &&
+                     ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) )
+            {
+               ishex = true;
+               parser_state = ParserTwoDigitsAlreadyRead;
+            }
+            else if ( !ishex &&
+                     ( ('d' == ch) || ('D' == ch) ) )
+            {
+               isdec = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
