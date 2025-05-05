@@ -82,6 +82,30 @@ void test_GetID_NumRange_Zd_Format(void);
 void test_GetID_NumRange_ZD_Format(void);
 void test_GetID_DecRange_Z_Format_PreemptivelyDec(void);
 
+void test_GetID_InvalidNum_TooManyDigits_ZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZh_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void);
+
+void test_GetID_InvalidNum_DecFormatWithHexNum_ZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_ZZD(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void);
+
+void test_GetID_InvalidNum_0xZZd(void);
+void test_GetID_InvalidNum_xZZd(void);
+void test_GetID_InvalidNum_ZZhd(void);
+void test_GetID_InvalidNum_ZZHd(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
                                     uint8_t * id,
@@ -132,6 +156,29 @@ int main(void)
    RUN_TEST(test_GetID_NumRange_ZD_Format);
    RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
 
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZh_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZH_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZx_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZX_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
+//
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_ZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_ZZD);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_XZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_InvalidNum_0xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_ZZhd);
+//   RUN_TEST(test_GetID_InvalidNum_ZZHd);
 
    return UNITY_END();
 }
@@ -695,6 +742,66 @@ void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
    }
 }
 
+
+/******************************************************************************/
+
+void test_GetID_InvalidNum_TooManyDigits_ZZ_Format(void)
+{
+   // Decimal numbers
+   for ( uint8_t id = 100; id < UINT8_MAX; id++ )
+   {
+      char str[3 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 3 + 1, "%d", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, (int)result );
+   }
+
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      if ( (id & 0xF) == 0xD )   continue;   // Skip over the ZZD numbers
+
+      snprintf(str, 4 + 1, "%X", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZh_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void);
+
+/******************************************************************************/
+
+void test_GetID_InvalidNum_DecFormatWithHexNum_ZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_ZZD(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void);
+
+/******************************************************************************/
+
+void test_GetID_InvalidNum_0xZZd(void);
+void test_GetID_InvalidNum_xZZd(void);
+void test_GetID_InvalidNum_ZZhd(void);
+void test_GetID_InvalidNum_ZZHd(void);
 
 /******************************************************************************/
 
