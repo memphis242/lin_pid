@@ -88,21 +88,18 @@ void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void);
 
-void test_GetID_InvalidNum_DecFormatWithHexNum_ZZd(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_ZZD(void);
 void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void);
 void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void);
 void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void);
 void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void);
 
-void test_GetID_InvalidNum_0xZZd(void);
-void test_GetID_InvalidNum_xZZd(void);
+void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd(void);
+void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD(void);
+
 void test_GetID_InvalidNum_ZZhd(void);
 void test_GetID_InvalidNum_ZZHd(void);
 
@@ -157,28 +154,25 @@ int main(void)
    RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
 
    RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZ_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZh_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZH_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZx_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZX_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
-//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
-//
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_ZZd);
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_ZZD);
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_XZZd);
-//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec);
-//
-//   RUN_TEST(test_GetID_InvalidNum_0xZZd);
-//   RUN_TEST(test_GetID_InvalidNum_xZZd);
-//   RUN_TEST(test_GetID_InvalidNum_ZZhd);
-//   RUN_TEST(test_GetID_InvalidNum_ZZHd);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZh_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZH_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZx_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZX_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
+
+   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
+   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
+   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_XZZd);
+   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec);
+
+   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd);
+   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD);
+
+   RUN_TEST(test_GetID_InvalidNum_ZZhd);
+   RUN_TEST(test_GetID_InvalidNum_ZZHd);
 
    return UNITY_END();
 }
@@ -757,7 +751,7 @@ void test_GetID_InvalidNum_TooManyDigits_ZZ_Format(void)
       snprintf(str, 3 + 1, "%d", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
    }
 
    // Hexadecimal numbers
@@ -776,32 +770,268 @@ void test_GetID_InvalidNum_TooManyDigits_ZZ_Format(void)
    }
 }
 
-void test_GetID_InvalidNum_TooManyDigits_ZZh_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void);
-void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_ZZh_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%Xh", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%XH", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%Xx", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%XX", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "x%X", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void)
+{
+   // Hexadecimal numbers
+   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
+   {
+      char str[5 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 5 + 1, "0x%X", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void)
+{
+   // Decimal numbers
+   for ( uint16_t id = 1000; id < 9999; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%dd", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void)
+{
+   // Decimal numbers
+   for ( uint16_t id = 1000; id < 9999; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%dD", id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
 
 /******************************************************************************/
 
-void test_GetID_InvalidNum_DecFormatWithHexNum_ZZd(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_ZZD(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void);
-void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void);
+void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%02Xd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x%02Xd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X%02Xd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      // Only check uniquely hex number entries.
+      if ( (id & 0xF) < 0xA ) continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02Xd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
 
 /******************************************************************************/
 
-void test_GetID_InvalidNum_0xZZd(void);
-void test_GetID_InvalidNum_xZZd(void);
-void test_GetID_InvalidNum_ZZhd(void);
-void test_GetID_InvalidNum_ZZHd(void);
+void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      // Skip over uniquely hex number entries.
+      if ( (id & 0xF) >= 0xA ) continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02Xd", (uint8_t)id);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      // Skip over uniquely hex number entries.
+      if ( (id & 0xF) >= 0xA ) continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02XD", (uint8_t)id);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+/******************************************************************************/
+
+void test_GetID_InvalidNum_ZZhd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02Xhd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_ZZHd(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02XHd", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
 
 /******************************************************************************/
 
