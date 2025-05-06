@@ -709,11 +709,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             break;
 
          case ParserPreemptivelyHex:
-            if ( '0' == ch )
-            {
-               parser_state = ParserOneZeroIn;
-            }
-            else if ( ('x' == ch) || ('X' == ch) )
+            if ( ('x' == ch) || ('X' == ch) )
             {
                parser_state = ParserHexPrefix;
             }
