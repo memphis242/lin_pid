@@ -576,7 +576,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
                else
                {
                   ishex = true;
-                  parser_state = ParserHexDigits;
+                  parser_state = ParserTwoHexDigits;
                }
                second_digit = ch;
             }
