@@ -13,3 +13,8 @@
 *.a1
 *.snalyzerinfo
 *.s1
+
+# gcov
+*.gcov
+*.gcno
+*.gcda
