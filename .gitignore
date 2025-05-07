@@ -18,3 +18,7 @@
 *.gcov
 *.gcno
 *.gcda
+
+# gcovr
+cov*.html
+cov*.css

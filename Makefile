@@ -171,7 +171,13 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(PATH_BUILD)
 
 # gcov Flags
 GCOV = gcov
-GCOV_FLAGS = --conditions --display-progress --function-summaries
+GCOV_FLAGS = --conditions --function-summaries
+ifeq ($(GCOV_CON), 1)
+GCOV_FLAGS += --use-colors --stdout
+endif
+
+# gcovr Flags
+GCOVR_FLAGS = --html-details $(PATH_RESULTS)coverage.html
 
 ############################# The Rules & Recipes ##############################
 
@@ -252,12 +258,20 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	$(CC) -c $(CFLAGS_TEST_FILES) $< -o $@
 	@echo
 
+# NOTE:
+# gcov seems very picky about how the directory to look for .gcno and .gcda
+# files is specified. The string for the directory must utilize forward slashes
+# '/', not back slashes '\', and must not end with a forward slash. Otherwise,
+# gcov exists with a cryptic
+# 		<obj_dir>/.gcno:cannot open notes file
+# kind of error. Hence, I use $(<path>:%/=%) /w PATH_OBJECT_FILES.
 %.c.gcov: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo "Analyzing coverage for $<..."
 	$(GCOV) $(GCOV_FLAGS) --object-directory $(PATH_OBJECT_FILES:%/=%) $<
-	mv $@ $(PATH_RESULTS)
+	mv *.gcov $(PATH_RESULTS)
+	gcovr $(GCOVR_FLAGS)
 	@echo
 
 # Make the directories if they don't already exist
@@ -281,7 +295,9 @@ clean:
 	$(CLEANUP) $(PATH_OBJECT_FILES)*.gcno
 	$(CLEANUP) $(PATH_BUILD)*.$(TARGET_EXTENSION)
 	$(CLEANUP) $(PATH_RESULTS)*.gcov
-	$(CLEANUP) ./*.gcov
+	$(CLEANUP) $(PATH_RESULTS)*.html
+	$(CLEANUP) $(PATH_RESULTS)*.css
+	$(CLEANUP) *.gcov
 	$(CLEANUP) $(PATH_RESULTS)*.txt
 	$(CLEANUP) $(PATH_BUILD)*.lst
 
