@@ -175,6 +175,7 @@ GCOV_FLAGS = --conditions --function-summaries
 ifeq ($(GCOV_CON), 1)
 GCOV_FLAGS += --use-colors --stdout
 endif
+GCOV_CONSOLE_OUT_FILE = gcov_console_out.txt
 
 # gcovr Flags
 GCOVR_FLAGS = --html-details $(PATH_RESULTS)coverage.html
@@ -258,6 +259,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	$(CC) -c $(CFLAGS_TEST_FILES) $< -o $@
 	@echo
 
+
 # NOTE:
 # gcov seems very picky about how the directory to look for .gcno and .gcda
 # files is specified. The string for the directory must utilize forward slashes
@@ -265,11 +267,16 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 # gcov exists with a cryptic
 # 		<obj_dir>/.gcno:cannot open notes file
 # kind of error. Hence, I use $(<path>:%/=%) /w PATH_OBJECT_FILES.
+#
+# Also, I've redirected gcov's output because I want to prioritize viewing the
+# unit test results. Coverage results are meant to be inspected manually rather
+# than fed back immediately to the developer.
+
 %.c.gcov: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo "Analyzing coverage for $<..."
-	$(GCOV) $(GCOV_FLAGS) --object-directory $(PATH_OBJECT_FILES:%/=%) $<
+	$(GCOV) $(GCOV_FLAGS) --object-directory $(PATH_OBJECT_FILES:%/=%) $< > $(PATH_RESULTS)$(GCOV_CONSOLE_OUT_FILE)
 	mv *.gcov $(PATH_RESULTS)
 	gcovr $(GCOVR_FLAGS)
 	@echo
