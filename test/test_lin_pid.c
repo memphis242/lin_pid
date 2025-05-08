@@ -57,6 +57,8 @@ void test_GetID_HexRange_XZZ_Format(void);
 void test_GetID_DecRange_ZZd_Format(void);
 void test_GetID_DecRange_ZZD_Format(void);
 void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void);
+void test_GetID_DecRange_ZZd_Format_PreemptivelyDec(void);
+void test_GetID_DecRange_ZZD_Format_PreemptivelyDec(void);
 
 void test_GetID_HexRange_0x0Z_Format(void);
 void test_GetID_HexRange_0Z_Default_Format(void);
@@ -69,6 +71,8 @@ void test_GetID_HexRange_X0Z_Format(void);
 void test_GetID_DecRange_0Zd_Format(void);
 void test_GetID_DecRange_0ZD_Format(void);
 void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void);
+void test_GetID_DecRange_0Zd_Format_PreemptivelyDec(void);
+void test_GetID_DecRange_0ZD_Format_PreemptivelyDec(void);
 
 void test_GetID_HexRange_0xZ_Format(void);
 void test_GetID_HexRange_Z_Default_Format(void);
@@ -91,6 +95,7 @@ void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void);
 void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void);
+void test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec(void);
 
 void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void);
 void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void);
@@ -102,6 +107,14 @@ void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD(void);
 
 void test_GetID_InvalidNum_ZZhd(void);
 void test_GetID_InvalidNum_ZZHd(void);
+
+void test_GetID_InvalidNum_PreemptivelyDec_0xZZ(void);
+void test_GetID_InvalidNum_PreemptivelyDec_xZZ(void);
+void test_GetID_InvalidNum_PreemptivelyDec_XZZ(void);
+void test_GetID_InvalidNum_PreemptivelyDec_ZZh(void);
+void test_GetID_InvalidNum_PreemptivelyDec_ZZH(void);
+void test_GetID_InvalidNum_PreemptivelyDec_ZZx(void);
+void test_GetID_InvalidNum_PreemptivelyDec_ZZX(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
@@ -128,6 +141,8 @@ int main(void)
    RUN_TEST(test_GetID_DecRange_ZZd_Format);
    RUN_TEST(test_GetID_DecRange_ZZD_Format);
    RUN_TEST(test_GetID_DecRange_ZZ_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_DecRange_ZZd_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_DecRange_ZZD_Format_PreemptivelyDec);
 
    RUN_TEST(test_GetID_HexRange_0x0Z_Format);
    RUN_TEST(test_GetID_HexRange_0Z_Default_Format);
@@ -140,6 +155,8 @@ int main(void)
    RUN_TEST(test_GetID_DecRange_0Zd_Format);
    RUN_TEST(test_GetID_DecRange_0ZD_Format);
    RUN_TEST(test_GetID_DecRange_0Z_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_DecRange_0Zd_Format_PreemptivelyDec);
+   RUN_TEST(test_GetID_DecRange_0ZD_Format_PreemptivelyDec);
 
    RUN_TEST(test_GetID_HexRange_0xZ_Format);
    RUN_TEST(test_GetID_HexRange_Z_Default_Format);
@@ -162,6 +179,7 @@ int main(void)
    RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
    RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
    RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
+   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec);
 
    RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
    RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
@@ -173,6 +191,14 @@ int main(void)
 
    RUN_TEST(test_GetID_InvalidNum_ZZhd);
    RUN_TEST(test_GetID_InvalidNum_ZZHd);
+
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_0xZZ);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_xZZ);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_XZZ);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZh);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZH);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZx);
+   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZX);
 
    return UNITY_END();
 }
@@ -330,7 +356,7 @@ void test_GetID_HexRange_XZZ_Format(void)
 
 void test_GetID_DecRange_ZZd_Format(void)
 {
-   for ( uint8_t id = 0x10; id < 99; id++ )
+   for ( uint8_t id = 10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -346,7 +372,7 @@ void test_GetID_DecRange_ZZd_Format(void)
 
 void test_GetID_DecRange_ZZD_Format(void)
 {
-   for ( uint8_t id = 0x10; id < 99; id++ )
+   for ( uint8_t id = 10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -362,7 +388,7 @@ void test_GetID_DecRange_ZZD_Format(void)
 
 void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
 {
-   for ( uint8_t id = 0x10; id < 99; id++ )
+   for ( uint8_t id = 10; id < 99; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -371,7 +397,39 @@ void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
       snprintf(str, MAX_NUM_LEN, "%d", id);
       result = GetID(str, &parsed_id, false, true);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+   }
+}
+
+void test_GetID_DecRange_ZZd_Format_PreemptivelyDec(void)
+{
+   for ( uint8_t id = 10; id < 99; id++ )
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%dd", id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+   }
+}
+
+void test_GetID_DecRange_ZZD_Format_PreemptivelyDec(void)
+{
+   for ( uint8_t id = 10; id < 99; id++ )
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%dD", id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -508,7 +566,7 @@ void test_GetID_HexRange_X0Z_Format(void)
 
 void test_GetID_DecRange_0Zd_Format(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -524,7 +582,7 @@ void test_GetID_DecRange_0Zd_Format(void)
 
 void test_GetID_DecRange_0ZD_Format(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -540,13 +598,45 @@ void test_GetID_DecRange_0ZD_Format(void)
 
 void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02d", id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+   }
+}
+
+void test_GetID_DecRange_0Zd_Format_PreemptivelyDec(void)
+{
+   for ( uint8_t id = 0; id < 10; id++ )
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02dd", id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
+   }
+}
+
+void test_GetID_DecRange_0ZD_Format_PreemptivelyDec(void)
+{
+   for ( uint8_t id = 0; id < 10; id++ )
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02dd", id);
       result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
@@ -722,7 +812,7 @@ void test_GetID_NumRange_ZD_Format(void)
 
 void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
 {
-   for ( uint8_t id = 0; id < 0x10; id++ )
+   for ( uint8_t id = 0; id < 10; id++ )
    {
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
@@ -869,7 +959,7 @@ void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void)
 void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void)
 {
    // Decimal numbers
-   for ( uint16_t id = 1000; id < 9999; id++ )
+   for ( uint16_t id = 100; id < 9999; id++ )
    {
       char str[4 + 1] = {0};
       uint8_t parsed_id;
@@ -885,7 +975,7 @@ void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void)
 void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void)
 {
    // Decimal numbers
-   for ( uint16_t id = 1000; id < 9999; id++ )
+   for ( uint16_t id = 100; id < 9999; id++ )
    {
       char str[4 + 1] = {0};
       uint8_t parsed_id;
@@ -893,6 +983,22 @@ void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void)
 
       snprintf(str, 4 + 1, "%dD", id);
       result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec(void)
+{
+   // Decimal numbers
+   for ( uint16_t id = 100; id < 9999; id++ )
+   {
+      char str[4 + 1] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, 4 + 1, "%d", id);
+      result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
    }
@@ -956,7 +1062,7 @@ void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void)
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
-      snprintf(str, MAX_NUM_LEN, "%02Xd", (uint8_t)id);
+      snprintf(str, MAX_NUM_LEN, "%02X", (uint8_t)id);
       result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
@@ -1028,6 +1134,113 @@ void test_GetID_InvalidNum_ZZHd(void)
 
       snprintf(str, MAX_NUM_LEN, "%02XHd", (uint8_t)id);
       result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+/******************************************************************************/
+
+void test_GetID_InvalidNum_PreemptivelyDec_0xZZ(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%02X", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_xZZ(void)
+{
+   for (uint16_t id = 0; id <= 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x%02X", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_XZZ(void)
+{
+   for (uint16_t id = 0; id < 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X%02X", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_ZZh(void)
+{
+   for (uint16_t id = 0; id < 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02Xh", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_ZZH(void)
+{
+   for (uint16_t id = 0; id < 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02XH", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_ZZx(void)
+{
+   for (uint16_t id = 0; id < 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02Xx", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidNum_PreemptivelyDec_ZZX(void)
+{
+   for (uint16_t id = 0; id < 0xFF; id++)
+   {
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%02XX", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
    }
