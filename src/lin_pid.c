@@ -437,7 +437,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
       ParserHexPrefix,
       ParserIndeterminateOneDigitIn,
       ParserIndeterminateTwoDigitsIn,
-      ParserDecDigits,
+      ParserOneDecDigit,
       ParserTwoDecDigits,
       ParserHexDigits,
       ParserTwoHexDigits,
@@ -611,13 +611,8 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             }
             break;
 
-         case ParserDecDigits:
-            if ( ('x' == ch) || ('X' == ch) || (isxdigit(ch) && !isdigit(ch)) )
-            {
-               result = HexDigitEncounteredUnderDecSetting_SecondDigit;
-               exit_loop = true;
-            }
-            else if ( isdigit(ch) )
+         case ParserOneDecDigit:
+            if ( isdigit(ch) )
             {
                second_digit = ch;
                parser_state = ParserTwoDecDigits;
@@ -738,7 +733,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( isdigit(ch) )
             {
                first_digit = ch;
-               parser_state = ParserDecDigits;
+               parser_state = ParserOneDecDigit;
             }
             else
             {
@@ -760,7 +755,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( isdigit(ch) )
             {
                first_digit = ch;
-               parser_state = ParserDecDigits;
+               parser_state = ParserTwoDecDigits;
             }
             else
             {
