@@ -25,3 +25,6 @@
  LIN_PID_EXCEPTION( InvalidFlagDetected,                             "Invalid flag detected. Please use only from the following: -d, --dec, -h, --hex, --no-new-line, --quiet, -q, -t, --table, --help" )
  LIN_PID_EXCEPTION( InvalidPositionOfNumber,                         "Number was not placed properly. It needs to either be the first or second argument." )
  LIN_PID_EXCEPTION( CantUseNoNewLineWithoutQuiet,                    "Can't use --no-new-line without (--quiet | -q)" )
+ LIN_PID_EXCEPTION( PrematureTerminatingCharEncounted,               "Premature terminating character encountered when a digit was expected." )
+ LIN_PID_EXCEPTION( NoNumericalDigitsEnteredWithFormat,              "No numerical digits entered wit." )
+ LIN_PID_EXCEPTION( HexPrefixAndSuffixEncountered,                   "Hexadecimal prefix and suffix encountered. That is not allowed." )

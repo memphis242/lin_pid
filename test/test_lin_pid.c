@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include "unity.h"
 #include "lin_pid.h"
 
@@ -46,6 +47,7 @@ void test_FullRangeOfValidIDs(void);
 // Hex:     0xZZ, ZZ, Z, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
 // Decimal: ZZd, ZZD
 
+// TODO: Make sure all the test assertions on the result of GetID have an extra msg
 void test_GetID_HexRange_0xZZ_Format(void);
 void test_GetID_HexRange_ZZ_Default_Format(void);
 void test_GetID_HexRange_ZZh_Format(void);
@@ -115,6 +117,22 @@ void test_GetID_InvalidNum_PreemptivelyDec_ZZh(void);
 void test_GetID_InvalidNum_PreemptivelyDec_ZZH(void);
 void test_GetID_InvalidNum_PreemptivelyDec_ZZx(void);
 void test_GetID_InvalidNum_PreemptivelyDec_ZZX(void);
+
+void test_GetID_InvalidFirstChar_0xKZ(void);
+void test_GetID_InvalidFirstChar_xKZ(void);
+void test_GetID_InvalidFirstChar_XKZ(void);
+void test_GetID_InvalidFirstChar_KZh(void);
+void test_GetID_InvalidFirstChar_KZH(void);
+void test_GetID_InvalidFirstChar_KZx(void);
+void test_GetID_InvalidFirstChar_KZX(void);
+
+void test_GetID_InvalidSecondChar_0xZK(void);
+void test_GetID_InvalidSecondChar_xZK(void);
+void test_GetID_InvalidSecondChar_XZK(void);
+void test_GetID_InvalidSecondChar_ZKh(void);
+void test_GetID_InvalidSecondChar_ZKH(void);
+void test_GetID_InvalidSecondChar_ZKx(void);
+void test_GetID_InvalidSecondChar_ZKX(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
@@ -199,6 +217,23 @@ int main(void)
    RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZH);
    RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZx);
    RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZX);
+
+   RUN_TEST(test_GetID_InvalidFirstChar_0xKZ);
+   RUN_TEST(test_GetID_InvalidFirstChar_xKZ);
+   RUN_TEST(test_GetID_InvalidFirstChar_XKZ);
+   RUN_TEST(test_GetID_InvalidFirstChar_KZh);
+   RUN_TEST(test_GetID_InvalidFirstChar_KZH);
+   RUN_TEST(test_GetID_InvalidFirstChar_KZx);
+   RUN_TEST(test_GetID_InvalidFirstChar_KZX);
+
+   RUN_TEST(test_GetID_InvalidSecondChar_0xZK);
+   RUN_TEST(test_GetID_InvalidSecondChar_xZK);
+   RUN_TEST(test_GetID_InvalidSecondChar_XZK);
+   RUN_TEST(test_GetID_InvalidSecondChar_ZKh);
+   RUN_TEST(test_GetID_InvalidSecondChar_ZKH);
+   RUN_TEST(test_GetID_InvalidSecondChar_ZKx);
+   RUN_TEST(test_GetID_InvalidSecondChar_ZKX);
+
 
    return UNITY_END();
 }
@@ -511,7 +546,7 @@ void test_GetID_HexRange_0Zx_Format(void)
       snprintf(str, MAX_NUM_LEN, "%02Xx", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -527,7 +562,7 @@ void test_GetID_HexRange_0ZX_Format(void)
       snprintf(str, MAX_NUM_LEN, "%02XX", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -543,7 +578,7 @@ void test_GetID_HexRange_x0Z_Format(void)
       snprintf(str, MAX_NUM_LEN, "x%02X", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -607,7 +642,7 @@ void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
       snprintf(str, MAX_NUM_LEN, "%02d", id);
       result = GetID(str, &parsed_id, false, true);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -623,7 +658,7 @@ void test_GetID_DecRange_0Zd_Format_PreemptivelyDec(void)
       snprintf(str, MAX_NUM_LEN, "%02dd", id);
       result = GetID(str, &parsed_id, false, true);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -636,10 +671,10 @@ void test_GetID_DecRange_0ZD_Format_PreemptivelyDec(void)
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
 
-      snprintf(str, MAX_NUM_LEN, "%02dd", id);
+      snprintf(str, MAX_NUM_LEN, "%02dD", id);
       result = GetID(str, &parsed_id, false, true);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -721,7 +756,7 @@ void test_GetID_HexRange_Zx_Format(void)
       snprintf(str, MAX_NUM_LEN, "%Xx", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -737,7 +772,7 @@ void test_GetID_HexRange_ZX_Format(void)
       snprintf(str, MAX_NUM_LEN, "%XX", id);
       result = GetID(str, &parsed_id, false, false);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -821,7 +856,7 @@ void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
       snprintf(str, MAX_NUM_LEN, "%d", id);
       result = GetID(str, &parsed_id, false, true);
 
-      TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
+      TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
 }
@@ -1240,6 +1275,645 @@ void test_GetID_InvalidNum_PreemptivelyDec_ZZX(void)
       enum LIN_PID_Result_E result;
 
       snprintf(str, MAX_NUM_LEN, "%02XX", (uint8_t)id);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+/******************************************************************************/
+
+void test_GetID_InvalidFirstChar_0xKZ(void)
+{
+   // Start at 1 because "0x" is valid input - it is '0' with the supported hex
+   // 'x' suffix.
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_xKZ(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_XKZ(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_KZh(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_KZH(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_KZx(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidFirstChar_KZX(void)
+{
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+/******************************************************************************/
+
+#define VALID_DIGIT "1"
+void test_GetID_InvalidSecondChar_0xZK(void)
+{
+   // Start at 1 because "0x" is valid input - it is '0' with the supported hex
+   // 'x' suffix.
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_xZK(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_XZK(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_ZKh(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_ZKH(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_ZKx(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
+      result = GetID(str, &parsed_id, false, true);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+}
+
+void test_GetID_InvalidSecondChar_ZKX(void)
+{
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
+      result = GetID(str, &parsed_id, false, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
+      result = GetID(str, &parsed_id, true, false);
+
+      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
+   }
+
+   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
+   {
+      if ( isxdigit((char)first_char) )   continue;
+
+      char str[MAX_NUM_LEN] = {0};
+      uint8_t parsed_id;
+      enum LIN_PID_Result_E result;
+
+      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
       result = GetID(str, &parsed_id, false, true);
 
       TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );

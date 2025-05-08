@@ -454,6 +454,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    char second_digit = '\0';
    bool ishex = pre_emptively_hex;
    bool isdec = pre_emptively_dec;
+   bool hex_prefix_already_encountered = false;
 
    if ( pre_emptively_hex )
    {
@@ -468,13 +469,14 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
       parser_state = ParserInit;
    }
 
+   char ch = '\0';
    while (
       (loop_limit_counter <= MAX_NUM_LEN) &&
       (str[idx] != '\0') && /* Continue until terminating null character */
       !exit_loop /* Redundant here but I like extra guard rails */
    )
    {
-      char ch = str[idx];
+      ch = str[idx];
       switch (parser_state)
       {
          case ParserInit:
@@ -502,6 +504,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( ('x' == ch) || ('X' == ch) )
             {
                ishex = true;
+               hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
             else
@@ -520,6 +523,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( ('x' == ch) || ('X' == ch) )
             {
                ishex = true;
+               hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
             else if ( isxdigit(ch) )
@@ -646,8 +650,16 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( ('x' == ch) || ('X' == ch) ||
                       ('h' == ch) || ('H' == ch) )
             {
-               ishex = true;
-               parser_state = ParserTwoDigitsAlreadyRead;
+               if ( hex_prefix_already_encountered )
+               {
+                  result = HexPrefixAndSuffixEncountered;
+                  exit_loop = true;
+               }
+               else
+               {
+                  ishex = true;
+                  parser_state = ParserTwoDigitsAlreadyRead;
+               }
             }
             else
             {
@@ -706,6 +718,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
          case ParserPreemptivelyHex:
             if ( ('x' == ch) || ('X' == ch) )
             {
+               hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
             else if ( isxdigit(ch) )
@@ -728,6 +741,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             }
             else if ( '0' == ch )
             {
+               first_digit = ch;
                parser_state = ParserPreemptivelyDecOneZeroIn;
             }
             else if ( isdigit(ch) )
@@ -801,6 +815,16 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    else if ( exit_loop )
    {
       // Something erroneous was detected. Don't update ID!
+   }
+   else if ( (ishex || isdec) && ('\0' == first_digit) && ('\0' == second_digit) )
+   {
+      result = NoNumericalDigitsEnteredWithFormat;
+   }
+   else if ( ('\0' == first_digit) && ('\0' == second_digit) )
+   {
+      // Must have exited because str had only terminating characters where a
+      // number digit should have been.
+      result = PrematureTerminatingCharEncounted;
    }
    else
    {
