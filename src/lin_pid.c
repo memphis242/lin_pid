@@ -531,6 +531,10 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
                if ( !isdigit(ch) )
                {
                   // Must be a uniquely hex digit
+                  // NOTE: The 'd' suffix would also lead to this line,
+                  //       and the user may have intended a decimal number.
+                  //       I have chosen that the hex variant will take hold unless
+                  //       --dec | -d was specified.
                   ishex = true;
                   parser_state = ParserTwoHexDigits;
                }
@@ -543,11 +547,6 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             else if ( ('h' == ch) || ('H' == ch) )
             {
                ishex = true;
-               parser_state = ParserTwoDigitsAlreadyRead;
-            }
-            else if ( ('d' == ch) || ('D' == ch) )
-            {
-               isdec = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -683,15 +682,7 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             break;
 
          case ParserTwoZerosIn:
-            if ( ( ishex &&
-                     ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) ) ||
-                 ( isdec &&
-                     ( ('d' == ch) || ('D' == ch) ) )
-               )
-            {
-               parser_state = ParserTwoDigitsAlreadyRead;
-            }
-            else if ( !isdec &&
+            if ( !isdec &&
                      ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) )
             {
                ishex = true;
@@ -791,6 +782,8 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
             break;
 
          default:
+            assert(false); // Something went wrong /w the parser_state or we
+                           // forgot to account for a state!
             break;
       }
       
@@ -820,39 +813,32 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
    {
       result = NoNumericalDigitsEnteredWithFormat;
    }
-   else if ( ('\0' == first_digit) && ('\0' == second_digit) )
-   {
-      // Must have exited because str had only terminating characters where a
-      // number digit should have been.
-      result = PrematureTerminatingCharEncounted;
-   }
+
    else
    {
       // We got valid digits! Let's get that ID.
       uint8_t most_significant_digit = 0xFF;
       uint8_t least_significant_digit = 0xFF;
-      // By this point, I assume we have at least one digit placed in first_digit.
-      // If nothing is in first_digit, nothing should also be in the second_digit.
-      assert( (first_digit != '\0') || (second_digit) == '\0' );
 
-      if ( (first_digit != '\0') && (second_digit == '\0') )
+      // By this point, I assume we have at least one digit placed in first_digit.
+      assert( (first_digit != '\0') );
+
+      // Only one digit entered
+      if ( second_digit == '\0' )
       {
          most_significant_digit = 0x00u;
          bool conv = MyAtoI( first_digit, &least_significant_digit );
          assert( conv );
          assert( (most_significant_digit == 0x00) && (least_significant_digit <= 0x0F) );
       }
-      else if ( (first_digit != '\0') && (second_digit != '\0') )
+
+      // Two digits entered
+      else
       {
          bool conv1 = MyAtoI( first_digit, &most_significant_digit );
          bool conv2 = MyAtoI( second_digit, &least_significant_digit );
          assert( conv1 && conv2 );
          assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
-      }
-      else
-      {
-         most_significant_digit = 0;
-         least_significant_digit = 0;
       }
 
       // Digits obtained should be <= 0xF
