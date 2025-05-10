@@ -139,6 +139,8 @@ void test_GetID_InvalidSecondChar_0KD(void);
 void test_GetID_InvalidSecondChar_0Kx(void);
 void test_GetID_InvalidSecondChar_0KX(void);
 
+void test_GetID_NoDigitsEntered(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
                                     uint8_t * id,
@@ -243,6 +245,7 @@ int main(void)
    RUN_TEST(test_GetID_InvalidSecondChar_0Kx);
    RUN_TEST(test_GetID_InvalidSecondChar_0KX);
 
+   RUN_TEST(test_GetID_NoDigitsEntered);
 
    return UNITY_END();
 }
@@ -2107,6 +2110,27 @@ void test_GetID_InvalidSecondChar_0KX(void)
 
       TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
    }
+}
+
+void test_GetID_NoDigitsEntered(void)
+{
+   uint8_t parsed_id;
+
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, true,  false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, false, true) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, true,  false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, false, true) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, true,  false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, false, true) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, true,  false) );
+   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, false, true) );
 }
 
 
