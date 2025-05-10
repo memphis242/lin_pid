@@ -171,7 +171,7 @@ CPPCHECK_FLAGS = --cppcheck-build-dir=$(PATH_BUILD)
 
 # gcov Flags
 GCOV = gcov
-GCOV_FLAGS = --conditions --function-summaries
+GCOV_FLAGS = --conditions --function-summaries --branch-probabilities --branch-counts
 ifeq ($(GCOV_CON), 1)
 GCOV_FLAGS += --use-colors --stdout
 endif
