@@ -864,10 +864,12 @@ STATIC enum LIN_PID_Result_E GetID( char const * str,
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit)
 {
+   assert( converted_digit != NULL );
+
    bool ret_val = false;
 
    // Check input validity
-   if ( ( converted_digit != NULL ) ||
+   if (
           ( (digit >= '0') && (digit <= '9') ) ||
           ( (digit >= 'A') && (digit <= 'F') ) ||
           ( (digit >= 'a') && (digit <= 'f') )
