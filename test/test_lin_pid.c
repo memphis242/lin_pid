@@ -39,10 +39,17 @@ static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 };
 
 /* Forward Function Declarations */
+
+/* Test Setup */
 void setUp(void);
 void tearDown(void);
 
-void test_FullRangeOfValidIDs(void);
+/* ComputePID */
+
+void test_ComputePID_FullRangeOfValidIDs(void);
+void test_ComputePID_FullRangeOfInvalidIDs(void);
+
+/* GetID */
 
 // Acceptable formats:
 // Hex:     0xZZ, ZZ, Z, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
@@ -141,11 +148,21 @@ void test_GetID_InvalidSecondChar_0KX(void);
 
 void test_GetID_NoDigitsEntered(void);
 
+/* MyAtoI */
+
+void test_MyAtoI_ValidDecimalDigits(void);
+void test_MyAtoI_ValidHexadecimalDigitsLowercase(void);
+void test_MyAtoI_ValidHexadecimalDigitsUppercase(void);
+void test_MyAtoI_InvalidCharacters(void);
+void test_MyAtoI_EmptyCharacter(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
                                     uint8_t * id,
                                     bool pre_emptively_hex,
                                     bool pre_emptively_dec );
+
+extern bool MyAtoI(char digit, uint8_t * converted_digit);
 
 /* Meat of the Program */
 
@@ -153,8 +170,13 @@ int main(void)
 {
    UNITY_BEGIN();
    
-   RUN_TEST(test_FullRangeOfValidIDs);
+   /* ComputePID */
 
+   RUN_TEST(test_ComputePID_FullRangeOfValidIDs);
+   RUN_TEST(test_ComputePID_FullRangeOfInvalidIDs);
+
+   /* GetID */
+   
    RUN_TEST(test_GetID_HexRange_0xZZ_Format);
    RUN_TEST(test_GetID_HexRange_ZZ_Default_Format);
    RUN_TEST(test_GetID_HexRange_ZZh_Format);
@@ -247,6 +269,14 @@ int main(void)
 
    RUN_TEST(test_GetID_NoDigitsEntered);
 
+   /* MyAtoI */
+
+   RUN_TEST(test_MyAtoI_ValidDecimalDigits);
+   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsLowercase);
+   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsUppercase);
+   RUN_TEST(test_MyAtoI_InvalidCharacters);
+   RUN_TEST(test_MyAtoI_EmptyCharacter);
+
    return UNITY_END();
 }
 
@@ -263,11 +293,19 @@ void tearDown(void)
 
 /******************************************************************************/
 
-void test_FullRangeOfValidIDs(void)
+void test_ComputePID_FullRangeOfValidIDs(void)
 {
    for ( uint8_t i = 0; i < MAX_ID_ALLOWED; i++ )
    {
       TEST_ASSERT_EQUAL_UINT8( REFERENCE_PID_TABLE[i], ComputePID(i) );
+   }
+}
+
+void test_ComputePID_FullRangeOfInvalidIDs(void)
+{
+   for ( uint16_t i = (MAX_ID_ALLOWED + 1); i <= UINT8_MAX; i++ )
+   {
+      TEST_ASSERT_EQUAL_UINT8( INVALID_PID, ComputePID( (uint8_t)i) );
    }
 }
 
@@ -2133,6 +2171,55 @@ void test_GetID_NoDigitsEntered(void)
    TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, false, true) );
 }
 
+/******************************************************************************/
+
+void test_MyAtoI_ValidDecimalDigits(void)
+{
+   uint8_t converted_digit;
+   for (char digit = '0'; digit <= '9'; digit++)
+   {
+      TEST_ASSERT_TRUE(MyAtoI(digit, &converted_digit));
+      TEST_ASSERT_EQUAL_UINT8(digit - '0', converted_digit);
+   }
+}
+
+void test_MyAtoI_ValidHexadecimalDigitsLowercase(void)
+{
+   uint8_t converted_digit;
+   for (char digit = 'a'; digit <= 'f'; digit++)
+   {
+      TEST_ASSERT_TRUE(MyAtoI(digit, &converted_digit));
+      TEST_ASSERT_EQUAL_UINT8(10 + (digit - 'a'), converted_digit);
+   }
+}
+
+void test_MyAtoI_ValidHexadecimalDigitsUppercase(void)
+{
+   uint8_t converted_digit;
+   for (char digit = 'A'; digit <= 'F'; digit++)
+   {
+      TEST_ASSERT_TRUE(MyAtoI(digit, &converted_digit));
+      TEST_ASSERT_EQUAL_UINT8(10 + (digit - 'A'), converted_digit);
+   }
+}
+
+void test_MyAtoI_InvalidCharacters(void)
+{
+   uint8_t converted_digit;
+   char invalid_chars[] = {'g', 'G', 'z', 'Z', '@', '!', '-', ' '};
+   for (size_t i = 0; i < sizeof(invalid_chars); i++)
+   {
+      char fail_msg[2] = {0};
+      snprintf( fail_msg, 1, "%c", invalid_chars[i] );
+      TEST_ASSERT_FALSE_MESSAGE( MyAtoI(invalid_chars[i], &converted_digit), fail_msg );
+   }
+}
+
+void test_MyAtoI_EmptyCharacter(void)
+{
+   uint8_t converted_digit;
+   TEST_ASSERT_FALSE( MyAtoI('\0', &converted_digit) );
+}
 
 /******************************************************************************/
 
