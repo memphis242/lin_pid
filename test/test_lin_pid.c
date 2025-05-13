@@ -38,6 +38,8 @@ static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
    0x78, 0x39, 0xBA, 0xFB, 0x3C, 0x7D, 0xFE, 0xBF
 };
 
+/* External Data */
+
 /* Forward Function Declarations */
 
 /* Test Setup */
@@ -156,6 +158,31 @@ void test_MyAtoI_ValidHexadecimalDigitsUppercase(void);
 void test_MyAtoI_InvalidCharacters(void);
 void test_MyAtoI_EmptyCharacter(void);
 
+#ifndef NDEBUG
+
+/* UInt8_Cmp */
+
+void test_UInt8_Cmp_A_Greater_Than_B(void);
+void test_UInt8_Cmp_A_Less_Than_B(void);
+void test_UInt8_Cmp_A_Equal_To_B(void);
+void test_UInt8_Cmp_Min_And_Max_Values(void);
+void test_UInt8_Cmp_Adjacent_Values(void);
+void test_UInt8_Cmp_Zero_Comparison(void);
+
+#endif
+
+/* OnlyValidFlagsArePresent */
+
+void test_OnlyValidFlagsArePresent_AllValidFlags(void);
+void test_OnlyValidFlagsArePresent_ValidFlagsSubset(void);
+void test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent(void);
+void test_OnlyValidFlagsArePresent_OffByOneCharFlag(void);
+void test_OnlyValidFlagsArePresent_DuplicateValidFlags(void);
+void test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry(void);
+void test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString(void);
+void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void);
+
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
                                     uint8_t * id,
@@ -163,6 +190,10 @@ extern enum LIN_PID_Result_E GetID( char const * str,
                                     bool pre_emptively_dec );
 
 extern bool MyAtoI(char digit, uint8_t * converted_digit);
+#ifndef NDEBUG
+extern int UInt8_Cmp( const void * a, const void * b );
+#endif
+extern bool OnlyValidFlagsArePresent( char const * args[], int argc );
 
 /* Meat of the Program */
 
@@ -276,6 +307,28 @@ int main(void)
    RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsUppercase);
    RUN_TEST(test_MyAtoI_InvalidCharacters);
    RUN_TEST(test_MyAtoI_EmptyCharacter);
+
+#ifndef NDEBUG
+
+   /* UInt8_Cmp */
+
+   RUN_TEST(test_UInt8_Cmp_A_Greater_Than_B);
+   RUN_TEST(test_UInt8_Cmp_A_Less_Than_B);
+   RUN_TEST(test_UInt8_Cmp_A_Equal_To_B);
+   RUN_TEST(test_UInt8_Cmp_Min_And_Max_Values);
+   RUN_TEST(test_UInt8_Cmp_Adjacent_Values);
+   RUN_TEST(test_UInt8_Cmp_Zero_Comparison);
+
+#endif
+
+   RUN_TEST(test_OnlyValidFlagsArePresent_AllValidFlags);
+   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsSubset);
+   RUN_TEST(test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent);
+   RUN_TEST(test_OnlyValidFlagsArePresent_OffByOneCharFlag);
+   RUN_TEST(test_OnlyValidFlagsArePresent_DuplicateValidFlags);
+   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry);
+   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString);
+   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace);
 
    return UNITY_END();
 }
@@ -2219,6 +2272,136 @@ void test_MyAtoI_EmptyCharacter(void)
 {
    uint8_t converted_digit;
    TEST_ASSERT_FALSE( MyAtoI('\0', &converted_digit) );
+}
+
+/******************************************************************************/
+
+#ifndef NDEBUG
+
+void test_UInt8_Cmp_A_Greater_Than_B(void)
+{
+   uint8_t a = 10;
+   uint8_t b = 5;
+   TEST_ASSERT_GREATER_THAN(0, UInt8_Cmp(&a, &b));
+}
+
+void test_UInt8_Cmp_A_Less_Than_B(void)
+{
+   uint8_t a = 5;
+   uint8_t b = 10;
+   TEST_ASSERT_LESS_THAN(0, UInt8_Cmp(&a, &b));
+}
+
+void test_UInt8_Cmp_A_Equal_To_B(void)
+{
+   uint8_t a = 7;
+   uint8_t b = 7;
+   TEST_ASSERT_EQUAL(0, UInt8_Cmp(&a, &b));
+}
+
+void test_UInt8_Cmp_Min_And_Max_Values(void)
+{
+   uint8_t a = 0;
+   uint8_t b = UINT8_MAX;
+   TEST_ASSERT_LESS_THAN(0, UInt8_Cmp(&a, &b));
+
+   a = UINT8_MAX;
+   b = 0;
+   TEST_ASSERT_GREATER_THAN(0, UInt8_Cmp(&a, &b));
+}
+
+void test_UInt8_Cmp_Adjacent_Values(void)
+{
+   uint8_t a = 100;
+   uint8_t b = 101;
+   TEST_ASSERT_LESS_THAN(0, UInt8_Cmp(&a, &b));
+
+   a = 101;
+   b = 100;
+   TEST_ASSERT_GREATER_THAN(0, UInt8_Cmp(&a, &b));
+}
+
+void test_UInt8_Cmp_Zero_Comparison(void)
+{
+   uint8_t a = 0;
+   uint8_t b = 0;
+   TEST_ASSERT_EQUAL(0, UInt8_Cmp(&a, &b));
+}
+
+#endif
+
+/******************************************************************************/
+
+void test_OnlyValidFlagsArePresent_AllValidFlags(void)
+{
+   const char * args[] = {"program", "--hex", "-h", "--dec", "-d", "--quiet", "-q", "--table", "-t", "--help", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_ValidFlagsSubset(void)
+{
+   const char * args[] = {"program", "--hex", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent(void)
+{
+   const char * args1[] = {"program", "--hex", "-h", "--invalid-flag"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args1, sizeof(args1) / sizeof(args1[0])));
+
+   const char * args2[] = {"program", "--hex", "--invalid-flag", "-q"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args2, sizeof(args2) / sizeof(args2[0])));
+}
+
+void test_OnlyValidFlagsArePresent_OffByOneCharFlag(void)
+{
+   const char * args1[] = {"program", "--hes"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args1, sizeof(args1) / sizeof(args1[0])));
+
+   const char * args2[] = {"program", "--dex"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args2, sizeof(args2) / sizeof(args2[0])));
+
+   const char * args3[] = {"program", "--quit"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args3, sizeof(args3) / sizeof(args3[0])));
+
+   const char * args4[] = {"program", "--quite"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args4, sizeof(args4) / sizeof(args4[0])));
+
+   const char * args5[] = {"program", "--hex", "--no-ne-line"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args5, sizeof(args5) / sizeof(args5[0])));
+
+   const char * args6[] = {"program", "--dex", "--no-ne-line"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args6, sizeof(args6) / sizeof(args6[0])));
+
+   const char * args7[] = {"program", "--hel"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args7, sizeof(args7) / sizeof(args7[0])));
+
+   const char * args8[] = {"program", "-g"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args8, sizeof(args8) / sizeof(args8[0])));
+}
+
+void test_OnlyValidFlagsArePresent_DuplicateValidFlags(void)
+{
+   const char * args[] = {"program", "--hex", "--hex", "-q", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry(void)
+{
+   const char * args[] = {"program", "--hex", NULL, "-q"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString(void)
+{
+   const char * args[] = {"program", "--hex", "", "-q"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void)
+{
+   const char * args[] = {"program", "--hex", "  ", "-q"};
+   TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
 }
 
 /******************************************************************************/
