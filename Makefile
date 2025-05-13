@@ -211,29 +211,12 @@ $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
-$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION): $(PATH_OBJECT_FILES)lin_pid_sscanf.o
-	@echo
-	@echo "----------------------------------------"
-	@echo "Linking the object files $^ into the executable..."
-	@echo
-	$(CC) $(LDFLAGS) $^ -o $@
-
 $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
 	@echo "Linking the object files $^ into the executable..."
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
-
-$(PATH_OBJECT_FILES)lin_pid_sscanf.o: $(PATH_BENCHMARK)lin_pid_sscanf.c
-	@echo
-	@echo "----------------------------------------"
-	@echo "Compiling $<..."
-	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
-	@echo
-	@echo "----------------------------------------"
-	@echo "Running static analysis on $<..."
-	@echo
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
@@ -371,19 +354,3 @@ benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin
 	@echo
 
 .PHONY: profile
-profile: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) $(BUILD_PATHS)
-	@echo
-	@echo "----------------------------------------"
-	@echo "Running $< with profiling enabled..."
-	./$< 0x00
-	mv gmon.out $(PATH_PROFILE)gmon_$(MAIN_TARGET_NAME).out
-	@echo
-	@echo "Running $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) with profiling enabled..."
-	./$(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) 0x00
-	mv gmon.out $(PATH_PROFILE)gmon_lin_pid_sscanf.out
-	@echo
-	@echo "Running gprof..."
-	gprof $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_PROFILE)gmon_$(MAIN_TARGET_NAME).out > $(PATH_PROFILE)$(MAIN_TARGET_NAME)_profile.txt
-	gprof $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION) $(PATH_PROFILE)gmon_lin_pid_sscanf.out > $(PATH_PROFILE)lin_pid_sscanf_profile.txt
-	@echo
-
