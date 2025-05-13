@@ -963,6 +963,8 @@ static void PrintReferenceTable(void)
 
 STATIC int UInt8_Cmp( const void * a, const void * b )
 {
+   assert( (a != NULL) && (b != NULL) );
+
    uint8_t * c = (uint8_t *)a;
    uint8_t * d = (uint8_t *)b;
 
