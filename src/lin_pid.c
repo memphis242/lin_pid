@@ -321,35 +321,38 @@ uint8_t ComputePID(uint8_t id)
 
 STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
 {
-   assert( (args != NULL) && (argc >= 1) );
+   assert(args != NULL);
+   assert(argc >= 1);
+   assert( (size_t)argc <= ( (sizeof(AcceptableFlags) / sizeof(AcceptableFlags[0])) + 1) );
 
+   bool only_valid;
    for ( uint8_t i = 1; i < argc; i++ )
    {
-      if ( args[i] == NULL )
+      if ( (NULL == args[i]) || (args[i][0] != '-') || (args[i][0] == ' ') )
       {
+         only_valid = false;
          break;
       }
       else
       {
-         bool valid_arg = false;
+         only_valid = false;
          for ( size_t j = 0; j < (sizeof(AcceptableFlags) / sizeof(char *)); j++ )
          {
-            if ( (strncmp( AcceptableFlags[j], args[i], MAX_ARG_LEN ) == 0) ||
-                 (args[i][0] != '-') )
+            if ( (strncmp( AcceptableFlags[j], args[i], MAX_ARG_LEN ) == 0) )
             {
-               valid_arg = true;
+               only_valid = true;
                break;
             }
          }
 
-         if ( !valid_arg )
+         if ( !only_valid )
          {
-            return false;
+            break;
          }
       }
    }
 
-   return true;
+   return only_valid;
 }
 
 STATIC size_t ArgOccurrenceCount( char const * args[],
