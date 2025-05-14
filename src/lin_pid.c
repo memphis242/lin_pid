@@ -362,7 +362,7 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
 {
    // Assert instead of return false because this function is internal and we
    // have control on what it is called with.
-   assert( (args != NULL) && (str != NULL) && (argc >= 2) );
+   assert( (args != NULL) && (str != NULL) );
 
    size_t count = 0;
    bool found_occurrence = false;
@@ -375,7 +375,7 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
    {
       if ( args[i] == NULL )
       {
-         break;
+         continue;
       }
       else if ( !found_occurrence && (strncmp( str, args[i], MAX_ARG_LEN ) == 0) )
       {
