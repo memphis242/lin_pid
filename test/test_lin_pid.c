@@ -182,6 +182,17 @@ void test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void);
 
+/* OnlyValidFlagsArePresent */
+
+void test_ArgOccurrenceCount_SingleOccurrence(void);
+void test_ArgOccurrenceCount_MultipleOccurrences(void);
+void test_ArgOccurrenceCount_NoOccurrence(void);
+void test_ArgOccurrenceCount_NullIdxPointer(void);
+void test_ArgOccurrenceCount_ArgAtEnd(void);
+void test_ArgOccurrenceCount_ArgAtBeginning(void);
+void test_ArgOccurrenceCount_EmptyArgs(void);
+void test_ArgOccurrenceCount_NullArgEntry(void);
+void test_ArgOccurrenceCount_MaxArgsLimit(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( char const * str,
@@ -190,10 +201,17 @@ extern enum LIN_PID_Result_E GetID( char const * str,
                                     bool pre_emptively_dec );
 
 extern bool MyAtoI(char digit, uint8_t * converted_digit);
+
 #ifndef NDEBUG
 extern int UInt8_Cmp( const void * a, const void * b );
 #endif
+
 extern bool OnlyValidFlagsArePresent( char const * args[], int argc );
+
+extern size_t ArgOccurrenceCount( char const * args[],
+                                  char const * str,
+                                  int argc,
+                                  uint8_t * idx_of_first_occurrence );
 
 /* Meat of the Program */
 
@@ -329,6 +347,17 @@ int main(void)
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry);
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString);
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace);
+
+   RUN_TEST(test_ArgOccurrenceCount_SingleOccurrence);
+   RUN_TEST(test_ArgOccurrenceCount_MultipleOccurrences);
+   RUN_TEST(test_ArgOccurrenceCount_NoOccurrence);
+   RUN_TEST(test_ArgOccurrenceCount_NullIdxPointer);
+   RUN_TEST(test_ArgOccurrenceCount_ArgAtEnd);
+   RUN_TEST(test_ArgOccurrenceCount_ArgAtBeginning);
+   RUN_TEST(test_ArgOccurrenceCount_EmptyArgs);
+   RUN_TEST(test_ArgOccurrenceCount_NullArgEntry);
+   RUN_TEST(test_ArgOccurrenceCount_MaxArgsLimit);
+
 
    return UNITY_END();
 }
@@ -2402,6 +2431,92 @@ void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void)
 {
    const char * args[] = {"program", "--hex", "  ", "-q"};
    TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+/******************************************************************************/
+
+void test_ArgOccurrenceCount_SingleOccurrence(void)
+{
+   const char * args[] = {"program", "--hex", "-q", "--dec"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 4, &idx);
+   TEST_ASSERT_EQUAL_UINT32(1, count);
+   TEST_ASSERT_EQUAL_UINT8(1, idx);
+}
+
+void test_ArgOccurrenceCount_MultipleOccurrences(void)
+{
+   const char * args[] = {"program", "--hex", "-q", "--hex", "--hex"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 5, &idx);
+   TEST_ASSERT_EQUAL_UINT32(3, count);
+   TEST_ASSERT_EQUAL_UINT8(1, idx);
+}
+
+void test_ArgOccurrenceCount_NoOccurrence(void)
+{
+   const char * args[] = {"program", "--hex", "-q", "--dec"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--table", 4, &idx);
+   TEST_ASSERT_EQUAL_UINT32(0, count);
+   // idx is not updated, but should remain unchanged
+   TEST_ASSERT_EQUAL_UINT8(0xFF, idx);
+}
+
+void test_ArgOccurrenceCount_NullIdxPointer(void)
+{
+   const char * args[] = {"program", "--hex", "-q", "--hex"};
+   // Make sure that passing in a NULL pointer for the idx doesn't crash anything
+   // and still results in the correct count being returned.
+   size_t count = ArgOccurrenceCount(args, "--hex", 4, NULL);
+   TEST_ASSERT_EQUAL_UINT32(2, count);
+}
+
+void test_ArgOccurrenceCount_ArgAtEnd(void)
+{
+   const char * args[] = {"program", "-q", "--dec", "--table"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--table", 4, &idx);
+   TEST_ASSERT_EQUAL_UINT32(1, count);
+   TEST_ASSERT_EQUAL_UINT8(3, idx);
+}
+
+void test_ArgOccurrenceCount_ArgAtBeginning(void)
+{
+   const char * args[] = {"program", "--hex", "-q", "--dec"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 4, &idx);
+   TEST_ASSERT_EQUAL_UINT32(1, count);
+   TEST_ASSERT_EQUAL_UINT8(1, idx);
+}
+
+void test_ArgOccurrenceCount_EmptyArgs(void)
+{
+   const char * args[] = {"program"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 1, &idx);
+   TEST_ASSERT_EQUAL_UINT32(0, count);
+   TEST_ASSERT_EQUAL_UINT8(0xFF, idx);
+}
+
+void test_ArgOccurrenceCount_NullArgEntry(void)
+{
+   const char * args[] = {"program", "--hex", NULL, "--hex"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 4, &idx);
+   // Should skip past NULL entry
+   TEST_ASSERT_EQUAL_UINT32(2, count);
+   TEST_ASSERT_EQUAL_UINT8(1, idx);
+}
+
+void test_ArgOccurrenceCount_MaxArgsLimit(void)
+{
+   // MAX_ARGS_TO_CHECK is 5, so only first 5 args are checked
+   const char * args[] = {"program", "--hex", "--hex", "--hex", "--hex", "--hex", "--hex"};
+   uint8_t idx = 0xFF;
+   size_t count = ArgOccurrenceCount(args, "--hex", 7, &idx);
+   TEST_ASSERT_EQUAL_UINT32(4, count); // Only args[1]..args[4] are checked
+   TEST_ASSERT_EQUAL_UINT8(1, idx);
 }
 
 /******************************************************************************/
