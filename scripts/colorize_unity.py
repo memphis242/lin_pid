@@ -6,10 +6,11 @@ GREEN = "\033[1;32m"
 RED = "\033[1;31m"
 YEL = "\033[0;33m"
 BLU = "\033[1;34m"
+CYAN = "\033[1;36m"
 RESET = "\033[0m"
 
 # Combined regex to match severity levels
-test_result_pattern = re.compile(r"(PASS)|(FAIL)|(IGNORE)")
+test_result_pattern = re.compile(r"(PASS)|(FAIL)|(IGNORE)|(INFO)")
 
 def colorize(match):
     if match.group(1):  # Matches "PASS"
@@ -17,7 +18,9 @@ def colorize(match):
     elif match.group(2):  # Matches "FAIL"
         return f"{RED}{match.group(2)}{RESET}"
     elif match.group(3):  # Matches "IGNORE"
-        return f"{BLU}{match.group(2)}{RESET}"
+        return f"{BLU}{match.group(3)}{RESET}"
+    elif match.group(4):  # Matches "INFO"
+        return f"{CYAN}{match.group(4)}{RESET}"
 
 # Check for input
 if sys.stdin.isatty() and sys.stderr.isatty():

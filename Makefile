@@ -31,14 +31,24 @@ endif
 # Relevant paths
 PATH_UNITY        = Unity/src/
 PATH_SRC          = src/
+PATH_INC          = $(PATH_SRC)/
 PATH_TEST_FILES   = test/
 PATH_BUILD        = build/
-PATH_OBJECT_FILES = build/objs/
-PATH_RESULTS      = build/results/
-PATH_BENCHMARK		= benchmark/
-PATH_PROFILE		= profile/
+PATH_OBJECT_FILES = $(PATH_BUILD)objs/
+PATH_RESULTS      = $(PATH_BUILD)results/
+PATH_PROFILE      = $(PATH_BUILD)profile/
+PATH_BENCHMARK	   = benchmark/
+PATH_SCRIPTS      = scripts/
+BUILD_DIRS        = $(PATH_BUILD) $(PATH_OBJECT_FILES)
 
 # List of all the build paths
+# The pattern employed here is to generate lists of files which shall then be
+# used as pre-requisities in downstream rules.
+COLORIZE_CPPCHECK_SCRIPT = $(PATH_SCRIPTS)colorize_cppcheck.py
+COLORIZE_UNITY_SCRIPT = $(PATH_SCRIPTS)colorize_unity.py
+
+# Other constants
+MAIN_TARGET_NAME = lin_pid
 ifeq ($(BUILD_TYPE), TEST)
 BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES) $(PATH_RESULTS)
 # List of all the test .c files
@@ -47,8 +57,6 @@ SRC_TEST_FILES = $(wildcard $(PATH_TEST_FILES)*.c)
 RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
 # List of all .c files to be compiled
 SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) $(wildcard $(PATH_UNITY)*.c)
-# List of all object files I'm expecting
-OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
 # List of all gcov coverage files I'm expecting
 GCOV_FILES = $(patsubst $(PATH_SRC)%.c, %.c.gcov, $(SRC_FILES))
 
@@ -56,16 +64,14 @@ else
 BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES)
 # List of all .c files to be compiled
 SRC_FILES = $(wildcard $(PATH_SRC)*.c)
-# List of all object files I'm expecting
-OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
 endif
 
 ifeq ($(BUILD_TYPE), PROFILE)
 BUILD_PATHS += $(PATH_PROFILE)
 endif
 
-# Other constants
-MAIN_TARGET_NAME = lin_pid
+# List of all object files we're expecting for the data structures
+OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
 
 # Compiler setup
 CROSS	= 
@@ -124,7 +130,7 @@ COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
 COMPILER_STANDARD = -std=c99
-INCLUDE_PATHS = -I. -I$(PATH_SRC) -I$(PATH_UNITY) -I$(PATH_BENCHMARK)
+INCLUDE_PATHS = -I. -I$(PATH_INC) -I$(PATH_UNITY)
 COMMON_DEFINES =
 DIAGNOSTIC_FLAGS = -fdiagnostics-color
 COMPILER_STATIC_ANALYZER = -fanalyzer
@@ -184,61 +190,72 @@ GCOVR_FLAGS = --html-details $(PATH_RESULTS)coverage.html
 
 .PHONY: target
 target: $(BUILD_PATHS) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
+	@echo
+	@echo -e "\033[36mTarget successfully built!\033[0m"
+	@echo
 
 .PHONY: test
 test: $(BUILD_PATHS) $(RESULTS) $(GCOV_FILES)
+	@echo
+	@echo -e "\033[36mAll tests completed!\033[0m"
+	@echo
 
 # Write the test results to a result .txt file
 $(PATH_RESULTS)%.txt: $(PATH_BUILD)%.$(TARGET_EXTENSION) $(PATH_BUILD)$(MAIN_TARGET_NAME).lst	# Don't actually need the .lst file but want to force the disassembly generation
 	@echo
 	@echo "----------------------------------------"
-	@echo "Running $<..."
+	@echo -e "\033[36mRunning\033[0m $<..."
 	@echo
-	-./$< 2>&1 | tee $@ | python colorize_unity_output.py
+	-./$< 2>&1 | tee $@ | python $(COLORIZE_UNITY_SCRIPT)
 
 # Produces an object dump that includes the disassembly of the executable
 $(PATH_BUILD)%.lst: $(PATH_OBJECT_FILES)%.o
 	@echo
 	@echo "----------------------------------------"
-	@echo "Disassembly of $<..."
+	@echo -e "\033[36mDisassembly\033[0m of $< into $@..."
 	@echo
 	objdump -D $< > $@
 
 $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
-	@echo "Linking the object files $^ into the executable..."
+	@echo -e "\033[36mLinking\033[0m the object files $^ into the executable..."
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	@echo "----------------------------------------"
-	@echo "Linking the object files $^ into the executable..."
+	@echo -e "\033[36mLinking\033[0m the object files $^ into the executable..."
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
-	@echo "Compiling $<..."
+	@echo -e "\033[36mCompiling\033[0m the main program source files: $<..."
+	@echo
 	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
 	@echo
-	@echo "----------------------------------------"
-	@echo "Running static analysis on $<..."
-	@echo
+# @echo "----------------------------------------"
+# @echo -e "\033[36mRunning static analysis\033[0m on $<..."
+# @echo
+# cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
+# @echo
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo
 	@echo "----------------------------------------"
-	@echo "Compiling $<..."
+	@echo -e "\033[36mCompiling\033[0m the test source files: $<..."
+	@echo
 	$(CC) -c $(CFLAGS_TEST_FILES) $< -o $@
 	@echo
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 	@echo
 	@echo "----------------------------------------"
-	@echo "Compiling $<..."
+	@echo -e "\033[36mCompiling\033[0m the unity source files: $<..."
+	@echo
 	$(CC) -c $(CFLAGS_TEST_FILES) $< -o $@
 	@echo
 
@@ -258,7 +275,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 %.c.gcov: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
-	@echo "Analyzing coverage for $<..."
+	@echo -e "\033[36mAnalyzing coverage\033[0m for $<..."
 	$(GCOV) $(GCOV_FLAGS) --object-directory $(PATH_OBJECT_FILES:%/=%) $< > $(PATH_RESULTS)$(GCOV_CONSOLE_OUT_FILE)
 	mv *.gcov $(PATH_RESULTS)
 	gcovr $(GCOVR_FLAGS)
@@ -280,6 +297,7 @@ $(PATH_PROFILE):
 # Clean rule to remove generated files
 .PHONY: clean
 clean:
+	@echo
 	$(CLEANUP) $(PATH_OBJECT_FILES)*.o
 	$(CLEANUP) $(PATH_OBJECT_FILES)*.gcda
 	$(CLEANUP) $(PATH_OBJECT_FILES)*.gcno
