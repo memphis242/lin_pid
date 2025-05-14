@@ -325,7 +325,7 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
    assert(argc >= 1);
    assert( (size_t)argc <= ( (sizeof(AcceptableFlags) / sizeof(AcceptableFlags[0])) + 1) );
 
-   bool only_valid;
+   bool only_valid = false;
    for ( uint8_t i = 1; i < argc; i++ )
    {
       if ( (NULL == args[i]) || (args[i][0] != '-') || (args[i][0] == ' ') )
