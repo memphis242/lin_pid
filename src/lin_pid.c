@@ -34,6 +34,27 @@
 
 /* Datatypes */
 
+#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
+   enum,
+
+enum NumericFormat_E
+{
+   #include "lin_pid_supported_formats.h"
+   NUM_OF_GENERAL_NUMERIC_FORMATS,
+   INVALID_NUMERIC_FORMAT
+};
+
+#undef LIN_PID_NUMERIC_ENTRY
+
+struct NumericFormatStrings_S
+{
+   const char * UppercaseLeadingZero;
+   const char * UppercaseNoLeadingZero;
+   const char * LowercaseLeadingZero;
+   const char * LowercaseNoLeadingZero;
+};
+
+
 /* Local Data */
 
 static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
@@ -86,27 +107,6 @@ STATIC const char * AcceptableFlags[] =
 };
 
 #define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
-   enum,
-
-enum NumericFormat_E
-{
-   #include "lin_pid_supported_formats.h"
-   NUM_OF_GENERAL_NUMERIC_FORMATS,
-   INVALID_NUMERIC_FORMAT
-};
-
-#undef LIN_PID_NUMERIC_ENTRY
-
-
-struct NumericFormatStrings_S
-{
-   const char * UppercaseLeadingZero;
-   const char * UppercaseNoLeadingZero;
-   const char * LowercaseLeadingZero;
-   const char * LowercaseNoLeadingZero;
-};
-
-#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
    {                                                                                     \
       .UppercaseLeadingZero   = fs_upp_ldz,                                              \
       .UppercaseNoLeadingZero = fs_upp_nldz,                                             \
@@ -148,6 +148,7 @@ STATIC enum NumericFormat_E DetermineEntryFormat( char * str );
 static void PrintHelpMsg(void);
 
 static void PrintReferenceTable(void);
+
 
 /* Meat of the Program */
 
@@ -1014,22 +1015,34 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
    return ( *c - *d );
 }
 
+/**
+ * @brief Determines the numeric format of the given string entry.
+ *
+ * This function analyzes the input string and identifies its numeric format,
+ * based on a list of supported formats.
+ * 
+ * @note str is assumed to be a valid ID entry! Do not call this functino before
+ *       passing the string through GetID.
+ *
+ * @param str Pointer to the null-terminated string to be analyzed.
+ * @return NumericFormat_E enunm indicating the detected format.
+ */
 STATIC enum NumericFormat_E DetermineEntryFormat( char * str )
 {
-   assert( str != NULL );
+   assert( (str != NULL) && (str[0] != NULL) );
 
-   if ( ('\0' == str[0]) ||
-        () )
+   // There are many ways to go about this, but I think the fastest route
+   // is another state machine. I don't want to clog up my GetID state machine
+   // though, so I'll separate it out here. Maybe one day I'll try jamming
+   // this into the GetID state machine and compare performance...
+   // This'll be a lighter state machine though, because I am assuming that
+   // this function is called only after an ID has been obtained, which means
+   // the string carrying the ID will have been determined to be valid.
+   enum FormatIdentificationStates_E
    {
-      return INVALID_NUMERIC_FORMAT;
-   }
-
-
-}
-
-static void ConstructListOfValidFirstChars(void)
-{
-   for (  )
+      FIS_Init,
+      FIS_NoPrefix
+   };
 }
 
 #endif
