@@ -85,20 +85,43 @@ STATIC const char * AcceptableFlags[] =
    "--no-new-line"
 };
 
+#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
+   enum,
+
+enum NumericFormat_E
+{
+   #include "lin_pid_supported_formats.h"
+   NUM_OF_GENERAL_NUMERIC_FORMATS,
+   INVALID_NUMERIC_FORMAT
+};
+
+#undef LIN_PID_NUMERIC_ENTRY
+
+
+struct NumericFormatStrings_S
+{
+   const char * UppercaseLeadingZero;
+   const char * UppercaseNoLeadingZero;
+   const char * LowercaseLeadingZero;
+   const char * LowercaseNoLeadingZero;
+};
+
+#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
+   {                                                                                     \
+      .UppercaseLeadingZero   = fs_upp_ldz,                                              \
+      .UppercaseNoLeadingZero = fs_upp_nldz,                                             \
+      .LowercaseLeadingZero   = fs_low_ldz,                                              \
+      .LowercaseNoLeadingZero = fs_low_nldz                                              \
+   },
+
+const struct NumericFormatStrings_S NumericFormats[] =
+{
+   #include "lin_pid_supported_formats.h"
+};
+
+#undef LIN_PID_NUMERIC_ENTRY
+
 /* Private Function Prototypes */
-
-#ifndef NDEBUG
-
-STATIC int UInt8_Cmp( const void * a, const void * b );
-
-#endif
-
-STATIC enum LIN_PID_Result_E GetID( char const * str,
-                                    uint8_t * id,
-                                    bool pre_emptively_hex,
-                                    bool pre_emptively_dec );
-
-STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
 STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc );
 
@@ -107,6 +130,21 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
                                   int argc,
                                   uint8_t * idx_of_first_occurrence );
 
+STATIC enum LIN_PID_Result_E GetID( char const * str,
+                                    uint8_t * id,
+                                    bool pre_emptively_hex,
+                                    bool pre_emptively_dec );
+
+STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
+
+#ifndef NDEBUG
+
+STATIC int UInt8_Cmp( const void * a, const void * b );
+
+#endif
+
+STATIC enum NumericFormat_E DetermineEntryFormat( char * str );
+
 static void PrintHelpMsg(void);
 
 static void PrintReferenceTable(void);
@@ -114,9 +152,9 @@ static void PrintReferenceTable(void);
 /* Meat of the Program */
 
 #ifdef TEST
-int lin_pid_cli(int argc, char * argv[])
+int lin_pid_cli( int argc, char * argv[] )
 #else
-int main(int argc, char * argv[])
+int main( int argc, char * argv[] )
 #endif
 {
    /* Early return opportunities */
@@ -396,6 +434,11 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
    assert( (found_occurrence && (count > 0)) || (!found_occurrence && (count == 0)) );
 
    return count;
+}
+
+STATIC enum NumericFormat_E DetermineEntryFormat( char * str )
+{
+
 }
 
 // Acceptable formats:
@@ -969,6 +1012,24 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
    uint8_t * d = (uint8_t *)b;
 
    return ( *c - *d );
+}
+
+STATIC enum NumericFormat_E DetermineEntryFormat( char * str )
+{
+   assert( str != NULL );
+
+   if ( ('\0' == str[0]) ||
+        () )
+   {
+      return INVALID_NUMERIC_FORMAT;
+   }
+
+
+}
+
+static void ConstructListOfValidFirstChars(void)
+{
+   for (  )
 }
 
 #endif

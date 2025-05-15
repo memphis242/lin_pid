@@ -230,18 +230,18 @@ $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	@echo
 	$(CC) $(LDFLAGS) $^ -o $@
 
-$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h
+$(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h $(PATH_SRC)lin_pid_exceptions.h $(PATH_SRC)lin_pid_supported_formats.h
 	@echo
 	@echo "----------------------------------------"
 	@echo -e "\033[36mCompiling\033[0m the main program source files: $<..."
 	@echo
 	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
 	@echo
-# @echo "----------------------------------------"
-# @echo -e "\033[36mRunning static analysis\033[0m on $<..."
-# @echo
-# cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
-# @echo
+	@echo "----------------------------------------"
+	@echo -e "\033[36mRunning static analysis\033[0m on $<..."
+	@echo
+	cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
+	@echo
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TEST_FILES)%.c
 	@echo
