@@ -16,13 +16,16 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
+#include <regex.h>
 #include "lin_pid.h"
 
 /* Local Macro Definitions */
-#define MAX_ARGS_TO_CHECK  5  // e.g., lin_pid XX --hex --quiet --no-new-line
-#define MAX_NUM_LEN        (strlen("0x3F") + 1)
-#define MAX_ARG_LEN        (strlen("--no-new-line"))
-#define MAX_ERR_MSG_LEN    250
+#define MAX_ARGS_TO_CHECK              5  // e.g., lin_pid XX --hex --quiet --no-new-line
+#define MAX_NUM_LEN                    (strlen("0x3F") + 1)
+#define MAX_ARG_LEN                    (strlen("--no-new-line"))
+#define MAX_ERR_MSG_LEN                250
+#define NO_SPECIAL_COMP_FLAGS          0
+#define DEFAULT_OUTPUT_NUMERIC_FORMAT  ClassicHexPrefix_LeadingZeros_Uppercase
 
 #define GET_BIT(x, n)      ((x >> n) & 0x01)
 
@@ -34,13 +37,13 @@
 
 /* Datatypes */
 
-#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
    enum,
 
 enum NumericFormat_E
 {
    #include "lin_pid_supported_formats.h"
-   NUM_OF_GENERAL_NUMERIC_FORMATS,
+   NUM_OF_NUMERIC_FORMATS,
    INVALID_NUMERIC_FORMAT
 };
 
@@ -48,10 +51,8 @@ enum NumericFormat_E
 
 struct NumericFormatStrings_S
 {
-   const char * UppercaseLeadingZero;
-   const char * UppercaseNoLeadingZero;
-   const char * LowercaseLeadingZero;
-   const char * LowercaseNoLeadingZero;
+   const char * regular_expression;
+   const char * print_format;
 };
 
 
@@ -106,12 +107,10 @@ STATIC const char * AcceptableFlags[] =
    "--no-new-line"
 };
 
-#define LIN_PID_NUMERIC_FORMAT( enum, fs_upp_ldz, fs_upp_nldz, fs_low_ldz, fs_low_nldz ) \
-   {                                                                                     \
-      .UppercaseLeadingZero   = fs_upp_ldz,                                              \
-      .UppercaseNoLeadingZero = fs_upp_nldz,                                             \
-      .LowercaseLeadingZero   = fs_low_ldz,                                              \
-      .LowercaseNoLeadingZero = fs_low_nldz                                              \
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
+   {                                                     \
+      .regular_expression   = regexp,                    \
+      .print_format         = prnt_fmt,                  \
    },
 
 const struct NumericFormatStrings_S NumericFormats[] =
@@ -292,17 +291,23 @@ int main( int argc, char * argv[] )
                            sizeof(uint8_t),
                            UInt8_Cmp ) != NULL) );
 
+      /* Determine format to print output in */
+      enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
+      assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
+      const char * print_format = NumericFormats[ (unsigned int)num_format ].print_format;
+
       /* Print Output */
       if ( (ArgOccurrenceCount((const char **)argv, "--quiet", argc, NULL) > 0) ||
            (ArgOccurrenceCount((const char **)argv, "-q", argc, NULL) > 0) )
       {
          if ( (ArgOccurrenceCount((const char **)argv, "--no-new-line", argc, NULL) == 0) )
          {
-            printf("%02X\n", pid);
+            printf(print_format, pid);
+            printf("\n");
          }
          else
          {
-            printf("%02X", pid);
+            printf(print_format, pid);
          }
       }
       else if ( (ArgOccurrenceCount((const char **)argv, "--no-new-line", argc, NULL) > 0) )
@@ -312,8 +317,12 @@ int main( int argc, char * argv[] )
       }
       else
       {
-         printf( "\nID:  \033[36m" "0x%02X" "\033[0m\n", user_input );
-         printf( "PID: \033[32m"   "0x%02X" "\033[0m\n", pid );
+         printf( "\nID:  \033[36m" );
+         printf( print_format, user_input );
+         printf( "\033[0m\n" );
+         printf( "\nPID:  \033[32m" );
+         printf( print_format, pid );
+         printf( "\033[0m\n" );
          printf("\n");
       }
 
@@ -435,11 +444,6 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
    assert( (found_occurrence && (count > 0)) || (!found_occurrence && (count == 0)) );
 
    return count;
-}
-
-STATIC enum NumericFormat_E DetermineEntryFormat( char * str )
-{
-
 }
 
 // Acceptable formats:
@@ -1021,28 +1025,38 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
  * This function analyzes the input string and identifies its numeric format,
  * based on a list of supported formats.
  * 
- * @note str is assumed to be a valid ID entry! Do not call this functino before
+ * @note str is assumed to be a valid ID entry! Do not call this function before
  *       passing the string through GetID.
  *
  * @param str Pointer to the null-terminated string to be analyzed.
  * @return NumericFormat_E enunm indicating the detected format.
  */
-STATIC enum NumericFormat_E DetermineEntryFormat( char * str )
+STATIC enum NumericFormat_E DetermineEntryFormat( const char * str )
 {
    assert( (str != NULL) && (str[0] != NULL) );
 
-   // There are many ways to go about this, but I think the fastest route
-   // is another state machine. I don't want to clog up my GetID state machine
-   // though, so I'll separate it out here. Maybe one day I'll try jamming
-   // this into the GetID state machine and compare performance...
-   // This'll be a lighter state machine though, because I am assuming that
-   // this function is called only after an ID has been obtained, which means
-   // the string carrying the ID will have been determined to be valid.
-   enum FormatIdentificationStates_E
+   // Let's try this /w regex, just for fun.
+   regex_t regex;
+   for ( int i = 0; i < NUM_OF_NUMERIC_FORMATS; i++ )
    {
-      FIS_Init,
-      FIS_NoPrefix
-   };
+      bool failed_regex_compile = regcomp( &regex,               // regex_t *restrict preg
+                                           NumericFormats[i].regexp, // const char *restrict regex
+                                           NO_SPECIAL_COMP_FLAGS );  // int cflags
+      assert( !failed_regex_compile );
+      bool did_not_match = regexec( &regex, // const regex_t *restrict preg
+                                    str,    // const char *restrict string
+                                    0,      // size_t nmatch
+                                    NULL,   // regmatch_t pmatch[_Nullable restrict .nmatch]
+                                    0 );    // int eflags
+      if ( !did_not_match )
+      {
+         regfree(&regex);
+         return (enum NumericFormat_E)i;
+      }
+   }
+   regfree(&regex);
+
+   return DEFAULT_OUTPUT_NUMERIC_FORMAT;
 }
 
 #endif
