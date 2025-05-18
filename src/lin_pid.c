@@ -1033,7 +1033,7 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
  */
 STATIC enum NumericFormat_E DetermineEntryFormat( const char * str )
 {
-   assert( (str != NULL) && (str[0] != NULL) );
+   assert( (str != NULL) && (str[0] != '\0') );
 
    // Let's try this /w regex, just for fun.
    regex_t regex;
@@ -1042,7 +1042,7 @@ STATIC enum NumericFormat_E DetermineEntryFormat( const char * str )
       bool failed_regex_compile = regcomp( &regex,               // regex_t *restrict preg
                                            NumericFormats[i].regexp, // const char *restrict regex
                                            NO_SPECIAL_COMP_FLAGS );  // int cflags
-      assert( !failed_regex_compile );
+      assert( !failed_regex_compile );    // FIXME: For now, asserting on a failed compilation until I get used to this library
       bool did_not_match = regexec( &regex, // const regex_t *restrict preg
                                     str,    // const char *restrict string
                                     0,      // size_t nmatch
