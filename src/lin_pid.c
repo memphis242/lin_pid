@@ -130,7 +130,7 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
                                   int argc,
                                   uint8_t * idx_of_first_occurrence );
 
-STATIC enum LIN_PID_Result_E GetID( char const * str,
+STATIC enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
                                     bool pre_emptively_hex,
                                     bool pre_emptively_dec );
@@ -165,11 +165,12 @@ int main( int argc, char * argv[] )
       return EXIT_FAILURE;
    }
 
-   else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
-   {
-      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
-      return EXIT_FAILURE;
-   }
+// FIXME: Need OnlyValidFlagsArePresent to identify numeric entries...
+//   else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
+//   {
+//      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
+//      return EXIT_FAILURE;
+//   }
 
    else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
    {
@@ -450,7 +451,7 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
 // Acceptable formats:
 // Hex:     0xZZ, Z, ZZ, ZZh, ZZH, ZZx, ZZX, xZZ, XZZ
 // Decimal: ZZd, ZZD
-STATIC enum LIN_PID_Result_E GetID( char const * str,
+STATIC enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
                                     bool pre_emptively_hex,
                                     bool pre_emptively_dec )

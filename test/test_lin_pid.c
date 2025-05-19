@@ -195,7 +195,7 @@ void test_ArgOccurrenceCount_NullArgEntry(void);
 void test_ArgOccurrenceCount_MaxArgsLimit(void);
 
 /* Extern Functions */
-extern enum LIN_PID_Result_E GetID( char const * str,
+extern enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
                                     bool pre_emptively_hex,
                                     bool pre_emptively_dec );
