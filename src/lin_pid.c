@@ -197,7 +197,7 @@ int main( int argc, char * argv[] )
       uint8_t pid = 0xFFu;
       uint8_t user_input;
       enum LIN_PID_Result_E result_status;
-      const char * id_arg = NULL;
+      const char * id_arg = argv[1];   // By default, first arg is numeric entry
 
       // Check format arguments
       uint8_t idx_of_arg_h   = 0;
