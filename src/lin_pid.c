@@ -16,7 +16,8 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <string.h>
-#include <regex.h>
+
+#include "re.h"
 #include "lin_pid.h"
 
 /* Local Macro Definitions */
@@ -47,11 +48,11 @@ enum NumericFormat_E
    INVALID_NUMERIC_FORMAT
 };
 
-#undef LIN_PID_NUMERIC_ENTRY
+#undef LIN_PID_NUMERIC_FORMAT
 
 struct NumericFormatStrings_S
 {
-   const char * regular_expression;
+   const char * regex_pattern;
    const char * print_format;
 };
 
@@ -109,8 +110,8 @@ STATIC const char * AcceptableFlags[] =
 
 #define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
    {                                                     \
-      .regular_expression   = regexp,                    \
-      .print_format         = prnt_fmt,                  \
+      .regex_pattern = regexp,                           \
+      .print_format  = prnt_fmt,                         \
    },
 
 const struct NumericFormatStrings_S NumericFormats[] =
@@ -118,7 +119,7 @@ const struct NumericFormatStrings_S NumericFormats[] =
    #include "lin_pid_supported_formats.h"
 };
 
-#undef LIN_PID_NUMERIC_ENTRY
+#undef LIN_PID_NUMERIC_FORMAT
 
 /* Private Function Prototypes */
 
@@ -142,7 +143,7 @@ STATIC int UInt8_Cmp( const void * a, const void * b );
 
 #endif
 
-STATIC enum NumericFormat_E DetermineEntryFormat( char * str );
+STATIC enum NumericFormat_E DetermineEntryFormat( const char * str );
 
 static void PrintHelpMsg(void);
 
@@ -1019,6 +1020,8 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
    return ( *c - *d );
 }
 
+#endif
+
 /**
  * @brief Determines the numeric format of the given string entry.
  *
@@ -1036,27 +1039,14 @@ STATIC enum NumericFormat_E DetermineEntryFormat( const char * str )
    assert( (str != NULL) && (str[0] != '\0') );
 
    // Let's try this /w regex, just for fun.
-   regex_t regex;
    for ( int i = 0; i < NUM_OF_NUMERIC_FORMATS; i++ )
    {
-      bool failed_regex_compile = regcomp( &regex,               // regex_t *restrict preg
-                                           NumericFormats[i].regexp, // const char *restrict regex
-                                           NO_SPECIAL_COMP_FLAGS );  // int cflags
-      assert( !failed_regex_compile );    // FIXME: For now, asserting on a failed compilation until I get used to this library
-      bool did_not_match = regexec( &regex, // const regex_t *restrict preg
-                                    str,    // const char *restrict string
-                                    0,      // size_t nmatch
-                                    NULL,   // regmatch_t pmatch[_Nullable restrict .nmatch]
-                                    0 );    // int eflags
-      if ( !did_not_match )
+      int match_len; // don't care about this but tiny-regex-c expects it
+      if ( re_match( NumericFormats[i].regex_pattern, str, &match_len) != -1 )
       {
-         regfree(&regex);
          return (enum NumericFormat_E)i;
       }
    }
-   regfree(&regex);
 
    return DEFAULT_OUTPUT_NUMERIC_FORMAT;
 }
-
-#endif

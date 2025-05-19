@@ -31,6 +31,7 @@ endif
 # Relevant paths
 PATH_UNITY        = Unity/src/
 PATH_SRC          = src/
+PATH_TINY_REGEX	= $(PATH_SRC)tiny-regex-c/
 PATH_INC          = $(PATH_SRC)/
 PATH_TEST_FILES   = test/
 PATH_BUILD        = build/
@@ -56,15 +57,20 @@ SRC_TEST_FILES = $(wildcard $(PATH_TEST_FILES)*.c)
 # List of all the result output .txt files from the build
 RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
 # List of all .c files to be compiled
-SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) $(wildcard $(PATH_UNITY)*.c)
+SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) \
+				$(wildcard $(PATH_UNITY)*.c) \
+				$(wildcard $(PATH_TINY_REGEX)*.c)
 # List of all gcov coverage files I'm expecting
-GCOV_FILES = $(patsubst $(PATH_SRC)%.c, %.c.gcov, $(SRC_FILES))
+GCOV_FILES = $(SRC_FILES:.c=.c.gcov)
 
 else
 BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES)
 # List of all .c files to be compiled
-SRC_FILES = $(wildcard $(PATH_SRC)*.c)
+SRC_FILES = $(wildcard $(PATH_SRC)*.c) \
+				$(wildcard $(PATH_TINY_REGEX)*.c)
 endif
+
+$(info List of source files: $(SRC_FILES))
 
 ifeq ($(BUILD_TYPE), PROFILE)
 BUILD_PATHS += $(PATH_PROFILE)
@@ -72,6 +78,7 @@ endif
 
 # List of all object files we're expecting for the data structures
 OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
+$(info List of object files: $(OBJ_FILES))
 
 # Compiler setup
 CROSS	= 
@@ -130,7 +137,7 @@ COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
 COMPILER_STANDARD = -std=c99
-INCLUDE_PATHS = -I. -I$(PATH_INC) -I$(PATH_UNITY)
+INCLUDE_PATHS = -I. -I$(PATH_INC) -I$(PATH_UNITY) -I$(PATH_TINY_REGEX)
 COMMON_DEFINES =
 DIAGNOSTIC_FLAGS = -fdiagnostics-color
 COMPILER_STATIC_ANALYZER = -fanalyzer
@@ -225,6 +232,19 @@ $(PATH_BUILD)%.$(TARGET_EXTENSION): $(OBJ_FILES)
 	$(CC) $(LDFLAGS) $^ -o $@
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h $(PATH_SRC)lin_pid_exceptions.h $(PATH_SRC)lin_pid_supported_formats.h
+	@echo
+	@echo "----------------------------------------"
+	@echo -e "\033[36mCompiling\033[0m the main program source files: $<..."
+	@echo
+	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
+	@echo
+	@echo "----------------------------------------"
+	@echo -e "\033[36mRunning static analysis\033[0m on $<..."
+	@echo
+	cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
+	@echo
+
+$(PATH_OBJECT_FILES)%.o: $(PATH_TINY_REGEX)%.c $(PATH_TINY_REGEX)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo -e "\033[36mCompiling\033[0m the main program source files: $<..."
