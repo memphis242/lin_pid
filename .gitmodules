@@ -1,3 +1,6 @@
 [submodule "Unity"]
 	path = Unity
 	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "src/tiny-regex-c"]
+	path = src/tiny-regex-c
+	url = git@github.com:kokke/tiny-regex-c.git
