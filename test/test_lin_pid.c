@@ -174,7 +174,8 @@ void test_UInt8_Cmp_Zero_Comparison(void);
 /* OnlyValidFlagsArePresent */
 
 void test_OnlyValidFlagsArePresent_AllValidFlags(void);
-void test_OnlyValidFlagsArePresent_ValidFlagsSubset(void);
+void test_OnlyValidFlagsArePresent_BasicArgs_NumFirst(void);
+void test_OnlyValidFlagsArePresent_BasicArgs_NumLast(void);
 void test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent(void);
 void test_OnlyValidFlagsArePresent_OffByOneCharFlag(void);
 void test_OnlyValidFlagsArePresent_DuplicateValidFlags(void);
@@ -182,7 +183,7 @@ void test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void);
 
-/* OnlyValidFlagsArePresent */
+/* ArgOccurenceCount */
 
 void test_ArgOccurrenceCount_SingleOccurrence(void);
 void test_ArgOccurrenceCount_MultipleOccurrences(void);
@@ -340,7 +341,8 @@ int main(void)
 #endif
 
    RUN_TEST(test_OnlyValidFlagsArePresent_AllValidFlags);
-   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsSubset);
+   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumFirst);
+   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumLast);
    RUN_TEST(test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent);
    RUN_TEST(test_OnlyValidFlagsArePresent_OffByOneCharFlag);
    RUN_TEST(test_OnlyValidFlagsArePresent_DuplicateValidFlags);
@@ -357,7 +359,6 @@ int main(void)
    RUN_TEST(test_ArgOccurrenceCount_EmptyArgs);
    RUN_TEST(test_ArgOccurrenceCount_NullArgEntry);
    RUN_TEST(test_ArgOccurrenceCount_MaxArgsLimit);
-
 
    return UNITY_END();
 }
@@ -2363,13 +2364,65 @@ void test_UInt8_Cmp_Zero_Comparison(void)
 
 void test_OnlyValidFlagsArePresent_AllValidFlags(void)
 {
-   const char * args[] = {"program", "--hex", "-h", "--dec", "-d", "--quiet", "-q", "--table", "-t", "--help", "--no-new-line"};
+   const char * args1[] = {"program", "0x10", "--hex"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args1, sizeof(args1) / sizeof(args1[0])));
+   const char * args2[] = {"program", "0x10", "-h"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args2, sizeof(args2) / sizeof(args2[0])));
+   const char * args3[] = {"program", "0x10", "--hex", "--quiet"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args3, sizeof(args3) / sizeof(args3[0])));
+   const char * args4[] = {"program", "0x10", "-h", "--quiet"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args4, sizeof(args4) / sizeof(args4[0])));
+   const char * args5[] = {"program", "0x10", "--hex", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args5, sizeof(args5) / sizeof(args5[0])));
+   const char * args6[] = {"program", "0x10", "-h", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args6, sizeof(args6) / sizeof(args6[0])));
+   const char * args7[] = {"program", "0x10", "--hex", "--quiet", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args7, sizeof(args7) / sizeof(args7[0])));
+   const char * args8[] = {"program", "0x10", "-h", "--quiet", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args8, sizeof(args8) / sizeof(args8[0])));
+   const char * args9[] = {"program", "0x10", "--hex", "-q", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args9, sizeof(args9) / sizeof(args9[0])));
+   const char * args10[] = {"program", "0x10", "-h", "-q", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args10, sizeof(args10) / sizeof(args10[0])));
+
+   const char * args11[] = {"program", "10", "--dec"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args11, sizeof(args11) / sizeof(args11[0])));
+   const char * args12[] = {"program", "10", "-d"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args12, sizeof(args12) / sizeof(args12[0])));
+   const char * args13[] = {"program", "10", "--dec", "--quiet"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args13, sizeof(args13) / sizeof(args13[0])));
+   const char * args14[] = {"program", "10", "-d", "--quiet"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args14, sizeof(args14) / sizeof(args14[0])));
+   const char * args15[] = {"program", "10", "--dec", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args15, sizeof(args15) / sizeof(args15[0])));
+   const char * args16[] = {"program", "10", "-d", "-q"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args16, sizeof(args16) / sizeof(args16[0])));
+   const char * args17[] = {"program", "10", "--dec", "--quiet", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args17, sizeof(args17) / sizeof(args17[0])));
+   const char * args18[] = {"program", "10", "-d", "--quiet", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args18, sizeof(args18) / sizeof(args18[0])));
+   const char * args19[] = {"program", "10", "--dec", "-q", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args19, sizeof(args19) / sizeof(args19[0])));
+   const char * args20[] = {"program", "10", "-d", "-q", "--no-new-line"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args20, sizeof(args20) / sizeof(args20[0])));
+
+   const char * args21[] = {"program", "--table"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args21, sizeof(args21) / sizeof(args21[0])));
+   const char * args22[] = {"program", "-t"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args22, sizeof(args22) / sizeof(args22[0])));
+   const char * args23[] = {"program", "--help"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args23, sizeof(args23) / sizeof(args23[0])));
+}
+
+void test_OnlyValidFlagsArePresent_BasicArgs_NumFirst(void)
+{
+   const char * args[] = {"program", "10", "-d"};
    TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
 }
 
-void test_OnlyValidFlagsArePresent_ValidFlagsSubset(void)
+void test_OnlyValidFlagsArePresent_BasicArgs_NumLast(void)
 {
-   const char * args[] = {"program", "--hex", "-q"};
+   const char * args[] = {"program", "-d", "10"};
    TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
 }
 
