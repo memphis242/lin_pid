@@ -7,6 +7,7 @@
 .PHONY: clean_target
 
 test:
+	@echo "Building code if applicable... Otherwise, straight to tests."
 	@$(MAKE) BUILD_TYPE=TEST _test > /dev/null
 	cat $(RESULTS) | python $(COLORIZE_UNITY_SCRIPT)
 
@@ -262,11 +263,13 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h $(PATH_SRC)lin_pid_except
 	@echo
 	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
 	@echo
-	@echo "----------------------------------------"
-	@echo -e "\033[36mRunning static analysis\033[0m on $<..."
-	@echo
-	cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
-	@echo
+ifneq ($(BUILD_TYPE),TEST) # FIXME: Need an actual solution here to enabling/disabling static analysis for the test run...
+		@echo "----------------------------------------"
+		@echo -e "\033[36mRunning static analysis\033[0m on $<..."
+		@echo
+		cppcheck $(CPPCHECK_FLAGS) --template='{severity}: {file}:{line}: {message}' $< 2>&1 | tee $(PATH_BUILD)cppcheck.log | python $(COLORIZE_CPPCHECK_SCRIPT)
+		@echo
+endif
 
 $(PATH_OBJECT_FILES)%.o: $(PATH_TINY_REGEX)%.c $(PATH_TINY_REGEX)%.h
 	@echo
