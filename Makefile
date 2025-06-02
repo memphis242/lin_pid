@@ -1,5 +1,27 @@
 .POSIX:
 
+.PHONY: test
+.PHONY: release debug benchmark profile
+.PHONY: target
+.PHONY: clean
+.PHONY: clean_target
+
+test:
+	@$(MAKE) BUILD_TYPE=TEST _test > /dev/null
+	cat $(RESULTS) | python $(COLORIZE_UNITY_SCRIPT)
+
+release:
+	@$(MAKE) target BUILD_TYPE=RELEASE
+
+debug:
+	@$(MAKE) target BUILD_TYPE=DEBUG
+
+benchmark:
+	@$(MAKE) _benchmark BUILD_TYPE=BENCHMARK
+
+profile:
+	@$(MAKE) _test BUILD_TYPE=PROFILE
+
 ################################# The Prelude ##################################
 
 CLEANUP = rm -f
@@ -50,27 +72,32 @@ COLORIZE_UNITY_SCRIPT = $(PATH_SCRIPTS)colorize_unity.py
 
 # Other constants
 MAIN_TARGET_NAME = lin_pid
-ifeq ($(BUILD_TYPE), TEST)
-BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES) $(PATH_RESULTS)
+
 # List of all the test .c files
 SRC_TEST_FILES = $(wildcard $(PATH_TEST_FILES)*.c)
 # List of all the result output .txt files from the build
-RESULTS = $(patsubst $(PATH_TEST_FILES)test_%.c, $(PATH_RESULTS)test_%.txt, $(SRC_TEST_FILES))
+RESULTS = $(patsubst $(PATH_TEST_FILES)%.c, $(PATH_RESULTS)%.txt, $(SRC_TEST_FILES))
+
+ifeq ($(BUILD_TYPE), TEST)
+
+BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES) $(PATH_RESULTS)
 # List of all .c files to be compiled
-SRC_FILES = $(wildcard $(PATH_SRC)*.c) $(wildcard $(PATH_TEST_FILES)*.c) \
-				$(wildcard $(PATH_UNITY)*.c) \
-				$(wildcard $(PATH_TINY_REGEX)*.c)
+MAIN_SRC_FILES = $(wildcard $(PATH_SRC)*.c)
+SRC_FILES = $(MAIN_SRC_FILES) \
+            $(wildcard $(PATH_TEST_FILES)*.c) \
+            $(wildcard $(PATH_UNITY)*.c) \
+            $(wildcard $(PATH_TINY_REGEX)*.c)
 # List of all gcov coverage files I'm expecting
-GCOV_FILES = $(SRC_FILES:.c=.c.gcov)
+GCOV_FILES = $(MAIN_SRC_FILES:.c=.c.gcov)
 
 else
+
 BUILD_PATHS = $(PATH_BUILD) $(PATH_OBJECT_FILES)
 # List of all .c files to be compiled
 SRC_FILES = $(wildcard $(PATH_SRC)*.c) \
 				$(wildcard $(PATH_TINY_REGEX)*.c)
-endif
 
-$(info List of source files: $(SRC_FILES))
+endif
 
 ifeq ($(BUILD_TYPE), PROFILE)
 BUILD_PATHS += $(PATH_PROFILE)
@@ -78,7 +105,6 @@ endif
 
 # List of all object files we're expecting for the data structures
 OBJ_FILES = $(patsubst %.c,$(PATH_OBJECT_FILES)%.o, $(notdir $(SRC_FILES)))
-$(info List of object files: $(OBJ_FILES))
 
 # Compiler setup
 CROSS	= 
@@ -95,7 +121,7 @@ COMPILER_WARNING_FLAGS = \
     -Wreturn-type -Wlogical-op -Wstrict-aliasing \
     -Wuninitialized -Wmaybe-uninitialized -Wshadow \
     -Wduplicated-cond -Wduplicated-branches \
-    -Walloc-zero -Walloc-size
+    -Walloc-zero -Walloc-size -Wpack
 
 # Includes some -Wno-... flags for warnings that I'd normally want for my lib
 # src but **not** for my test file, which intentionally has all sorts of
@@ -189,14 +215,12 @@ GCOVR_FLAGS = --html-details $(PATH_RESULTS)coverage.html
 
 ############################# The Rules & Recipes ##############################
 
-.PHONY: target
 target: $(BUILD_PATHS) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
 	@echo
 	@echo -e "\033[36mTarget successfully built!\033[0m"
 	@echo
 
-.PHONY: test
-test: $(BUILD_PATHS) $(RESULTS) $(GCOV_FILES)
+_test: $(BUILD_PATHS) $(RESULTS) $(GCOV_FILES)
 	@echo
 	@echo -e "\033[36mAll tests completed!\033[0m"
 	@echo
@@ -286,7 +310,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_UNITY)%.c $(PATH_UNITY)%.h
 # unit test results. Coverage results are meant to be inspected manually rather
 # than fed back immediately to the developer.
 
-%.c.gcov: $(PATH_SRC)%.c $(PATH_SRC)%.h
+$(PATH_SRC)%.c.gcov: $(PATH_SRC)%.c $(PATH_SRC)%.h
 	@echo
 	@echo "----------------------------------------"
 	@echo -e "\033[36mAnalyzing coverage\033[0m for $<..."
@@ -309,7 +333,6 @@ $(PATH_PROFILE):
 	$(MKDIR) $@
 
 # Clean rule to remove generated files
-.PHONY: clean
 clean:
 	@echo
 	$(CLEANUP) $(PATH_OBJECT_FILES)*.o
@@ -323,7 +346,6 @@ clean:
 	$(CLEANUP) $(PATH_RESULTS)*.txt
 	$(CLEANUP) $(PATH_BUILD)*.lst
 
-.PHONY: clean_target
 clean_target:
 	$(CLEANUP) $(PATH_OBJECT_FILES)$(MAIN_TARGET_NAME).o
 	$(CLEANUP) $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION)
@@ -333,8 +355,7 @@ clean_target:
 .PRECIOUS: $(PATH_RESULTS)%.txt
 .PRECIOUS: $(PATH_RESULTS)%.lst
 
-.PHONY: benchmark
-benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION)
+_benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin_pid_sscanf.$(TARGET_EXTENSION)
 	@echo
 	@echo "----------------------------------------"
 	@echo "Running $(MAIN_TARGET_NAME).$(TARGET_EXTENSION) 100 times and calculating the average, max, and min times..."
@@ -385,4 +406,3 @@ benchmark: $(PATH_BUILD)$(MAIN_TARGET_NAME).$(TARGET_EXTENSION) $(PATH_BUILD)lin
 	}
 	@echo
 
-.PHONY: profile
