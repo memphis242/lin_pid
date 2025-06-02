@@ -263,7 +263,7 @@ $(PATH_OBJECT_FILES)%.o: $(PATH_SRC)%.c $(PATH_SRC)%.h $(PATH_SRC)lin_pid_except
 	@echo
 	$(CC) -c $(CFLAGS_SRC_FILES) $< -o $@
 	@echo
-ifneq ($(BUILD_TYPE),TEST) # FIXME: Need an actual solution here to enabling/disabling static analysis for the test run...
+ifeq ($(STATIC_ANALYSIS),1) # FIXME: Need an actual solution here to enabling/disabling static analysis for the test run...
 		@echo "----------------------------------------"
 		@echo -e "\033[36mRunning static analysis\033[0m on $<..."
 		@echo
