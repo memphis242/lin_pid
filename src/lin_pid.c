@@ -299,6 +299,22 @@ int main( int argc, char * argv[] )
       const char * print_format = NumericFormats[ (unsigned int)num_format ].print_format;
 
       /* Print Output */
+
+#ifdef __GNUC__
+/* -Wformat-nonliteral suppression:
+* Specifically, the warning is:
+*
+* src/lin_pid.c:307:13: warning: format not a string literal, argument types not checked [-Wformat-nonliteral]
+*   307 |             printf(print_format, pid);
+*       |             ^~~~~~
+* 
+*
+* As long as nobody puts anything dumb or malicious in lin_pid_exceptions.h for
+* the format string, we should be fine with this otherwise unsafe situation.
+*/
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-nonliteral"
+#endif
       if ( (ArgOccurrenceCount((const char **)argv, "--quiet", argc, NULL) > 0) ||
            (ArgOccurrenceCount((const char **)argv, "-q", argc, NULL) > 0) )
       {
@@ -327,6 +343,10 @@ int main( int argc, char * argv[] )
          printf( "\033[0m\n" );
          printf("\n");
       }
+   
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
    }
 
