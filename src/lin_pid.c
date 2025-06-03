@@ -309,7 +309,7 @@ int main( int argc, char * argv[] )
 *       |             ^~~~~~
 * 
 *
-* As long as nobody puts anything dumb or malicious in lin_pid_exceptions.h for
+* As long as nobody puts anything dumb or malicious in lin_pid_supported_formats.h for
 * the format string, we should be fine with this otherwise unsafe situation.
 */
 #pragma GCC diagnostic push
