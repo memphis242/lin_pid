@@ -165,12 +165,11 @@ int main( int argc, char * argv[] )
       return EXIT_FAILURE;
    }
 
-// FIXME: Need OnlyValidFlagsArePresent to identify numeric entries...
-//   else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
-//   {
-//      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
-//      return EXIT_FAILURE;
-//   }
+   else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
+   {
+      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
+      return EXIT_FAILURE;
+   }
 
    else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
    {
@@ -395,7 +394,7 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
    assert(argc >= 1);
    assert( (size_t)argc <= ( (sizeof(AcceptableFlags) / sizeof(AcceptableFlags[0])) + 1) );
 
-   bool only_valid = false;
+   bool only_valid = true;
    for ( uint8_t i = 1; i < argc; i++ )
    {
       if ( NULL == args[i] )
@@ -914,7 +913,11 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
       if ( second_digit == '\0' )
       {
          most_significant_digit = 0x00u;
+#ifndef NDEBUG
          bool conv = MyAtoI( first_digit, &least_significant_digit );
+#else
+         (void)MyAtoI( first_digit, &least_significant_digit );
+#endif
          assert( conv );
          assert( (most_significant_digit == 0x00) && (least_significant_digit <= 0x0F) );
       }
@@ -922,8 +925,13 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
       // Two digits entered
       else
       {
+#ifndef NDEBUG
          bool conv1 = MyAtoI( first_digit, &most_significant_digit );
          bool conv2 = MyAtoI( second_digit, &least_significant_digit );
+#else
+         (void)MyAtoI( first_digit, &most_significant_digit );
+         (void)MyAtoI( second_digit, &least_significant_digit );
+#endif
          assert( conv1 && conv2 );
          assert( (most_significant_digit <= 0x0F) && (least_significant_digit <= 0x0F) );
       }

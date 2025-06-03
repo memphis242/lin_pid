@@ -182,6 +182,7 @@ void test_OnlyValidFlagsArePresent_DuplicateValidFlags(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString(void);
 void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void);
+void test_OnlyValidFlagsArePresent_NoFlagsJustNum(void);
 
 /* ArgOccurenceCount */
 
@@ -349,6 +350,7 @@ int main(void)
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry);
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString);
    RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace);
+   RUN_TEST(test_OnlyValidFlagsArePresent_NoFlagsJustNum);
 
    RUN_TEST(test_ArgOccurrenceCount_SingleOccurrence);
    RUN_TEST(test_ArgOccurrenceCount_MultipleOccurrences);
@@ -2484,6 +2486,12 @@ void test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace(void)
 {
    const char * args[] = {"program", "--hex", "  ", "-q"};
    TEST_ASSERT_FALSE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
+}
+
+void test_OnlyValidFlagsArePresent_NoFlagsJustNum(void)
+{
+   const char * args[] = {"program", "0x10"};
+   TEST_ASSERT_TRUE(OnlyValidFlagsArePresent(args, sizeof(args) / sizeof(args[0])));
 }
 
 /******************************************************************************/
