@@ -398,7 +398,10 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
    bool only_valid = false;
    for ( uint8_t i = 1; i < argc; i++ )
    {
-      if ( (NULL == args[i]) || (args[i][0] != '-') || (args[i][0] == ' ') )
+      if ( ( NULL == args[i] ) ||
+           (
+             (args[i][0] != '-') && (args[i][0] < '0') && (args[i][0] >'9') && (tolower(args[i][0]) != 'x') && (tolower(args[i][0]) != 'h') ) ||
+           (args[i][0] == ' ') )
       {
          only_valid = false;
          break;
