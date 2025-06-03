@@ -398,11 +398,22 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
    bool only_valid = false;
    for ( uint8_t i = 1; i < argc; i++ )
    {
-      if ( ( NULL == args[i] ) ||
-           (
-             (args[i][0] != '-') && (args[i][0] < '0') && (args[i][0] >'9') && (tolower(args[i][0]) != 'x') && (tolower(args[i][0]) != 'h') ) ||
-           (args[i][0] == ' ') )
+      if ( NULL == args[i] )
       {
+         only_valid = false;
+         break;
+      }
+      else if (
+           ( (args[i][0] >= '0') && (args[i][0] <= '9') ) ||  /* General Digits */
+           ( (tolower(args[i][0]) == 'x') && (tolower(args[i][0]) == 'h') ) || /* Hex prefixes*/
+           ( (tolower(args[i][0]) >= 'a')  && (tolower(args[i][0]) <= 'f') ) /* Unique Hex Digits */
+         )
+      {
+         continue;   // This is the number argument. Skip it.
+      }
+      else if ( args[i][0] != '-' )
+      {
+         // Not a number argument but also doesn't start with a dash == Invalid
          only_valid = false;
          break;
       }
