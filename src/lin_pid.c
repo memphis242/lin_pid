@@ -149,6 +149,8 @@ static void PrintHelpMsg(void);
 
 static void PrintReferenceTable(void);
 
+static void PrintErrMsg(enum LIN_PID_Result_E err);
+
 
 /* Meat of the Program */
 
@@ -161,13 +163,13 @@ int main( int argc, char * argv[] )
    /* Early return opportunities */
    if ( argc > MAX_ARGS_TO_CHECK )
    {
-      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[TooManyInputArgs]);
+      PrintErrMsg(TooManyInputArgs);
       return EXIT_FAILURE;
    }
 
    else if ( !OnlyValidFlagsArePresent( (const char **)argv, argc) )
    {
-      fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidFlagDetected]);
+      PrintErrMsg(InvalidFlagDetected);
       return EXIT_FAILURE;
    }
 
@@ -215,7 +217,7 @@ int main( int argc, char * argv[] )
            ( (arg_count_d > 0) && (arg_count_dec > 0) )
          )
       {
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[DuplicateFormatFlagsUsed]);
+         PrintErrMsg(DuplicateFormatFlagsUsed);
          return EXIT_FAILURE;
       }
 
@@ -232,7 +234,7 @@ int main( int argc, char * argv[] )
          }
          else
          {
-            fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidPositionOfNumber]);
+            PrintErrMsg(InvalidPositionOfNumber);
             return EXIT_FAILURE;
          }
       }
@@ -250,14 +252,14 @@ int main( int argc, char * argv[] )
          }
          else
          {
-            fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[InvalidPositionOfNumber]);
+            PrintErrMsg(InvalidPositionOfNumber);
             return EXIT_FAILURE;
          }
       }
 
       if ( ishex && isdec )
       {
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[HexAndDecFlagsSimultaneouslyUsed]);
+         PrintErrMsg(HexAndDecFlagsSimultaneouslyUsed);
          return EXIT_FAILURE;
       }
 
@@ -265,17 +267,17 @@ int main( int argc, char * argv[] )
 
       /* Now try to get the ID the user provided... */
       result_status = GetID(id_arg, &user_input, ishex, isdec);
-      assert( ((int)result_status >= 0) && ((int)result_status < NUM_OF_EXCEPTIONS) );
+      assert( ((int)result_status >= 0) && (result_status < NUM_OF_EXCEPTIONS) );
       if ( GoodResult != result_status )
       {
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[result_status]);
+         PrintErrMsg(result_status);
          return EXIT_FAILURE;
       }
 
       /* Process input */
       if ( user_input > MAX_ID_ALLOWED )
       {
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[ID_OOR]);
+         PrintErrMsg(ID_OOR);
          return EXIT_FAILURE;
       }
 
@@ -293,8 +295,10 @@ int main( int argc, char * argv[] )
                            UInt8_Cmp ) != NULL) );
 
       /* Determine format to print output in */
-      enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
-      assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
+      // FIXME: DetermineEntryFormat doesn't work yet...
+      //enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
+      //assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
+      enum NumericFormat_E num_format = ClassicHexPrefix_LeadingZeros_Uppercase;
       const char * print_format = NumericFormats[ (unsigned int)num_format ].print_format;
 
       /* Print Output */
@@ -329,7 +333,7 @@ int main( int argc, char * argv[] )
       }
       else if ( (ArgOccurrenceCount((const char **)argv, "--no-new-line", argc, NULL) > 0) )
       {
-         fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[CantUseNoNewLineWithoutQuiet]);
+         PrintErrMsg(CantUseNoNewLineWithoutQuiet);
          return EXIT_FAILURE;
       }
       else
@@ -337,7 +341,7 @@ int main( int argc, char * argv[] )
          printf( "\nID:  \033[36m" );
          printf( print_format, user_input );
          printf( "\033[0m\n" );
-         printf( "\nPID:  \033[32m" );
+         printf( "PID:  \033[32m" );
          printf( print_format, pid );
          printf( "\033[0m\n" );
          printf("\n");
@@ -1050,6 +1054,11 @@ static void PrintReferenceTable(void)
    fprintf(stdout, "\n");
 }
 
+static void PrintErrMsg(enum LIN_PID_Result_E err)
+{
+   assert( (err >= (enum LIN_PID_Result_E)0) && (err < NUM_OF_EXCEPTIONS) );
+   fprintf(stderr, "%.*s", MAX_ERR_MSG_LEN, ErrorMsgs[err]);
+}
 
 #ifndef NDEBUG
 
