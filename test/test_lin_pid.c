@@ -25,6 +25,18 @@
 
 /* Datatypes */
 
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
+   enum,
+
+enum NumericFormat_E
+{
+   #include "lin_pid_supported_formats.h"
+   NUM_OF_NUMERIC_FORMATS,
+   INVALID_NUMERIC_FORMAT
+};
+
+#undef LIN_PID_NUMERIC_FORMAT
+
 /* Local Variables */
 static const uint8_t REFERENCE_PID_TABLE[MAX_ID_ALLOWED + 1] =
 {
@@ -196,6 +208,8 @@ void test_ArgOccurrenceCount_EmptyArgs(void);
 void test_ArgOccurrenceCount_NullArgEntry(void);
 void test_ArgOccurrenceCount_MaxArgsLimit(void);
 
+void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
@@ -361,6 +375,8 @@ int main(void)
    RUN_TEST(test_ArgOccurrenceCount_EmptyArgs);
    RUN_TEST(test_ArgOccurrenceCount_NullArgEntry);
    RUN_TEST(test_ArgOccurrenceCount_MaxArgsLimit);
+
+   RUN_TEST(test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros);
 
    return UNITY_END();
 }
@@ -2578,6 +2594,15 @@ void test_ArgOccurrenceCount_MaxArgsLimit(void)
    size_t count = ArgOccurrenceCount(args, "--hex", 7, &idx);
    TEST_ASSERT_EQUAL_UINT32(4, count); // Only args[1]..args[4] are checked
    TEST_ASSERT_EQUAL_UINT8(1, idx);
+}
+
+void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void)
+{
+   TEST_ASSERT_EQUAL_INT( DetermineEntryFormat("22"),  DecNoPrefixOrSuffix_NoLeadingZeros );
+   TEST_ASSERT_EQUAL_INT( DetermineEntryFormat("0"),   DecNoPrefixOrSuffix_NoLeadingZeros );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DetermineEntryFormat("333"), DecNoPrefixOrSuffix_NoLeadingZeros );
+   TEST_ASSERT_NOT_EQUAL_INT( DetermineEntryFormat("09"),  DecNoPrefixOrSuffix_NoLeadingZeros );
 }
 
 /******************************************************************************/
