@@ -295,10 +295,9 @@ int main( int argc, char * argv[] )
                            UInt8_Cmp ) != NULL) );
 
       /* Determine format to print output in */
-      // FIXME: DetermineEntryFormat doesn't work yet...
-      //enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
-      //assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
-      enum NumericFormat_E num_format = ClassicHexPrefix_LeadingZeros_Uppercase;
+      enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
+      assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
+      //enum NumericFormat_E num_format = ClassicHexPrefix_LeadingZeros_Uppercase;
       const char * print_format = NumericFormats[ (unsigned int)num_format ].print_format;
 
       /* Print Output */
