@@ -12,8 +12,8 @@
  */
 
  //                     Format Enum                                     Regex                      Print Format Specifier
-LIN_PID_NUMERIC_FORMAT( DecNoPrefixOrSuffix_NoLeadingZeros,             "^[0-9][0-9]?$",            "%d"                    )
-LIN_PID_NUMERIC_FORMAT( DecNoPrefixOrSuffix_LeadingZeros,               "^[1-9][0-9]?$",            "%02d"                  )
+LIN_PID_NUMERIC_FORMAT( DecNoPrefixOrSuffix_NoLeadingZeros,             "^[1-9][0-9]?$",            "%d"                    )
+LIN_PID_NUMERIC_FORMAT( DecNoPrefixOrSuffix_LeadingZeros,               "^[0-9][0-9]?$",            "%02d"                  )
 
 LIN_PID_NUMERIC_FORMAT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase,   "^[1-9a-f][0-9a-f]?$",      "%x"                    )
 LIN_PID_NUMERIC_FORMAT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase,   "^[1-9A-F][0-9A-F]?$",      "%X"                    )
