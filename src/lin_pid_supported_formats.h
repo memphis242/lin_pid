@@ -41,9 +41,9 @@ LIN_PID_NUMERIC_FORMAT( LowercasehSuffix_LeadingZeros_Lowercase,        "^[0-9a-
 LIN_PID_NUMERIC_FORMAT( LowercasehSuffix_LeadingZeros_Uppercase,        "^[0-9A-F][0-9A-F]?h$",     "%02Xh"                 )
 
 LIN_PID_NUMERIC_FORMAT( UppercaseHSuffix_NoLeadingZeros_Lowercase,      "^[1-9a-f][0-9a-f]?H$",      "%xH"                  )
-LIN_PID_NUMERIC_FORMAT( UppercasehSuffix_NoLeadingZeros_Uppercase,      "^[1-9A-F][0-9A-F]?H$",      "%XH"                  )
-LIN_PID_NUMERIC_FORMAT( UppercasehSuffix_LeadingZeros_Lowercase,        "^[0-9a-f][0-9a-f]?H$",      "%02xH"                )
-LIN_PID_NUMERIC_FORMAT( UppercasehSuffix_LeadingZeros_Uppercase,        "^[0-9A-F][0-9A-F]?H$",      "%02XH"                )
+LIN_PID_NUMERIC_FORMAT( UppercaseHSuffix_NoLeadingZeros_Uppercase,      "^[1-9A-F][0-9A-F]?H$",      "%XH"                  )
+LIN_PID_NUMERIC_FORMAT( UppercaseHSuffix_LeadingZeros_Lowercase,        "^[0-9a-f][0-9a-f]?H$",      "%02xH"                )
+LIN_PID_NUMERIC_FORMAT( UppercaseHSuffix_LeadingZeros_Uppercase,        "^[0-9A-F][0-9A-F]?H$",      "%02XH"                )
 
 LIN_PID_NUMERIC_FORMAT( LowercasexSuffix_NoLeadingZeros_Lowercase,      "^[1-9a-f][0-9a-f]?x$",     "%xx"                   )
 LIN_PID_NUMERIC_FORMAT( LowercasexSuffix_NoLeadingZeros_Uppercase,      "^[1-9A-F][0-9A-F]?x$",     "%Xx"                   )
