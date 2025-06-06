@@ -209,6 +209,9 @@ void test_ArgOccurrenceCount_NullArgEntry(void);
 void test_ArgOccurrenceCount_MaxArgsLimit(void);
 
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void);
+void test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros(void);
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase(void);
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( const char * str,
@@ -229,154 +232,162 @@ extern size_t ArgOccurrenceCount( char const * args[],
                                   int argc,
                                   uint8_t * idx_of_first_occurrence );
 
+extern enum NumericFormat_E DetermineEntryFormat( const char * str );
+
+extern void CompileAllRegexPatterns(void);
+extern void FreeAllRegexPatterns(void);
+
 /* Meat of the Program */
 
 int main(void)
 {
    UNITY_BEGIN();
    
-   /* ComputePID */
-
-   RUN_TEST(test_ComputePID_FullRangeOfValidIDs);
-   RUN_TEST(test_ComputePID_FullRangeOfInvalidIDs);
-
-   /* GetID */
-   
-   RUN_TEST(test_GetID_HexRange_0xZZ_Format);
-   RUN_TEST(test_GetID_HexRange_ZZ_Default_Format);
-   RUN_TEST(test_GetID_HexRange_ZZh_Format);
-   RUN_TEST(test_GetID_HexRange_ZZH_Format);
-   RUN_TEST(test_GetID_HexRange_ZZx_Format);
-   RUN_TEST(test_GetID_HexRange_ZZX_Format);
-   RUN_TEST(test_GetID_HexRange_xZZ_Format);
-   RUN_TEST(test_GetID_HexRange_XZZ_Format);
-   RUN_TEST(test_GetID_DecRange_ZZd_Format);
-   RUN_TEST(test_GetID_DecRange_ZZD_Format);
-   RUN_TEST(test_GetID_DecRange_ZZ_Format_PreemptivelyDec);
-   RUN_TEST(test_GetID_DecRange_ZZd_Format_PreemptivelyDec);
-   RUN_TEST(test_GetID_DecRange_ZZD_Format_PreemptivelyDec);
-
-   RUN_TEST(test_GetID_HexRange_0x0Z_Format);
-   RUN_TEST(test_GetID_HexRange_0Z_Default_Format);
-   RUN_TEST(test_GetID_HexRange_0Zh_Format);
-   RUN_TEST(test_GetID_HexRange_0ZH_Format);
-   RUN_TEST(test_GetID_HexRange_0Zx_Format);
-   RUN_TEST(test_GetID_HexRange_0ZX_Format);
-   RUN_TEST(test_GetID_HexRange_x0Z_Format);
-   RUN_TEST(test_GetID_HexRange_X0Z_Format);
-   RUN_TEST(test_GetID_DecRange_0Zd_Format);
-   RUN_TEST(test_GetID_DecRange_0ZD_Format);
-   RUN_TEST(test_GetID_DecRange_0Z_Format_PreemptivelyDec);
-   RUN_TEST(test_GetID_DecRange_0Zd_Format_PreemptivelyDec);
-   RUN_TEST(test_GetID_DecRange_0ZD_Format_PreemptivelyDec);
-
-   RUN_TEST(test_GetID_HexRange_0xZ_Format);
-   RUN_TEST(test_GetID_HexRange_Z_Default_Format);
-   RUN_TEST(test_GetID_HexRange_Zh_Format);
-   RUN_TEST(test_GetID_HexRange_ZH_Format);
-   RUN_TEST(test_GetID_HexRange_Zx_Format);
-   RUN_TEST(test_GetID_HexRange_ZX_Format);
-   RUN_TEST(test_GetID_HexRange_xZ_Format);
-   RUN_TEST(test_GetID_HexRange_XZ_Format);
-   RUN_TEST(test_GetID_NumRange_Zd_Format);
-   RUN_TEST(test_GetID_NumRange_ZD_Format);
-   RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
-
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZ_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZh_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZH_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZx_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZX_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
-   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec);
-
-   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
-   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
-   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_XZZd);
-   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec);
-
-   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd);
-   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD);
-
-   RUN_TEST(test_GetID_InvalidNum_ZZhd);
-   RUN_TEST(test_GetID_InvalidNum_ZZHd);
-
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_0xZZ);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_xZZ);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_XZZ);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZh);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZH);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZx);
-   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZX);
-
-   RUN_TEST(test_GetID_InvalidFirstChar_0xKZ);
-   RUN_TEST(test_GetID_InvalidFirstChar_xKZ);
-   RUN_TEST(test_GetID_InvalidFirstChar_XKZ);
-   RUN_TEST(test_GetID_InvalidFirstChar_KZh);
-   RUN_TEST(test_GetID_InvalidFirstChar_KZH);
-   RUN_TEST(test_GetID_InvalidFirstChar_KZx);
-   RUN_TEST(test_GetID_InvalidFirstChar_KZX);
-
-   RUN_TEST(test_GetID_InvalidSecondChar_0xZK);
-   RUN_TEST(test_GetID_InvalidSecondChar_xZK);
-   RUN_TEST(test_GetID_InvalidSecondChar_XZK);
-   RUN_TEST(test_GetID_InvalidSecondChar_ZKh);
-   RUN_TEST(test_GetID_InvalidSecondChar_ZKH);
-   RUN_TEST(test_GetID_InvalidSecondChar_ZKx);
-   RUN_TEST(test_GetID_InvalidSecondChar_ZKX);
-   RUN_TEST(test_GetID_InvalidSecondChar_0Kd);
-   RUN_TEST(test_GetID_InvalidSecondChar_0KD);
-   RUN_TEST(test_GetID_InvalidSecondChar_0Kx);
-   RUN_TEST(test_GetID_InvalidSecondChar_0KX);
-
-   RUN_TEST(test_GetID_NoDigitsEntered);
-
-   /* MyAtoI */
-
-   RUN_TEST(test_MyAtoI_ValidDecimalDigits);
-   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsLowercase);
-   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsUppercase);
-   RUN_TEST(test_MyAtoI_InvalidCharacters);
-   RUN_TEST(test_MyAtoI_EmptyCharacter);
-
-#ifndef NDEBUG
-
-   /* UInt8_Cmp */
-
-   RUN_TEST(test_UInt8_Cmp_A_Greater_Than_B);
-   RUN_TEST(test_UInt8_Cmp_A_Less_Than_B);
-   RUN_TEST(test_UInt8_Cmp_A_Equal_To_B);
-   RUN_TEST(test_UInt8_Cmp_Min_And_Max_Values);
-   RUN_TEST(test_UInt8_Cmp_Adjacent_Values);
-   RUN_TEST(test_UInt8_Cmp_Zero_Comparison);
-
-#endif
-
-   RUN_TEST(test_OnlyValidFlagsArePresent_AllValidFlags);
-   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumFirst);
-   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumLast);
-   RUN_TEST(test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent);
-   RUN_TEST(test_OnlyValidFlagsArePresent_OffByOneCharFlag);
-   RUN_TEST(test_OnlyValidFlagsArePresent_DuplicateValidFlags);
-   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry);
-   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString);
-   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace);
-   RUN_TEST(test_OnlyValidFlagsArePresent_NoFlagsJustNum);
-
-   RUN_TEST(test_ArgOccurrenceCount_SingleOccurrence);
-   RUN_TEST(test_ArgOccurrenceCount_MultipleOccurrences);
-   RUN_TEST(test_ArgOccurrenceCount_NoOccurrence);
-   RUN_TEST(test_ArgOccurrenceCount_NullIdxPointer);
-   RUN_TEST(test_ArgOccurrenceCount_ArgAtEnd);
-   RUN_TEST(test_ArgOccurrenceCount_ArgAtBeginning);
-   RUN_TEST(test_ArgOccurrenceCount_EmptyArgs);
-   RUN_TEST(test_ArgOccurrenceCount_NullArgEntry);
-   RUN_TEST(test_ArgOccurrenceCount_MaxArgsLimit);
+//   /* ComputePID */
+//
+//   RUN_TEST(test_ComputePID_FullRangeOfValidIDs);
+//   RUN_TEST(test_ComputePID_FullRangeOfInvalidIDs);
+//
+//   /* GetID */
+//   
+//   RUN_TEST(test_GetID_HexRange_0xZZ_Format);
+//   RUN_TEST(test_GetID_HexRange_ZZ_Default_Format);
+//   RUN_TEST(test_GetID_HexRange_ZZh_Format);
+//   RUN_TEST(test_GetID_HexRange_ZZH_Format);
+//   RUN_TEST(test_GetID_HexRange_ZZx_Format);
+//   RUN_TEST(test_GetID_HexRange_ZZX_Format);
+//   RUN_TEST(test_GetID_HexRange_xZZ_Format);
+//   RUN_TEST(test_GetID_HexRange_XZZ_Format);
+//   RUN_TEST(test_GetID_DecRange_ZZd_Format);
+//   RUN_TEST(test_GetID_DecRange_ZZD_Format);
+//   RUN_TEST(test_GetID_DecRange_ZZ_Format_PreemptivelyDec);
+//   RUN_TEST(test_GetID_DecRange_ZZd_Format_PreemptivelyDec);
+//   RUN_TEST(test_GetID_DecRange_ZZD_Format_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_HexRange_0x0Z_Format);
+//   RUN_TEST(test_GetID_HexRange_0Z_Default_Format);
+//   RUN_TEST(test_GetID_HexRange_0Zh_Format);
+//   RUN_TEST(test_GetID_HexRange_0ZH_Format);
+//   RUN_TEST(test_GetID_HexRange_0Zx_Format);
+//   RUN_TEST(test_GetID_HexRange_0ZX_Format);
+//   RUN_TEST(test_GetID_HexRange_x0Z_Format);
+//   RUN_TEST(test_GetID_HexRange_X0Z_Format);
+//   RUN_TEST(test_GetID_DecRange_0Zd_Format);
+//   RUN_TEST(test_GetID_DecRange_0ZD_Format);
+//   RUN_TEST(test_GetID_DecRange_0Z_Format_PreemptivelyDec);
+//   RUN_TEST(test_GetID_DecRange_0Zd_Format_PreemptivelyDec);
+//   RUN_TEST(test_GetID_DecRange_0ZD_Format_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_HexRange_0xZ_Format);
+//   RUN_TEST(test_GetID_HexRange_Z_Default_Format);
+//   RUN_TEST(test_GetID_HexRange_Zh_Format);
+//   RUN_TEST(test_GetID_HexRange_ZH_Format);
+//   RUN_TEST(test_GetID_HexRange_Zx_Format);
+//   RUN_TEST(test_GetID_HexRange_ZX_Format);
+//   RUN_TEST(test_GetID_HexRange_xZ_Format);
+//   RUN_TEST(test_GetID_HexRange_XZ_Format);
+//   RUN_TEST(test_GetID_NumRange_Zd_Format);
+//   RUN_TEST(test_GetID_NumRange_ZD_Format);
+//   RUN_TEST(test_GetID_DecRange_Z_Format_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZh_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZH_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZx_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZX_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_0xZZ_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZd_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_ZZD_Format);
+//   RUN_TEST(test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_xZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_XZZd);
+//   RUN_TEST(test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec);
+//
+//   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd);
+//   RUN_TEST(test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD);
+//
+//   RUN_TEST(test_GetID_InvalidNum_ZZhd);
+//   RUN_TEST(test_GetID_InvalidNum_ZZHd);
+//
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_0xZZ);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_xZZ);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_XZZ);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZh);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZH);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZx);
+//   RUN_TEST(test_GetID_InvalidNum_PreemptivelyDec_ZZX);
+//
+//   RUN_TEST(test_GetID_InvalidFirstChar_0xKZ);
+//   RUN_TEST(test_GetID_InvalidFirstChar_xKZ);
+//   RUN_TEST(test_GetID_InvalidFirstChar_XKZ);
+//   RUN_TEST(test_GetID_InvalidFirstChar_KZh);
+//   RUN_TEST(test_GetID_InvalidFirstChar_KZH);
+//   RUN_TEST(test_GetID_InvalidFirstChar_KZx);
+//   RUN_TEST(test_GetID_InvalidFirstChar_KZX);
+//
+//   RUN_TEST(test_GetID_InvalidSecondChar_0xZK);
+//   RUN_TEST(test_GetID_InvalidSecondChar_xZK);
+//   RUN_TEST(test_GetID_InvalidSecondChar_XZK);
+//   RUN_TEST(test_GetID_InvalidSecondChar_ZKh);
+//   RUN_TEST(test_GetID_InvalidSecondChar_ZKH);
+//   RUN_TEST(test_GetID_InvalidSecondChar_ZKx);
+//   RUN_TEST(test_GetID_InvalidSecondChar_ZKX);
+//   RUN_TEST(test_GetID_InvalidSecondChar_0Kd);
+//   RUN_TEST(test_GetID_InvalidSecondChar_0KD);
+//   RUN_TEST(test_GetID_InvalidSecondChar_0Kx);
+//   RUN_TEST(test_GetID_InvalidSecondChar_0KX);
+//
+//   RUN_TEST(test_GetID_NoDigitsEntered);
+//
+//   /* MyAtoI */
+//
+//   RUN_TEST(test_MyAtoI_ValidDecimalDigits);
+//   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsLowercase);
+//   RUN_TEST(test_MyAtoI_ValidHexadecimalDigitsUppercase);
+//   RUN_TEST(test_MyAtoI_InvalidCharacters);
+//   RUN_TEST(test_MyAtoI_EmptyCharacter);
+//
+//#ifndef NDEBUG
+//
+//   /* UInt8_Cmp */
+//
+//   RUN_TEST(test_UInt8_Cmp_A_Greater_Than_B);
+//   RUN_TEST(test_UInt8_Cmp_A_Less_Than_B);
+//   RUN_TEST(test_UInt8_Cmp_A_Equal_To_B);
+//   RUN_TEST(test_UInt8_Cmp_Min_And_Max_Values);
+//   RUN_TEST(test_UInt8_Cmp_Adjacent_Values);
+//   RUN_TEST(test_UInt8_Cmp_Zero_Comparison);
+//
+//#endif
+//
+//   RUN_TEST(test_OnlyValidFlagsArePresent_AllValidFlags);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumFirst);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_BasicArgs_NumLast);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_ClearlyInvalidFlagPresent);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_OffByOneCharFlag);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_DuplicateValidFlags);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithNullEntry);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithEmptyString);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_ValidFlagsWithWhitespace);
+//   RUN_TEST(test_OnlyValidFlagsArePresent_NoFlagsJustNum);
+//
+//   RUN_TEST(test_ArgOccurrenceCount_SingleOccurrence);
+//   RUN_TEST(test_ArgOccurrenceCount_MultipleOccurrences);
+//   RUN_TEST(test_ArgOccurrenceCount_NoOccurrence);
+//   RUN_TEST(test_ArgOccurrenceCount_NullIdxPointer);
+//   RUN_TEST(test_ArgOccurrenceCount_ArgAtEnd);
+//   RUN_TEST(test_ArgOccurrenceCount_ArgAtBeginning);
+//   RUN_TEST(test_ArgOccurrenceCount_EmptyArgs);
+//   RUN_TEST(test_ArgOccurrenceCount_NullArgEntry);
+//   RUN_TEST(test_ArgOccurrenceCount_MaxArgsLimit);
 
    RUN_TEST(test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros);
+   RUN_TEST(test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros);
+   RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase);
+   RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase);
 
    return UNITY_END();
 }
@@ -2596,14 +2607,585 @@ void test_ArgOccurrenceCount_MaxArgsLimit(void)
    TEST_ASSERT_EQUAL_UINT8(1, idx);
 }
 
+/******************************************************************************/
+
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void)
 {
-   TEST_ASSERT_EQUAL_INT( DetermineEntryFormat("22"),  DecNoPrefixOrSuffix_NoLeadingZeros );
-   TEST_ASSERT_EQUAL_INT( DetermineEntryFormat("0"),   DecNoPrefixOrSuffix_NoLeadingZeros );
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20") );
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63") );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DetermineEntryFormat("333"), DecNoPrefixOrSuffix_NoLeadingZeros );
-   TEST_ASSERT_NOT_EQUAL_INT( DetermineEntryFormat("09"),  DecNoPrefixOrSuffix_NoLeadingZeros );
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("333") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("09") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("F") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("a") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("XF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10H") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fx") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10x") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10X") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63d") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63D") );
 }
+
+void test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0"));
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("00"));
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("09"));
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros,  DetermineEntryFormat("9"));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("333") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("F") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("a") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("XF") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aH") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10H") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fx") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10x") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aX") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10X") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63d") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63D") );
+}
+
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("a"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("df"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1f"));
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("9"));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("333") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("F") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("XF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10H") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fx") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10x") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10X") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63d") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63D") );
+}
+
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("DF"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1F"));
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase,  DetermineEntryFormat("9"));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("333") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1a") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("f") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X1A") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("XF") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Xa") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X10") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aH") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10H") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fx") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ax") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10x") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aX") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10X") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63d") );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63D") );
+}
+
+//void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0a"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0f"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0b"));
+//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0A"));
+//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1F"));
+//}
+//
+//void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0A"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0F"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("00"));
+//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0B"));
+//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0a"));
+//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1f"));
+//}
+//
+//void test_DetermineEntryFormat_ClassicHexPrefix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1f"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xaf"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x0f"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A"));
+//}
+//
+//void test_DetermineEntryFormat_ClassicHexPrefix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xA"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x1F"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xAF"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x0F"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x1a"));
+//}
+//
+//void test_DetermineEntryFormat_ClassicHexPrefix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x0a"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x0f"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x00"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x0b"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x0A"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("0x1F"));
+//}
+//
+//void test_DetermineEntryFormat_ClassicHexPrefix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x0A"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x0F"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x00"));
+//   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x0B"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x0a"));
+//   TEST_ASSERT_NOT_EQUAL_INT(ClassicHexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1f"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexPrefix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1f"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xaf"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x0f"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1A"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexPrefix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xA"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x1F"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xAF"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x0F"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x1a"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexPrefix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x0a"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x0f"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x00"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x0b"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x0A"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("x1F"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexPrefix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x0A"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x0F"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x00"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x0B"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x0a"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("x1f"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXPrefix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xa"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1f"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xaf"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X0f"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1A"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXPrefix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("XA"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X1F"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("XAF"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X0F"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X1a"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXPrefix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X0a"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X0f"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X00"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X0b"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X0A"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Lowercase, DetermineEntryFormat("X1F"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXPrefix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X0A"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X0F"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X00"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X0B"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X0a"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXPrefix_LeadingZeros_Uppercase, DetermineEntryFormat("X1f"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasehSuffix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1fh"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("afh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasehSuffix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Ah"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Fh"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AFh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0Fh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1ah"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasehSuffix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0ah"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fh"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00h"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0bh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Ah"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1Fh"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasehSuffix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Ah"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Fh"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("00h"));
+//   TEST_ASSERT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Bh"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0ah"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasehSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1fh"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseHSuffix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1fH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("afH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AH"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseHSuffix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1FH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AFH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0FH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1aH"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseHSuffix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00H"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0bH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0AH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1FH"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseHSuffix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0FH"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("00H"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0BH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0aH"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseHSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1fH"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexSuffix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1fx"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("afx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ax"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexSuffix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Ax"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Fx"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AFx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0Fx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1ax"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexSuffix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0ax"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fx"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00x"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0bx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Ax"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1Fx"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasexSuffix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Ax"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Fx"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("00x"));
+//   TEST_ASSERT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Bx"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0ax"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasexSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1fx"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1fX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("afX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1FX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("AFX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0FX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1aX"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Lowercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00X"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0bX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0AX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1FX"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Uppercase(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0FX"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("00X"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0BX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0aX"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1fX"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasedSuffix_NoLeadingZeros(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1d"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("ad"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("fd"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("afdd")); // Should not match
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0d"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1D"));
+//}
+//
+//void test_DetermineEntryFormat_LowercasedSuffix_LeadingZeros(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0d"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0fd"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("00d"));
+//   TEST_ASSERT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0bd"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0D"));
+//   TEST_ASSERT_NOT_EQUAL_INT(LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1F"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseDSuffix_NoLeadingZeros(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1D"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("aD"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("fD"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0D"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1d"));
+//}
+//
+//void test_DetermineEntryFormat_UppercaseDSuffix_LeadingZeros(void)
+//{
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0D"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0fD"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("00D"));
+//   TEST_ASSERT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0bD"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0d"));
+//   TEST_ASSERT_NOT_EQUAL_INT(UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1F"));
+//}
 
 /******************************************************************************/
 
