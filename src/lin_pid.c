@@ -38,7 +38,7 @@
 
 /* Datatypes */
 
-#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt, ish, isd ) \
    enum,
 
 enum NumericFormat_E
@@ -54,6 +54,8 @@ struct NumericFormatStrings_S
 {
    const char * regex_pattern;
    const char * print_format;
+   const bool ishex;
+   const bool isdec;
 };
 
 
@@ -108,10 +110,12 @@ STATIC const char * AcceptableFlags[] =
    "--no-new-line"
 };
 
-#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
-   {                                                     \
-      .regex_pattern = regexp,                           \
-      .print_format  = prnt_fmt,                         \
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt, ish, isd ) \
+   {                                                               \
+      .regex_pattern = regexp,                                     \
+      .print_format  = prnt_fmt,                                   \
+      .ishex = ish,                                                \
+      .isdec = isd                                                 \
    },
 
 const struct NumericFormatStrings_S NumericFormats[] =
@@ -132,8 +136,8 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
 
 STATIC enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
-                                    bool pre_emptively_hex,
-                                    bool pre_emptively_dec );
+                                    bool * ishex,
+                                    bool * isdec );
 
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -143,7 +147,9 @@ STATIC int UInt8_Cmp( const void * a, const void * b );
 
 #endif
 
-STATIC enum NumericFormat_E DetermineEntryFormat( const char * str );
+STATIC enum NumericFormat_E DetermineEntryFormat( const char * str,
+                                                  bool ishex,
+                                                  bool isdec );
 
 static void PrintHelpMsg(void);
 
@@ -266,7 +272,7 @@ int main( int argc, char * argv[] )
       assert(id_arg != NULL);
 
       /* Now try to get the ID the user provided... */
-      result_status = GetID(id_arg, &user_input, ishex, isdec);
+      result_status = GetID(id_arg, &user_input, &ishex, &isdec);
       assert( ((int)result_status >= 0) && (result_status < NUM_OF_EXCEPTIONS) );
       if ( GoodResult != result_status )
       {
@@ -295,7 +301,7 @@ int main( int argc, char * argv[] )
                            UInt8_Cmp ) != NULL) );
 
       /* Determine format to print output in */
-      enum NumericFormat_E num_format = DetermineEntryFormat(id_arg);
+      enum NumericFormat_E num_format = DetermineEntryFormat(id_arg, ishex, isdec);
       assert( (int)num_format < NUM_OF_NUMERIC_FORMATS );
       //enum NumericFormat_E num_format = ClassicHexPrefix_LeadingZeros_Uppercase;
       const char * print_format = NumericFormats[ (unsigned int)num_format ].print_format;
@@ -489,12 +495,12 @@ STATIC size_t ArgOccurrenceCount( char const * args[],
 // Decimal: ZZd, ZZD
 STATIC enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
-                                    bool pre_emptively_hex,
-                                    bool pre_emptively_dec )
+                                    bool * ishex,
+                                    bool * isdec )
 {
    assert( (str != NULL) &&
            (id  != NULL) &&
-           (!pre_emptively_hex || !pre_emptively_dec) );
+           (!(*ishex) || !(*isdec)) );
 
    enum LIN_PID_Result_E result = GoodResult;
    size_t idx = 0;
@@ -541,15 +547,15 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
    bool exit_loop = false;
    char first_digit = '\0';
    char second_digit = '\0';
-   bool ishex = pre_emptively_hex;
-   bool isdec = pre_emptively_dec;
+   bool assume_hex = *ishex;
+   bool assume_dec = *isdec;
    bool hex_prefix_already_encountered = false;
 
-   if ( pre_emptively_hex )
+   if ( *ishex )
    {
       parser_state = ParserPreemptivelyHex;
    }
-   else if ( pre_emptively_dec )
+   else if ( *isdec )
    {
       parser_state = ParserPreemptivelyDec;
    }
@@ -585,14 +591,14 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
                else
                {
                   // Must be a uniquely hex digit
-                  ishex = true;
+                  assume_hex = true;
                   parser_state = ParserHexDigits;
                }
                first_digit = ch;
             }
             else if ( ('x' == ch) || ('X' == ch) )
             {
-               ishex = true;
+               assume_hex = true;
                hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
@@ -611,7 +617,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
             }
             else if ( ('x' == ch) || ('X' == ch) )
             {
-               ishex = true;
+               assume_hex = true;
                hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
@@ -624,7 +630,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
                   //       and the user may have intended a decimal number.
                   //       I have chosen that the hex variant will take hold unless
                   //       --dec | -d was specified.
-                  ishex = true;
+                  assume_hex = true;
                   parser_state = ParserTwoHexDigits;
                }
                else
@@ -635,7 +641,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
             }
             else if ( ('h' == ch) || ('H' == ch) )
             {
-               ishex = true;
+               assume_hex = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -667,7 +673,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
                }
                else
                {
-                  ishex = true;
+                  assume_hex = true;
                   parser_state = ParserTwoHexDigits;
                }
                second_digit = ch;
@@ -675,7 +681,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
             else if ( ('x' == ch) || ('X' == ch) ||
                       ('h' == ch) || ('H' == ch) )
             {
-               ishex = true;
+               assume_hex = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -688,12 +694,12 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
          case ParserIndeterminateTwoDigitsIn:
             if ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) )
             {
-               ishex = true;
+               assume_hex = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else if ( ('d' == ch) || ('D' == ch) )
             {
-               isdec = true;
+               assume_dec = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -745,7 +751,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
                }
                else
                {
-                  ishex = true;
+                  assume_hex = true;
                   parser_state = ParserTwoDigitsAlreadyRead;
                }
             }
@@ -771,16 +777,16 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
             break;
 
          case ParserTwoZerosIn:
-            if ( !isdec &&
+            if ( !assume_dec &&
                      ( ('x' == ch) || ('X' == ch) || ('h' == ch) || ('H' == ch) ) )
             {
-               ishex = true;
+               assume_hex = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
-            else if ( !ishex &&
+            else if ( !assume_hex &&
                      ( ('d' == ch) || ('D' == ch) ) )
             {
-               isdec = true;
+               assume_dec = true;
                parser_state = ParserTwoDigitsAlreadyRead;
             }
             else
@@ -887,7 +893,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
    }
    
    // Logic should not determine that input was both hex and dec at the same time
-   assert( !(ishex && isdec) );
+   assert( !(assume_hex && assume_dec) );
    
    // Post state machine processing
    if ( loop_limit_counter >= MAX_NUM_LEN )
@@ -898,7 +904,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
    {
       // Something erroneous was detected. Don't update ID!
    }
-   else if ( (ishex || isdec) && ('\0' == first_digit) && ('\0' == second_digit) )
+   else if ( (assume_hex || assume_dec) && ('\0' == first_digit) && ('\0' == second_digit) )
    {
       result = NoNumericalDigitsEnteredWithFormat;
    }
@@ -947,7 +953,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
       {
          *id = 0x00u;
       }
-      else if ( ishex || !isdec )
+      else if ( assume_hex || !assume_dec )
       {
          *id = (uint8_t)( (most_significant_digit * 0x10) + least_significant_digit );
       }
@@ -956,6 +962,9 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
          *id = (uint8_t)( (most_significant_digit * 10) + least_significant_digit );
       }
    }
+
+   *ishex = assume_hex;
+   *isdec = assume_dec;
    
    return result;
 }
@@ -1085,13 +1094,19 @@ STATIC int UInt8_Cmp( const void * a, const void * b )
  * @param str Pointer to the null-terminated string to be analyzed.
  * @return NumericFormat_E enunm indicating the detected format.
  */
-STATIC enum NumericFormat_E DetermineEntryFormat( const char * str )
+STATIC enum NumericFormat_E DetermineEntryFormat( const char * str,
+                                                  bool ishex,
+                                                  bool isdec )
 {
    assert( (str != NULL) && (str[0] != '\0') );
 
    // Let's try this /w regex, just for fun.
    for ( int i = 0; i < NUM_OF_NUMERIC_FORMATS; i++ )
    {
+      if ( (ishex && NumericFormats[i].isdec) || (isdec && NumericFormats[i].ishex) )
+      {
+         continue;
+      }
       int match_len; // don't care about this but tiny-regex-c expects it
       if ( re_match( NumericFormats[i].regex_pattern, str, &match_len) != -1 )
       {

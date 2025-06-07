@@ -25,7 +25,7 @@
 
 /* Datatypes */
 
-#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt ) \
+#define LIN_PID_NUMERIC_FORMAT( enum, regexp, prnt_fmt, ish, isd ) \
    enum,
 
 enum NumericFormat_E
@@ -208,16 +208,21 @@ void test_ArgOccurrenceCount_EmptyArgs(void);
 void test_ArgOccurrenceCount_NullArgEntry(void);
 void test_ArgOccurrenceCount_MaxArgsLimit(void);
 
+/* DetermineEntryFormat */
+
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void);
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros(void);
+
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase(void);
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase(void);
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void);
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void);
 
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
-                                    bool pre_emptively_hex,
-                                    bool pre_emptively_dec );
+                                    bool * ishex,
+                                    bool * isdec );
 
 extern bool MyAtoI(char digit, uint8_t * converted_digit);
 
@@ -232,7 +237,9 @@ extern size_t ArgOccurrenceCount( char const * args[],
                                   int argc,
                                   uint8_t * idx_of_first_occurrence );
 
-extern enum NumericFormat_E DetermineEntryFormat( const char * str );
+extern enum NumericFormat_E DetermineEntryFormat( const char * str,
+                                                  bool ishex,
+                                                  bool isdec );
 
 extern void CompileAllRegexPatterns(void);
 extern void FreeAllRegexPatterns(void);
@@ -388,6 +395,8 @@ int main(void)
    RUN_TEST(test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros);
    RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase);
    RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase);
+   RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase);
+   RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase);
 
    return UNITY_END();
 }
@@ -430,9 +439,11 @@ void test_GetID_HexRange_0xZZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "0x%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -446,9 +457,11 @@ void test_GetID_HexRange_ZZ_Default_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -462,9 +475,11 @@ void test_GetID_HexRange_ZZh_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%Xh", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -478,9 +493,11 @@ void test_GetID_HexRange_ZZH_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%XH", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -494,9 +511,11 @@ void test_GetID_HexRange_ZZx_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%Xx", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -510,9 +529,11 @@ void test_GetID_HexRange_ZZX_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%XX", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -526,9 +547,11 @@ void test_GetID_HexRange_xZZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "x%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -542,9 +565,11 @@ void test_GetID_HexRange_XZZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "X%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -558,9 +583,11 @@ void test_GetID_DecRange_ZZd_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%dd", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -574,9 +601,11 @@ void test_GetID_DecRange_ZZD_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%dD", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -590,9 +619,11 @@ void test_GetID_DecRange_ZZ_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%d", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -606,9 +637,11 @@ void test_GetID_DecRange_ZZd_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%dd", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -622,9 +655,11 @@ void test_GetID_DecRange_ZZD_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%dD", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -640,9 +675,11 @@ void test_GetID_HexRange_0x0Z_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "0x%02X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -656,9 +693,11 @@ void test_GetID_HexRange_0Z_Default_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -672,9 +711,11 @@ void test_GetID_HexRange_0Zh_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02Xh", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -688,9 +729,11 @@ void test_GetID_HexRange_0ZH_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02XH", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -704,9 +747,11 @@ void test_GetID_HexRange_0Zx_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02Xx", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -720,9 +765,11 @@ void test_GetID_HexRange_0ZX_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02XX", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -736,9 +783,11 @@ void test_GetID_HexRange_x0Z_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "x%02X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -752,9 +801,11 @@ void test_GetID_HexRange_X0Z_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "X%02X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -768,9 +819,11 @@ void test_GetID_DecRange_0Zd_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02dd", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -784,9 +837,11 @@ void test_GetID_DecRange_0ZD_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%02dD", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -800,9 +855,11 @@ void test_GetID_DecRange_0Z_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%02d", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -816,9 +873,11 @@ void test_GetID_DecRange_0Zd_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%02dd", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -832,9 +891,11 @@ void test_GetID_DecRange_0ZD_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%02dD", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -850,9 +911,11 @@ void test_GetID_HexRange_0xZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "0x%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -866,9 +929,11 @@ void test_GetID_HexRange_Z_Default_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -882,9 +947,11 @@ void test_GetID_HexRange_Zh_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%Xh", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -898,9 +965,11 @@ void test_GetID_HexRange_ZH_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%XH", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -914,9 +983,11 @@ void test_GetID_HexRange_Zx_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%Xx", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -930,9 +1001,11 @@ void test_GetID_HexRange_ZX_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%XX", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -946,9 +1019,11 @@ void test_GetID_HexRange_xZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "x%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -962,9 +1037,11 @@ void test_GetID_HexRange_XZ_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "X%X", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
@@ -978,9 +1055,11 @@ void test_GetID_NumRange_Zd_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%dd", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       // By default, these single digit + 'd' entries are assumed to actually
@@ -996,9 +1075,11 @@ void test_GetID_NumRange_ZD_Format(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = false;
 
       snprintf(str, MAX_NUM_LEN, "%dD", id);
-      result = GetID(str, &parsed_id, false, false);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT( (int)GoodResult, (int)result );
       // By default, these single digit + 'D' entries are assumed to actually
@@ -1014,1273 +1095,15 @@ void test_GetID_DecRange_Z_Format_PreemptivelyDec(void)
       char str[MAX_NUM_LEN] = {0};
       uint8_t parsed_id;
       enum LIN_PID_Result_E result;
+      bool pre_emptively_hex = false;
+      bool pre_emptively_dec = true;
 
       snprintf(str, MAX_NUM_LEN, "%d", id);
-      result = GetID(str, &parsed_id, false, true);
+      result = GetID(str, &parsed_id, &pre_emptively_hex, &pre_emptively_dec);
 
       TEST_ASSERT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
       TEST_ASSERT_EQUAL_UINT8( id, parsed_id );
    }
-}
-
-
-/******************************************************************************/
-
-void test_GetID_InvalidNum_TooManyDigits_ZZ_Format(void)
-{
-   // Decimal numbers
-   for ( uint16_t id = 0; id < 9999; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%03d", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x0000; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      if ( (id & 0xF) == 0xD )   continue;   // Skip over the ZZD numbers
-
-      snprintf(str, MAX_NUM_LEN + 2, "%03X", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZh_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%Xh", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZH_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%XH", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZx_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%Xx", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZX_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%XX", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_xZZ_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "x%X", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_0xZZ_Format(void)
-{
-   // Hexadecimal numbers
-   for ( uint16_t id = 0x100; id < 0xFFFF; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "0x%X", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZd_Format(void)
-{
-   // Decimal numbers
-   for ( uint16_t id = 100; id < 9999; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%dd", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_ZZD_Format(void)
-{
-   // Decimal numbers
-   for ( uint16_t id = 100; id < 9999; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%dD", id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_TooManyDigits_PreemptivelyDec(void)
-{
-   // Decimal numbers
-   for ( uint16_t id = 100; id < 9999; id++ )
-   {
-      char str[MAX_NUM_LEN + 2] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN + 2, "%d", id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-void test_GetID_InvalidNum_DecFormatWithHexNum_0xZZd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x%02Xd", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_DecFormatWithHexNum_xZZd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x%02Xd", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_DecFormatWithHexNum_XZZd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X%02Xd", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_DecFormatWithHexNum_PreemptivelyDec(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      // Only check uniquely hex number entries.
-      if ( (id & 0xF) < 0xA ) continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02X", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      // Skip over uniquely hex number entries.
-      if ( (id & 0xF) >= 0xA ) continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02Xd", (uint8_t)id);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_HexFormatWithDecNum_PreemptivelyHex_ZZD(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      // Skip over uniquely hex number entries.
-      if ( (id & 0xF) >= 0xA ) continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02XD", (uint8_t)id);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-void test_GetID_InvalidNum_ZZhd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02Xhd", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_ZZHd(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02XHd", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-void test_GetID_InvalidNum_PreemptivelyDec_0xZZ(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x%02X", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_xZZ(void)
-{
-   for (uint16_t id = 0; id <= 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x%02X", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_XZZ(void)
-{
-   for (uint16_t id = 0; id < 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X%02X", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_ZZh(void)
-{
-   for (uint16_t id = 0; id < 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02Xh", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_ZZH(void)
-{
-   for (uint16_t id = 0; id < 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02XH", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_ZZx(void)
-{
-   for (uint16_t id = 0; id < 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02Xx", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidNum_PreemptivelyDec_ZZX(void)
-{
-   for (uint16_t id = 0; id < 0xFF; id++)
-   {
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%02XX", (uint8_t)id);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-void test_GetID_InvalidFirstChar_0xKZ(void)
-{
-   // Start at 1 because "0x" is valid input - it is '0' with the supported hex
-   // 'x' suffix.
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_xKZ(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_XKZ(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_KZh(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_KZH(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_KZx(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidFirstChar_KZX(void)
-{
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 0; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-/******************************************************************************/
-
-#define VALID_DIGIT "1"
-void test_GetID_InvalidSecondChar_0xZK(void)
-{
-   // Start at 1 because "0x" is valid input - it is '0' with the supported hex
-   // 'x' suffix.
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_xZK(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "x" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_XZK(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "X" VALID_DIGIT "%c", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_ZKh(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%ch", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_ZKH(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cH", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_ZKx(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_ZKX(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_0Kd(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cd", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cd", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cd", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_0KD(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cD", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cD", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cD", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_0Kx(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cx", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, VALID_DIGIT "0%cx", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_InvalidSecondChar_0KX(void)
-{
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0%cX", (char)first_char);
-      result = GetID(str, &parsed_id, true, false);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-
-   for ( uint16_t first_char = 1; first_char < 0xFF; first_char++ )
-   {
-      if ( isxdigit((char)first_char) )   continue;
-
-      char str[MAX_NUM_LEN] = {0};
-      uint8_t parsed_id;
-      enum LIN_PID_Result_E result;
-
-      snprintf(str, MAX_NUM_LEN, "0%cX", (char)first_char);
-      result = GetID(str, &parsed_id, false, true);
-
-      TEST_ASSERT_NOT_EQUAL_INT_MESSAGE( (int)GoodResult, (int)result, str );
-   }
-}
-
-void test_GetID_NoDigitsEntered(void)
-{
-   uint8_t parsed_id;
-
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, true,  false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("x", &parsed_id, false, true) );
-
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, true,  false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("X", &parsed_id, false, true) );
-
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, true,  false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("h", &parsed_id, false, true) );
-
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, true,  false) );
-   TEST_ASSERT_NOT_EQUAL_INT( (int)GoodResult, GetID("H", &parsed_id, false, true) );
 }
 
 /******************************************************************************/
@@ -2612,254 +1435,326 @@ void test_ArgOccurrenceCount_MaxArgsLimit(void)
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_NoLeadingZeros(void)
 {
    // Positive Detection
-   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20") );
-   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63") );
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20", true,  false) );
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63", true,  false) );
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20", false, false) );
+   TEST_ASSERT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63", false, false) );
 
    // Negative Detection
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("333") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("09") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("333", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("09",  false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("09",  true,  false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("09",  false, true) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("F") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("a") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1A", true, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("F",  false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("a",  false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("XF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("X10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10H") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10H", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fx") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10x") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10x", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10X") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("10X", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0d") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20d") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63d", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0D") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20D") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_NoLeadingZeros, DetermineEntryFormat("63D", false, false) );
 }
 
 void test_DetermineEntryFormat_DecNoPrefixOrSuffix_LeadingZeros(void)
 {
    // Positive Detection
-   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0"));
-   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("00"));
-   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("09"));
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0", false, false));
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("00", false, false));
+   TEST_ASSERT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("09", false, false));
    
    // Negative Detection
-   TEST_ASSERT_NOT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros,  DetermineEntryFormat("9"));  // Will match no leading zeros first
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("333") );
+   TEST_ASSERT_NOT_EQUAL_INT(DecNoPrefixOrSuffix_LeadingZeros,  DetermineEntryFormat("9", false, false));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("333", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("F") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("a") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("F", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("a", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("XF") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X10") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("X10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aH") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10H") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10H", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fx") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10x") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10x", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aX") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10X") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("10X", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0d") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20d") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63d") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63d", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0D") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20D") );
-   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63D") );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( DecNoPrefixOrSuffix_LeadingZeros, DetermineEntryFormat("63D", false, false) );
 }
 
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase(void)
 {
    // Positive Detection
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("a"));
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("df"));
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1f"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("a", false, false));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("df", false, false));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1f", false, false));
    
    // Negative Detection
-   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("9"));  // Will match no leading zeros first
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("333") );
+   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("9", false, false));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("333", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("F") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("F", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("XF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10H") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10H", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fx") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10x") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10x", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10X") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10X", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0d") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20d") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63d", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0D") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20D") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63D", false, false) );
 }
 
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase(void)
 {
    // Positive Detection
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A"));
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("DF"));
-   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1F"));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A", false, false));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("DF", false, false));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1F", false, false));
    
    // Negative Detection
-   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase,  DetermineEntryFormat("9"));  // Will match no leading zeros first
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("333") );
+   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase,  DetermineEntryFormat("9", false, false));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("333", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1a") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("f") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("f", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("x10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X1A") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("XF") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Xa") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X10") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("X10", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10h", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aH") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10H") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10H", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fx") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ax") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10x") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10x", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aX") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10X") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10X", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0d") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20d") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63d") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63d", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0D") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20D") );
-   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63D") );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("63D", false, false) );
+}
+
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0a", false, false));
+   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0f", false, false));
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Uppercase,  DetermineEntryFormat("9", false, false));  // Will match no leading zeros first
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x10", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("x10", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("X10", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10h", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10h", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10H", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10X", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("63d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("63D", false, false) );
+}
+
+void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void)
+{
+
 }
 
 //void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void)
