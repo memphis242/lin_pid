@@ -219,6 +219,8 @@ void test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase(void
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void);
 void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void);
 
+void test_DetermineEntryFormat_ClassicHexPrefix_NoLeadingZeros_Lowercase(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
@@ -399,6 +401,7 @@ int main(void)
    RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_NoLeadingZeros_Uppercase);
    RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase);
    RUN_TEST(test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase);
+   RUN_TEST(test_DetermineEntryFormat_ClassicHexPrefix_NoLeadingZeros_Lowercase);
 
    return UNITY_END();
 }
@@ -1825,14 +1828,81 @@ void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void)
    TEST_ASSERT_NOT_EQUAL_INT( HexNoPrefixOrSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("63d", false, false) );
 }
 
-//void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Lowercase(void)
-//{
-//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0a"));
-//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0f"));
-//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("00"));
-//   TEST_ASSERT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0b"));
-//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0A"));
-//   TEST_ASSERT_NOT_EQUAL_INT(HexNoPrefixOrSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1F"));
+void test_DetermineEntryFormat_ClassicHexPrefix_NoLeadingZeros_Lowercase(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x10", false, false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x2",  false, false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x10", true,  false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xff", true,  false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa",  true,  false));
+   TEST_ASSERT_EQUAL_INT(ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x2",  true,  false));
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xA", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x10", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("XF", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X10", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10h", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10H", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fx", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10X", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( ClassicHexPrefix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63d", false, false) );
+}
 //}
 //
 //void test_DetermineEntryFormat_HexNoPrefixOrSuffix_LeadingZeros_Uppercase(void)
