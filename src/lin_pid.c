@@ -26,7 +26,6 @@
 #define MAX_ARG_LEN                    (strlen("--no-new-line"))
 #define MAX_ERR_MSG_LEN                250
 #define NO_SPECIAL_COMP_FLAGS          0
-#define DEFAULT_OUTPUT_NUMERIC_FORMAT  ClassicHexPrefix_LeadingZeros_Uppercase
 
 #define GET_BIT(x, n)      ((x >> n) & 0x01)
 
@@ -1114,5 +1113,5 @@ STATIC enum NumericFormat_E DetermineEntryFormat( const char * str,
       }
    }
 
-   return DEFAULT_OUTPUT_NUMERIC_FORMAT;
+   return INVALID_NUMERIC_FORMAT;
 }
