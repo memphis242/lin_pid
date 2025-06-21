@@ -159,7 +159,9 @@ COMPILER_WARNINGS_TEST_BUILD_SRC_FILES = \
 	 -fcondition-coverage -fprofile-arcs -ftest-coverage
 
 # Consider -Wmismatched-dealloc
-COMPILER_SANITIZERS = -fsanitize=bool -fsanitize=undefined -fsanitize-trap
+COMPILER_SANITIZERS = \
+    -fsanitize=undefined -fsanitize-trap \
+    -fsanitize=enum  -fsanitize=bool -fsanitize=bounds
 COMPILER_OPTIMIZATION_LEVEL_DEBUG = -Og -g3
 COMPILER_OPTIMIZATION_LEVEL_SPEED = -O3
 COMPILER_OPTIMIZATION_LEVEL_SPACE = -Os
