@@ -9,6 +9,9 @@
 # VSCode
 .vscode/*
 
+# vim
+*.swp
+
 # CppCheck
 *.a1
 *.snalyzerinfo
