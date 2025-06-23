@@ -806,6 +806,10 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
                hex_prefix_already_encountered = true;
                parser_state = ParserHexPrefix;
             }
+            else if ( '0' == ch )
+            {
+               parser_state = ParserOneZeroIn;
+            }
             else if ( isxdigit(ch) )
             {
                first_digit = ch;
