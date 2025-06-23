@@ -254,6 +254,12 @@ void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Lowercase(void);
 void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Uppercase(void);
 void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Lowercase(void);
 
+void test_DetermineEntryFormat_LowercasedSuffix_NoLeadingZeros(void);
+void test_DetermineEntryFormat_LowercasedSuffix_LeadingZeros(void);
+
+void test_DetermineEntryFormat_UppercaseDSuffix_NoLeadingZeros(void);
+void test_DetermineEntryFormat_UppercaseDSuffix_LeadingZeros(void);
+
 /* Extern Functions */
 extern enum LIN_PID_Result_E GetID( const char * str,
                                     uint8_t * id,
@@ -462,6 +468,10 @@ int main(void)
    RUN_TEST(test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Lowercase);
    RUN_TEST(test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Uppercase);
    RUN_TEST(test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Lowercase);
+   RUN_TEST(test_DetermineEntryFormat_LowercasedSuffix_NoLeadingZeros);
+   RUN_TEST(test_DetermineEntryFormat_LowercasedSuffix_LeadingZeros);
+   RUN_TEST(test_DetermineEntryFormat_UppercaseDSuffix_NoLeadingZeros);
+   RUN_TEST(test_DetermineEntryFormat_UppercaseDSuffix_LeadingZeros);
 
    return UNITY_END();
 }
@@ -3910,10 +3920,10 @@ void test_DetermineEntryFormat_LowercasexSuffix_LeadingZeros_Lowercase(void)
 void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Uppercase(void)
 {
    // Positive Detection
-   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1x", false, false) );
-   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A1x", false,  false) );
-   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1x", true, false) );
-   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A1x", true,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1X", false, false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A1X", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1X", true, false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("A1X", true,  false) );
    
    // Negative Detection
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("9", false, false) );
@@ -3975,25 +3985,29 @@ void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Uppercase(void)
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0AH", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0FH", false, false) );
 
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10x", false, false) );
+
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("ax", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1bx", false, false) );
-
-   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("Ax", false, false) );
-   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1x", false, false) );
-   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10x", false, false) );
 
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0Ax", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0Fx", false, false) );
 
-   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1x", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0ax", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0fx", false, false) );
 
-   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AX", false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FX", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("1AX", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("FX", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10X", false, false) );
 
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("aX", false, false) );
-   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("10X", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0fX", false, false) );
 
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("0d", false, false) );
    TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Uppercase, DetermineEntryFormat("20d", false, false) );
@@ -4002,16 +4016,722 @@ void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Uppercase(void)
 
 void test_DetermineEntryFormat_UppercaseXSuffix_NoLeadingZeros_Lowercase(void)
 {
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("a1X", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("a1X", true,  false) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("333", false, false) );
 
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("FX", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_NoLeadingZeros_Lowercase, DetermineEntryFormat("63d", false, false) );
 }
 
 void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Uppercase(void)
 {
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0X", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0X", true,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AX", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AX", true,  false) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("333", false, false) );
 
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("aX", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("01X", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Uppercase, DetermineEntryFormat("63d", false, false) );
 }
 
 void test_DetermineEntryFormat_UppercaseXSuffix_LeadingZeros_Lowercase(void)
 {
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aX", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aX", true,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fX", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fX", true,  false) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("333", false, false) );
 
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0AX", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0aX", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("0d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseXSuffix_LeadingZeros_Lowercase, DetermineEntryFormat("63d", false, false) );
+}
+
+void test_DetermineEntryFormat_LowercasedSuffix_NoLeadingZeros(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("10d", false,  false) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("63d", false,  false) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("10d", false,  true) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("63d", false,  true) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("0fX", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("20d", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("63d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("00d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("01d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_NoLeadingZeros, DetermineEntryFormat("063d", false, false) );
+}
+
+void test_DetermineEntryFormat_LowercasedSuffix_LeadingZeros(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("00d", false,  false) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01d", false,  false) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("063d", false,  false) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("00d", false,  true) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01d", false,  true) );
+   TEST_ASSERT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("063d", false,  true) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("63d", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0d", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01d", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("063d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("63D", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("0D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("01D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( LowercasedSuffix_LeadingZeros, DetermineEntryFormat("063D", false, false) );
+}
+
+void test_DetermineEntryFormat_UppercaseDSuffix_NoLeadingZeros(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("10D", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("63D", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("10D", false,  true) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("63D", false,  true) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("63d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("00d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("01d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("063d", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("20D", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("63D", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("00D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("01D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_NoLeadingZeros, DetermineEntryFormat("063D", false, false) );
+}
+
+void test_DetermineEntryFormat_UppercaseDSuffix_LeadingZeros(void)
+{
+   // Positive Detection
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("00D", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01D", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("063D", false,  false) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("00D", false,  true) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01D", false,  true) );
+   TEST_ASSERT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("063D", false,  true) );
+   
+   // Negative Detection
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("9", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("25", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("333", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros,  DetermineEntryFormat("09", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("025", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0F", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01a", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0f", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0xFF", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0xA",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0x1A",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0x1E",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0xff", false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0xa",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0x1a",  false, false));
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0x1e",  false, false));
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("xa", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("x1b", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("XA", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("X1", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("X0A", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("X01", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0Ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0Fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0ah", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0fh", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0aH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0fH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0AH", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0FH", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1x", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("10x", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1bx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0Ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0Fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0ax", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0fx", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("10X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("1AX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("FX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("aX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01X", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0AX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0aX", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("0fX", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("20d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("63d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("00d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01d", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("063d", false, false) );
+
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("20D", false, false) );
+   TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("63D", false, false) );
+
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("00D", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("01D", false, false) );
+   //TEST_ASSERT_NOT_EQUAL_INT( UppercaseDSuffix_LeadingZeros, DetermineEntryFormat("063D", false, false) );
 }
 
