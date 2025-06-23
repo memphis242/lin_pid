@@ -342,10 +342,10 @@ int main( int argc, char * argv[] )
       }
       else
       {
-         printf( "\nID:  \033[36m" );
+         printf( "\n%-5s\033[36m", "ID: " );
          printf( print_format, user_input );
          printf( "\033[0m\n" );
-         printf( "PID:  \033[32m" );
+         printf( "%-5s\033[32m", "PID:" );
          printf( print_format, pid );
          printf( "\033[0m\n" );
          printf("\n");
