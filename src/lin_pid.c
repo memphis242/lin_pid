@@ -17,6 +17,15 @@
 #include <ctype.h>
 #include <string.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#ifndef _POSIX_VERSION
+#error "No options available for checking stdin in a non-blocking manner"
+#endif
+#endif
+
 #include "re.h"
 #include "lin_pid.h"
 
@@ -128,6 +137,8 @@ const struct NumericFormatStrings_S NumericFormats[] =
 
 STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc );
 
+STATIC bool InputIsPiped(void);
+
 STATIC size_t ArgOccurrenceCount( char const * args[],
                                   char const * str,
                                   int argc,
@@ -141,9 +152,7 @@ STATIC enum LIN_PID_Result_E GetID( const char * str,
 STATIC bool MyAtoI(char digit, uint8_t * converted_digit);
 
 #ifndef NDEBUG
-
 STATIC int UInt8_Cmp( const void * a, const void * b );
-
 #endif
 
 STATIC enum NumericFormat_E DetermineEntryFormat( const char * str,
@@ -199,6 +208,13 @@ int main( int argc, char * argv[] )
 
    else
    {
+      // Detect if input was piped in through stdin
+      if ( InputIsPiped() )
+      {
+         // TODO: Input is piped, so process data that way
+         printf("Input pipe detected.");
+      }
+
       bool ishex = false;
       bool isdec = false;
       uint8_t pid = 0xFFu;
@@ -444,6 +460,54 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc )
    }
 
    return only_valid;
+}
+
+STATIC bool InputIsPiped(void)
+{
+#ifdef _WIN32
+   // Windows way
+   size_t num_of_bytes_avail = 0;
+
+   HANDLE h_stdin = GetStdHandle(STD_INPUT_HANDLE);
+   DWORD bytes_avail = 0;
+
+   assert( h_stdin != INVALID_HANDLE_VALUE );
+   bool pipe_check_went_thru =
+      PeekNamedPipe(
+         h_stdin,       // HANDLE hNamedPipe [in]
+         NULL,          // LPVOID lpBuffer [out, optional]
+         0,             // DWORD nBufferSize [in]
+         NULL,          // LPDWORD lpBytesRead [out, optional]
+         &bytes_avail,  // LPDWORD lpTotalBytesAvail [out, optional]
+         NULL           // LPDWORD lpBytesLeftThisMessage [out, optional]
+      );
+
+   num_of_bytes_avail = pipe_check_went_thru ? (size_t)bytes_avail : 0;
+   
+   return (num_of_bytes_avail > 0);
+#else
+   // POSIX way
+   fd_set read_fds;
+   struct timeval tv;
+   bool data_avail = false;
+   
+   // Configure the set of file descriptors to be read to just be stdin
+   FD_ZERO(&read_fds);
+   FD_SET(0, &read_fds);   // 0 is the file-descriptor for stdin
+   // No waiting
+   tv.tv_sec = 0;
+   tv.tv_usec = 0;
+
+   data_avail = select(
+                  1,          // int nfds (number of file descriptors in set)
+                  &read_fds,  // fd_set * readfds
+                  NULL,       // fd_set * writefds
+                  NULL,       // fd_set * exceptfds
+                  &tv         // struct timeval * timeout
+               );
+
+   return data_avail;
+#endif
 }
 
 STATIC size_t ArgOccurrenceCount( char const * args[],
