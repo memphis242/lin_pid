@@ -139,6 +139,8 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc );
 
 STATIC bool InputIsPiped(void);
 
+STATIC char * ReadLineStdIn(void);
+
 STATIC size_t ArgOccurrenceCount( char const * args[],
                                   char const * str,
                                   int argc,
@@ -509,6 +511,41 @@ STATIC bool InputIsPiped(void)
 
    return data_avail;
 #endif
+}
+
+STATIC char * ReadLineStdIn(void)
+{
+   size_t str_cap = 64;
+   char * str = malloc(str_cap);  // NOTE: Remember to destroy after use!
+   if ( NULL == str ) return NULL;
+   char * ret_val = str;
+
+   size_t str_len = 0;
+   int c;
+   while( ( (c = fgetc(stdin)) != EOF ) &&
+          (c != '\n') &&
+          (str_len < (str_cap - 2)) )
+   {
+      *(str++) = (char)c;
+      str_len++;
+
+      if ( str_len >= (str_cap - 2) )
+      {
+         char * tmp = realloc(ret_val, str_cap * 2);
+         if ( NULL == tmp )
+         {
+            free(ret_val);
+            return NULL;
+         }
+         ret_val = tmp;
+         str = tmp + str_len;
+         str_cap *= 2;
+      }
+   }
+   if ( '\n' == c ) *(str++) = (char)c;
+   *str = '\0';
+
+   return ret_val;
 }
 
 STATIC size_t ArgOccurrenceCount( char const * args[],
