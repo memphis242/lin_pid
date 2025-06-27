@@ -187,6 +187,14 @@ int main( int argc, char * argv[] )
       return EXIT_FAILURE;
    }
 
+   else if ( InputIsPiped() )
+   {
+      // TODO: Input is piped, so process data that way
+      printf("Input pipe detected.");
+      return EXIT_SUCCESS;
+   }
+
+
    else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
    {
       PrintHelpMsg();
@@ -208,13 +216,6 @@ int main( int argc, char * argv[] )
 
    else
    {
-      // Detect if input was piped in through stdin
-      if ( InputIsPiped() )
-      {
-         // TODO: Input is piped, so process data that way
-         printf("Input pipe detected.");
-      }
-
       bool ishex = false;
       bool isdec = false;
       uint8_t pid = 0xFFu;
@@ -487,7 +488,7 @@ STATIC bool InputIsPiped(void)
    return (num_of_bytes_avail > 0);
 #else
    // POSIX way
-   fd_set read_fds;
+   fd_set read_fds;  // Set of file descriptors
    struct timeval tv;
    bool data_avail = false;
    
