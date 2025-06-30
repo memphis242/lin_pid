@@ -26,3 +26,7 @@
 # gcovr
 cov*.html
 cov*.css
+
+# Vim
+tags
+
