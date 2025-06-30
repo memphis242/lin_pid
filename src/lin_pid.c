@@ -139,7 +139,7 @@ STATIC bool OnlyValidFlagsArePresent( char const * args[], int argc );
 
 STATIC bool InputIsPiped(void);
 
-STATIC char * ReadLineStdIn(void);
+STATIC char * ReadNextStdInToken(void);
 
 STATIC size_t ArgOccurrenceCount( char const * args[],
                                   char const * str,
@@ -191,11 +191,28 @@ int main( int argc, char * argv[] )
 
    else if ( InputIsPiped() )
    {
-      // TODO: Input is piped, so process data that way
       printf("Input pipe detected.");
+
+      // TODO: Input is piped, so process data that way
+      // Split input by spaces or ',' by default
+      // Vectorize... → Use ccol!
+      // Need vector of strings...
+      struct Vector_S * num_list = VectorInit(
+                                       sizeof(char *), // element size
+                                       8, // initial capacity
+                                       65536, // maximum capacity
+                                       0 // initial length
+                                    );
+      // Oh boy... This is gonna be painful to manually manage. I now miss
+      // C++'s RAII...
+      do
+      {
+         char * next_str = ReadNextStdInToken();
+         VectorPush(next_str);
+      } while( next_str != NULL );
+
       return EXIT_SUCCESS;
    }
-
 
    else if ( (1 == argc) || ( strcmp("--help", argv[1]) == 0 ) )
    {
@@ -513,9 +530,9 @@ STATIC bool InputIsPiped(void)
 #endif
 }
 
-STATIC char * ReadLineStdIn(void)
+STATIC char * ReadNextStdInToken(void)
 {
-   size_t str_cap = 64;
+   size_t str_cap = 8;
    char * str = malloc(str_cap);  // NOTE: Remember to destroy after use!
    if ( NULL == str ) return NULL;
    char * ret_val = str;
@@ -523,7 +540,8 @@ STATIC char * ReadLineStdIn(void)
    size_t str_len = 0;
    int c;
    while( ( (c = fgetc(stdin)) != EOF ) &&
-          (c != '\n') &&
+          (c != ',') &&
+          (c != ' ') &&
           (str_len < (str_cap - 2)) )
    {
       *(str++) = (char)c;
@@ -542,7 +560,6 @@ STATIC char * ReadLineStdIn(void)
          str_cap *= 2;
       }
    }
-   if ( '\n' == c ) *(str++) = (char)c;
    *str = '\0';
 
    return ret_val;
